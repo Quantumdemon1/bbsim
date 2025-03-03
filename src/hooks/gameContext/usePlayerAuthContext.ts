@@ -1,11 +1,11 @@
 
 import { useContext } from 'react';
 import { PlayerData } from '@/components/PlayerProfileTypes';
-import { PlayerAuthContext } from '@/contexts/PlayerAuthContext';
+import { usePlayerAuthContext as usePlayerAuth } from '@/contexts/PlayerAuthContext';
 import { Notification, PlayerSettings } from '@/hooks/usePlayerAuth';
 
 export function usePlayerAuthContext() {
-  const context = useContext(PlayerAuthContext);
+  const context = usePlayerAuth();
 
   if (!context) {
     throw new Error('usePlayerAuthContext must be used within a PlayerAuthProvider');

@@ -18,12 +18,10 @@ export function useHoHPhase({
   setLastHoH,
   toast
 }: HoHPhaseProps) {
-  const { makeAIDecision, addAIMemoryEntry, generateAIDialogue } = useGameContext();
   
   const handleSelectHoH = async () => {
-    if (selectedPlayers.length !== 1) {
+    if (!selectedPlayers || selectedPlayers.length !== 1) {
       toast({
-        title: "Error",
         description: "You must select exactly one player to be HoH",
         variant: "destructive"
       });
@@ -38,7 +36,9 @@ export function useHoHPhase({
     
     // Set the new HoH
     setHoH(newHoH);
-    setLastHoH(newHoH);
+    if (setLastHoH) {
+      setLastHoH(newHoH);
+    }
     
     // Update player statuses
     const updatedPlayers = players.map(player => {
@@ -52,29 +52,12 @@ export function useHoHPhase({
     
     setPlayers(updatedPlayers);
     
-    // If the HoH is an AI player, generate dialogue
-    if (hohPlayer && !hohPlayer.isHuman && !hohPlayer.isAdmin) {
-      const dialogue = await generateAIDialogue(hohPlayer.id, 'hoh', {});
-      console.log(`[AI HoH] ${hohPlayer.name}: ${dialogue}`);
-      
-      // Add memory entry for AI player
-      addAIMemoryEntry(hohPlayer.id, {
-        type: 'hoh',
-        week: 1, // TODO: Get current week from game state
-        description: 'Won Head of Household competition',
-        impact: 'positive',
-        importance: 5,
-        timestamp: Date.now()
-      });
-    }
-    
     // Move to the next phase
     setStatusMessage(`${hohPlayer?.name} is the new Head of Household!`);
     setPhase('Nomination Ceremony');
     setSelectedPlayers([]);
     
     toast({
-      title: "New Head of Household!",
       description: `${hohPlayer?.name} is the new Head of Household!`
     });
   };

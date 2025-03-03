@@ -7,7 +7,7 @@ interface FinaleManagerProps {
   players: PlayerData[];
   setFinalists: (finalists: string[]) => void;
   setJurors: (jurors: string[]) => void;
-  toast: (props: ToastProps) => void;
+  toast: any;
 }
 
 export function useFinaleManager({ 
@@ -43,8 +43,8 @@ export function useFinaleManager({
     setJurors(jurorsArray);
     
     toast({
-      title: "Finale Set",
       description: `Finalists and jury have been determined. ${finalistsArray.length} finalists and ${jurorsArray.length} jury members.`,
+      variant: "default"
     });
   };
 

@@ -1,8 +1,9 @@
+
 import { useState } from 'react';
-import { PhaseProgressInfo, PhaseProgressProps } from '../types/phaseProgressTypes';
+import { PhaseProgressInfo, SinglePhaseProgressInfo } from '../types/phaseProgressTypes';
 
 export function usePhaseTracker() {
-  const [phaseProgress, setPhaseProgress] = useState<PhaseProgressInfo>({});
+  const [phaseProgress, setPhaseProgress] = useState<Record<string, { playersReady: string[], completed: boolean }>>({});
 
   const markPhaseProgress = (phase: string, playerId: string, gameMode: 'singleplayer' | 'multiplayer' | null, humanPlayerCount: number) => {
     setPhaseProgress(prev => {
@@ -27,7 +28,7 @@ export function usePhaseTracker() {
     });
   };
   
-  const getPhaseProgress = (phase: string, humanPlayerCount: number) => {
+  const getPhaseProgress = (phase: string, humanPlayerCount: number): SinglePhaseProgressInfo => {
     const progressData = phaseProgress[phase] || { playersReady: [], completed: false };
     
     return {
