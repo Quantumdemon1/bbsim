@@ -31,9 +31,18 @@ export const PhaseProgressTracker: React.FC<PhaseProgressTrackerProps> = ({
   const relevantPlayers = playersToTrack || 
     players.filter(p => p.isHuman || p.isAdmin).map(p => p.id);
   
-  // Get the current phase progress
-  const progress: SinglePhaseProgressInfo | null = getPhaseProgress ? 
-    getPhaseProgress(phase) as SinglePhaseProgressInfo : null;
+  // Get the current phase progress and convert it to SinglePhaseProgressInfo
+  const phaseProgressInfo = getPhaseProgress ? getPhaseProgress(phase) : null;
+  
+  // Create a properly typed progress object or null
+  const progress: SinglePhaseProgressInfo | null = phaseProgressInfo ? {
+    playersReady: Array.isArray(phaseProgressInfo.playersReady) ? phaseProgressInfo.playersReady : [],
+    completed: !!phaseProgressInfo.completed,
+    completedCount: typeof phaseProgressInfo.completedCount === 'number' ? phaseProgressInfo.completedCount : 0,
+    totalCount: typeof phaseProgressInfo.totalCount === 'number' ? phaseProgressInfo.totalCount : 0,
+    percentage: typeof phaseProgressInfo.percentage === 'number' ? phaseProgressInfo.percentage : 0,
+    hasStartedCountdown: !!phaseProgressInfo.hasStartedCountdown
+  } : null;
   
   // Handle clicking ready
   const handleMarkReady = () => {
