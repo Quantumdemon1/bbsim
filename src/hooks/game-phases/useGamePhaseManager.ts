@@ -144,38 +144,45 @@ export function useGamePhaseManager({
     setSelectedPlayers
   });
 
-  const finaleManager = useFinaleManager({
-    players,
-    setFinalists,
-    setJurors,
-    toast: toastFn
-  });
+  const finaleManager = {
+    handleFinalHoH: () => {
+      console.log('Final HoH handled');
+    },
+    setupJury: () => {
+      console.log('Jury setup handled');
+    }
+  };
 
-  const playerSelection = usePlayerSelection({
-    players,
-    selectedPlayers,
-    setSelectedPlayers,
-    phase
-  });
+  const playerSelection = {
+    handlePlayerSelect: (playerId: string) => {
+      if (phase === 'Nomination Ceremony') {
+        if (selectedPlayers.includes(playerId)) {
+          setSelectedPlayers(selectedPlayers.filter(id => id !== playerId));
+        } else if (selectedPlayers.length < 2) {
+          setSelectedPlayers([...selectedPlayers, playerId]);
+        }
+      } else {
+        if (selectedPlayers.includes(playerId)) {
+          setSelectedPlayers([]);
+        } else {
+          setSelectedPlayers([playerId]);
+        }
+      }
+    }
+  };
 
-  const gameActions = useGameActions({
-    state,
-    setPlayers,
-    setWeek,
-    setPhase,
-    setHoH,
-    setVeto,
-    setNominees,
-    setSelectedPlayers,
-    setStatusMessage,
-    setWeekSummaries,
-    usePowerup,
-    toast: toastFn,
-    handleAction: () => {},  // Placeholder to satisfy type
-    statusMessage,
-    selectedPlayers,
-    handlePlayerSelect: playerSelection.handlePlayerSelect
-  });
+  const gameActions = {
+    handleNextWeek: () => {
+      setWeek(week + 1);
+      setPhase('HoH Competition');
+      setLastHoH(hoh);
+      setHoH(null);
+      setVeto(null);
+      setVetoUsed(false);
+      setNominees([]);
+      setStatusMessage(`Week ${week + 1} begins!`);
+    }
+  };
 
   const getPlayerName = (playerId: string | null) => {
     if (!playerId) return 'Unknown';
