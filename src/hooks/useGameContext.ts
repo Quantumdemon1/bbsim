@@ -5,6 +5,7 @@ import { useAllianceContext } from '../hooks/gameContext/useAllianceContext';
 import { usePowerupContext } from '../hooks/gameContext/usePowerupContext';
 import { usePlayerAuthContext } from '../hooks/gameContext/usePlayerAuthContext';
 import { useAIPlayerContext } from '../hooks/gameContext/useAIPlayerContext';
+import { GameNotification } from '@/types/gameTypes';
 
 /**
  * Central hook to access all game-related context
@@ -39,8 +40,8 @@ export function useGameContext() {
     // AI Player Management
     ...aiPlayer,
     
-    // Ensure notifications and saveGame are properly exposed
-    notifications: gameState.notifications || [],
+    // Ensure notifications and saveGame are properly exposed with appropriate fallbacks
+    notifications: (gameState.notifications || []) as GameNotification[],
     clearNotifications: gameState.clearNotifications || (() => {}),
     markNotificationAsRead: gameState.markNotificationAsRead || (() => {}),
     saveGame: gameState.saveGame || gameState.saveCurrentGame || (() => Promise.resolve())

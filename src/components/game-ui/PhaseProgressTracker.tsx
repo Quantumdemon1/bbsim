@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { useGameContext } from '@/contexts/GameContext';
 import { CheckCircle, Clock, User } from 'lucide-react';
 import { SinglePhaseProgressInfo } from '@/hooks/gameState/types/phaseProgressTypes';
+import { GamePhase } from '@/types/gameTypes';
 
 interface PhaseProgressTrackerProps {
-  phase: string;
+  phase: GamePhase;
   onPhaseComplete?: () => void;
   playersToTrack?: string[]; // Optional prop to track specific players only
 }
@@ -26,10 +27,11 @@ export const PhaseProgressTracker: React.FC<PhaseProgressTrackerProps> = ({
   } = useGameContext();
   
   const [hasMarkedProgress, setHasMarkedProgress] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Get the appropriate players to track progress for
   const relevantPlayers = playersToTrack || 
-    players.filter(p => p.isHuman || p.isAdmin).map(p => p.id);
+    players?.filter(p => p.isHuman || p.isAdmin).map(p => p.id) || [];
   
   // Get the current phase progress and convert it to SinglePhaseProgressInfo
   const phaseProgressInfo = getPhaseProgress ? getPhaseProgress(phase) : null;
@@ -46,10 +48,21 @@ export const PhaseProgressTracker: React.FC<PhaseProgressTrackerProps> = ({
   
   // Handle clicking ready
   const handleMarkReady = () => {
-    if (!currentPlayer || hasMarkedProgress) return;
+    if (!currentPlayer) {
+      setError("Cannot mark as ready: No current player found");
+      return;
+    }
     
-    markPhaseProgress(phase, currentPlayer.id);
-    setHasMarkedProgress(true);
+    if (hasMarkedProgress) return;
+    
+    try {
+      markPhaseProgress(phase, currentPlayer.id);
+      setHasMarkedProgress(true);
+      setError(null);
+    } catch (err) {
+      console.error("Error marking phase progress:", err);
+      setError("Failed to mark as ready");
+    }
   };
   
   // When the phase is completed, trigger the callback
@@ -62,6 +75,7 @@ export const PhaseProgressTracker: React.FC<PhaseProgressTrackerProps> = ({
   // Reset the marked progress state when the phase changes
   useEffect(() => {
     setHasMarkedProgress(false);
+    setError(null);
   }, [phase]);
   
   // If there's no progress data, show a simplified version
@@ -71,8 +85,17 @@ export const PhaseProgressTracker: React.FC<PhaseProgressTrackerProps> = ({
         <Progress value={0} className="h-2" />
         <div className="flex items-center justify-between text-sm mt-1">
           <span>Waiting for players...</span>
-          <Button size="sm" onClick={handleMarkReady}>Mark Ready</Button>
+          <Button 
+            size="sm" 
+            onClick={handleMarkReady}
+            disabled={!currentPlayer}
+          >
+            Mark Ready
+          </Button>
         </div>
+        {error && (
+          <div className="text-xs text-red-500 mt-1">{error}</div>
+        )}
       </div>
     );
   }
@@ -107,12 +130,16 @@ export const PhaseProgressTracker: React.FC<PhaseProgressTrackerProps> = ({
         <Button 
           size="sm" 
           onClick={handleMarkReady}
-          disabled={isCurrentPlayerReady}
+          disabled={isCurrentPlayerReady || !currentPlayer}
           variant={isCurrentPlayerReady ? "secondary" : "default"}
         >
           {isCurrentPlayerReady ? "Ready" : "Mark Ready"}
         </Button>
       </div>
+      
+      {error && (
+        <div className="text-xs text-red-500 mt-1">{error}</div>
+      )}
     </div>
   );
 };
