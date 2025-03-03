@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, ReactNode, useState } from 'react';
 import { GameContextType, mockPlayers } from './types';
 import { useAllianceManager } from './allianceManager';
@@ -113,8 +112,9 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Create single player game
-  const createSinglePlayerGame = () => {
-    if (!playerAuth.authState.isAuthenticated || playerAuth.authState.isGuest) {
+  const createSinglePlayerGame = (bypassAuth = false) => {
+    // If bypassAuth is true, skip the authentication check
+    if (!bypassAuth && !playerAuth.authState.isAuthenticated) {
       playerAuth.addNotification({
         type: 'system_message',
         message: 'You need to be registered to play single player mode.'
@@ -123,9 +123,19 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     }
     
     setGameMode('singleplayer');
+    
+    // If player is authenticated, use their profile
     if (playerAuth.authState.currentPlayer) {
       const humanPlayer = playerAuth.authState.currentPlayer;
       setHumanPlayers([humanPlayer]);
+    } else {
+      // For admin bypass, create a temporary player
+      const tempPlayer: PlayerData = {
+        id: `admin-${Date.now()}`,
+        name: 'Admin',
+        stats: { hohWins: 0, povWins: 0, timesNominated: 0, daysInHouse: 0 }
+      };
+      setHumanPlayers([tempPlayer]);
     }
     
     // Start game immediately since it's just one player

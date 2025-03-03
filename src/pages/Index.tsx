@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,7 +32,6 @@ const Index = () => {
   
   const navigate = useNavigate();
 
-  // Set player name if already authenticated
   useEffect(() => {
     if (isAuthenticated && currentPlayer) {
       setPlayerName(currentPlayer.name);
@@ -41,13 +39,13 @@ const Index = () => {
     }
   }, [isAuthenticated, currentPlayer]);
 
-  const handleCreateSinglePlayer = () => {
-    if (!isAuthenticated || isGuest) {
+  const handleCreateSinglePlayer = (bypassAuth = false) => {
+    if (!bypassAuth && (!isAuthenticated || isGuest)) {
       setShowAuth(true);
       return;
     }
     
-    if (createSinglePlayerGame()) {
+    if (createSinglePlayerGame(bypassAuth)) {
       navigate('/game');
     }
   };
@@ -55,7 +53,6 @@ const Index = () => {
   const handleCreateMultiplayerGame = () => {
     if (hostName.trim()) {
       if (!isAuthenticated) {
-        // Login as guest if not authenticated
         loginAsGuest(hostName);
       }
       if (createMultiplayerGame(hostName)) {
@@ -67,7 +64,6 @@ const Index = () => {
   const handleJoinMultiplayerGame = () => {
     if (gameId.trim() && playerName.trim()) {
       if (!isAuthenticated) {
-        // Login as guest if not authenticated
         loginAsGuest(playerName);
       }
       if (joinMultiplayerGame(gameId, playerName)) {
@@ -123,12 +119,11 @@ const Index = () => {
                 onPlayerNameChange={(e) => setPlayerName(e.target.value)}
                 isAuthenticated={isAuthenticated}
                 isGuest={isGuest}
-                onStartSinglePlayer={handleCreateSinglePlayer}
+                onStartSinglePlayer={() => handleCreateSinglePlayer(false)}
                 onCreateMultiplayerGame={handleCreateMultiplayerGame}
                 onJoinMultiplayerGame={handleJoinMultiplayerGame}
               />
 
-              {/* Login/Register buttons */}
               <div className="mt-4 flex space-x-2">
                 <AuthButton 
                   isAuthenticated={isAuthenticated}
@@ -148,7 +143,6 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Login/Registration Dialog */}
       <PlayerAuth 
         open={showAuth} 
         onClose={() => setShowAuth(false)}
