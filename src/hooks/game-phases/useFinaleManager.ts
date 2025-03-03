@@ -1,3 +1,4 @@
+
 import { FinaleManagerProps } from './types';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 
@@ -15,20 +16,30 @@ export function useFinaleManager({
     if (finalist1 && finalist2) {
       setFinalists([finalist1, finalist2]);
       
+      // In Big Brother, the jury typically consists of the last 7-9 evicted houseguests
       const evictedPlayers = players.filter(p => p.status === 'evicted');
-      let juryMembers = evictedPlayers.slice(0, 7).map(p => p.id);
+      // Take the last 7 evicted players to form the jury
+      let juryMembers = evictedPlayers.slice(-7).map(p => p.id);
       
-      if (juryMembers.length < 3) {
+      // If we don't have enough jury members, add some of the remaining active players
+      if (juryMembers.length < 7) {
         const remainingPlayers = activePlayers.slice(2).map(p => p.id);
         juryMembers = [...juryMembers, ...remainingPlayers.slice(0, 7 - juryMembers.length)];
       }
+      
+      // Update player statuses to show they're jurors
+      const updatedPlayers = players.map(player => ({
+        ...player,
+        status: juryMembers.includes(player.id) ? 'juror' : 
+                finalists.includes(player.id) ? player.status : player.status
+      }));
       
       setJurors(juryMembers);
     }
     
     toast({
       title: "Finale Setup",
-      description: "Finalists and jury members have been selected"
+      description: "The final 2 houseguests will now face the jury!"
     });
   };
 

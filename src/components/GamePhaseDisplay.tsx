@@ -12,6 +12,8 @@ interface GamePhaseDisplayProps {
   nominees: string[];
   hoh: string | null;
   veto: string | null;
+  vetoUsed?: boolean;
+  lastHoH?: string | null;
   onAction: (action: string, data?: any) => void;
   statusMessage: string;
   selectedPlayers: string[];

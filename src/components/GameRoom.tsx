@@ -5,6 +5,7 @@ import GamePhaseDisplay from './GamePhaseDisplay';
 import { PlayerData } from './PlayerProfileTypes';
 import { useGameContext } from '@/contexts/GameContext';
 import { useGamePhaseManager } from './game-phases/GamePhaseManager';
+import GameActionsToolbar from './game-ui/GameActionsToolbar';
 
 interface GameRoomProps {
   players: PlayerData[];
@@ -53,6 +54,8 @@ const GameRoom: React.FC<GameRoomProps> = ({
         onPhaseChange={handlePhaseChange}
       />
       
+      <GameActionsToolbar players={gamePhase.players} />
+      
       <GamePhaseDisplay 
         phase={gamePhase.phase}
         week={gamePhase.week}
@@ -60,6 +63,8 @@ const GameRoom: React.FC<GameRoomProps> = ({
         nominees={gamePhase.nominees}
         hoh={gamePhase.hoh}
         veto={gamePhase.veto}
+        vetoUsed={gamePhase.vetoUsed}
+        lastHoH={gamePhase.lastHoH}
         onAction={gamePhase.handleAction}
         statusMessage={gamePhase.statusMessage}
         selectedPlayers={gamePhase.selectedPlayers}

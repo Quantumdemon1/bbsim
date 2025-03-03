@@ -14,6 +14,8 @@ export function useGameState({
   const [phase, setPhase] = useState(initialPhase);
   const [hoh, setHoH] = useState<string | null>(null);
   const [veto, setVeto] = useState<string | null>(null);
+  const [vetoUsed, setVetoUsed] = useState<boolean>(false);
+  const [lastHoH, setLastHoH] = useState<string | null>(null);
   const [nominees, setNominees] = useState<string[]>([]);
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [statusMessage, setStatusMessage] = useState('');
@@ -30,6 +32,8 @@ export function useGameState({
     nominees,
     hoh,
     veto,
+    vetoUsed,
+    lastHoH,
     statusMessage,
     selectedPlayers,
     finalists,
@@ -44,6 +48,8 @@ export function useGameState({
     setPhase,
     setHoH,
     setVeto,
+    setVetoUsed,
+    setLastHoH,
     setNominees,
     setSelectedPlayers,
     setStatusMessage,

@@ -1,7 +1,46 @@
-
 import { PlayerData } from '@/components/PlayerProfileTypes';
-import { ToastProps, WeekSummary } from './common';
 import { PlayerAttributes, PlayerRelationship } from './player';
+import { WeekSummary } from '.';
+
+export interface GamePhaseProps {
+  players: PlayerData[];
+  week: number;
+  initialPhase?: string;
+}
+
+export interface GamePhaseState {
+  week: number;
+  phase: string;
+  players: PlayerData[];
+  nominees: string[];
+  hoh: string | null;
+  veto: string | null;
+  vetoUsed: boolean;
+  lastHoH: string | null;
+  statusMessage: string;
+  selectedPlayers: string[];
+  finalists: string[];
+  jurors: string[];
+  votes: Record<string, string>;
+  weekSummaries: WeekSummary[];
+}
+
+export interface GamePhaseSetters {
+  setWeek: (week: number) => void;
+  setPlayers: (players: PlayerData[]) => void;
+  setPhase: (phase: string) => void;
+  setHoH: (hohId: string | null) => void;
+  setVeto: (vetoId: string | null) => void;
+  setVetoUsed: (used: boolean) => void;
+  setLastHoH: (hohId: string | null) => void;
+  setNominees: (nominees: string[]) => void;
+  setSelectedPlayers: (players: string[]) => void;
+  setStatusMessage: (message: string) => void;
+  setFinalists: (finalists: string[]) => void;
+  setJurors: (jurors: string[]) => void;
+  setVotes: (votes: Record<string, string>) => void;
+  setWeekSummaries: (summaries: WeekSummary[]) => void;
+}
 
 export interface HoHPhaseProps {
   players: PlayerData[];
@@ -11,7 +50,9 @@ export interface HoHPhaseProps {
   setStatusMessage: (message: string) => void;
   setPhase: (phase: string) => void;
   setSelectedPlayers: (players: string[]) => void;
-  toast: (props: ToastProps) => void;
+  lastHoH: string | null;
+  setLastHoH: (hohId: string | null) => void;
+  toast: any;
 }
 
 export interface NominationPhaseProps {
@@ -24,7 +65,7 @@ export interface NominationPhaseProps {
   setPhase: (phase: string) => void;
   setSelectedPlayers: (players: string[]) => void;
   usePowerup: (playerId: string) => void;
-  toast: (props: ToastProps) => void;
+  toast: any;
 }
 
 export interface PoVPhaseProps {
@@ -35,7 +76,10 @@ export interface PoVPhaseProps {
   setStatusMessage: (message: string) => void;
   setPhase: (phase: string) => void;
   setSelectedPlayers: (players: string[]) => void;
-  toast: (props: ToastProps) => void;
+  hoh: string | null;
+  nominees: string[];
+  setVetoUsed: (used: boolean) => void;
+  toast: any;
 }
 
 export interface VetoPhaseProps {
@@ -49,7 +93,8 @@ export interface VetoPhaseProps {
   setPhase: (phase: string) => void;
   setSelectedPlayers: (players: string[]) => void;
   usePowerup: (playerId: string) => void;
-  toast: (props: ToastProps) => void;
+  setVetoUsed: (used: boolean) => void;
+  toast: any;
 }
 
 export interface EvictionPhaseProps {

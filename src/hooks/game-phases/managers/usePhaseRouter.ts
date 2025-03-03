@@ -21,6 +21,7 @@ export function usePhaseRouter({
   nominees,
   hoh,
   veto,
+  vetoUsed,
   selectedPlayers,
   setPhase
 }: {
@@ -40,6 +41,7 @@ export function usePhaseRouter({
   nominees: string[],
   hoh: string | null,
   veto: string | null,
+  vetoUsed: boolean,
   selectedPlayers: string[],
   setPhase: (phase: string) => void
 }) {
@@ -74,7 +76,7 @@ export function usePhaseRouter({
           nominees: nominees,
           vetoPlayers: nominees.concat(hoh ? [hoh] : []).concat(veto ? [veto] : []),
           vetoWinner: veto,
-          vetoUsed: false, // This should be updated when veto is used
+          vetoUsed: vetoUsed,
           finalNominees: nominees,
           evicted: selectedPlayers[0],
           evictionVotes: "5-2" // Mock voting result

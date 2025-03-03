@@ -13,6 +13,7 @@ export function useVetoPhase({
   setPhase,
   setSelectedPlayers,
   usePowerup,
+  setVetoUsed,
   toast
 }: VetoPhaseProps) {
   
@@ -43,9 +44,12 @@ export function useVetoPhase({
     let statusMsg = ''; // Create a local variable to store the status message
     
     if (action === 'use') {
+      // Mark that veto was used this week
+      setVetoUsed(true);
+      
       // If using veto, go to replacement nominee selection
-      const savedNomineeId = action;
-      const remainingNomineeId = nominees.find(id => id !== savedNomineeId);
+      const savedNomineeId = nominees[0]; // For simplicity, we'll save the first nominee
+      const remainingNomineeId = nominees[1];
       
       // For replacement, choose eligible players (not HoH, not veto holder, not already nominated)
       const availablePlayers = players.filter(p => 
@@ -87,6 +91,7 @@ export function useVetoPhase({
       }
     } else {
       // Not using veto
+      setVetoUsed(false);
       statusMsg = `${players.find(p => p.id === veto)?.name} decided not to use the Power of Veto.`;
     }
     

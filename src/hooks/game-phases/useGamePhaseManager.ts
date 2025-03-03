@@ -17,6 +17,7 @@ import { usePhaseRouter } from './managers/usePhaseRouter';
 
 /**
  * Main hook for managing all game phases and their interactions
+ * Updated to more closely match the real Big Brother format
  */
 export function useGamePhaseManager({ 
   players: initialPlayers, 
@@ -64,6 +65,8 @@ export function useGamePhaseManager({
     setStatusMessage: setters.setStatusMessage,
     setPhase: setters.setPhase,
     setSelectedPlayers: setters.setSelectedPlayers,
+    lastHoH: state.lastHoH,
+    setLastHoH: setters.setLastHoH,
     toast
   });
 
@@ -88,6 +91,9 @@ export function useGamePhaseManager({
     setStatusMessage: setters.setStatusMessage,
     setPhase: setters.setPhase,
     setSelectedPlayers: setters.setSelectedPlayers,
+    hoh: state.hoh,
+    nominees: state.nominees,
+    setVetoUsed: setters.setVetoUsed,
     toast
   });
 
@@ -102,6 +108,7 @@ export function useGamePhaseManager({
     setPhase: setters.setPhase,
     setSelectedPlayers: setters.setSelectedPlayers,
     usePowerup,
+    setVetoUsed: setters.setVetoUsed,
     toast
   });
 
@@ -171,6 +178,7 @@ export function useGamePhaseManager({
     nominees: state.nominees,
     hoh: state.hoh,
     veto: state.veto,
+    vetoUsed: state.vetoUsed,
     selectedPlayers: state.selectedPlayers,
     setPhase: setters.setPhase
   });
