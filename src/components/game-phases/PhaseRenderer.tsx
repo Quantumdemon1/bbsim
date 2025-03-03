@@ -3,22 +3,14 @@ import React from 'react';
 import { PlayerData } from '../PlayerProfileTypes';
 import { Alliance } from '@/contexts/types';
 import { WeekSummary } from '@/hooks/game-phases/types';
-
-// Phase components
-import HoHCompetition from './HoHCompetition';
-import NominationCeremony from './NominationCeremony';
-import PoVCompetition from './PoVCompetition';
-import VetoCeremony from './VetoCeremony';
-import EvictionVoting from './EvictionVoting';
-import Eviction from './Eviction';
-import SpecialCompetition from './SpecialCompetition';
-import JuryQuestions from './JuryQuestions';
-import JuryVoting from './JuryVoting';
-import WinnerReveal from './WinnerReveal';
-import FinaleStats from './FinaleStats';
-import WeeklySummary from './WeeklySummary';
-import PlacementsChart from './PlacementsChart';
 import DefaultPhase from './DefaultPhase';
+
+// Import specialized renderers
+import CompetitionPhaseRenderer from './renderers/CompetitionPhaseRenderer';
+import NominationPhaseRenderer from './renderers/NominationPhaseRenderer';
+import EvictionPhaseRenderer from './renderers/EvictionPhaseRenderer';
+import SummaryPhaseRenderer from './renderers/SummaryPhaseRenderer';
+import FinalePhaseRenderer from './renderers/FinalePhaseRenderer';
 
 interface PhaseRendererProps {
   phase: string;
@@ -38,214 +30,102 @@ interface PhaseRendererProps {
   weekSummaries?: WeekSummary[];
 }
 
-// Group 1: Regular Week Competition Phases
-const renderCompetitionPhase = (props: PhaseRendererProps) => {
-  const { phase, players, hoh, nominees, selectedPlayers, onPlayerSelect, onAction } = props;
-  
-  switch (phase) {
-    case 'HoH Competition':
-      return (
-        <HoHCompetition 
-          players={players}
-          selectedPlayers={selectedPlayers}
-          onPlayerSelect={onPlayerSelect}
-          onAction={onAction}
-        />
-      );
-      
-    case 'PoV Competition':
-      return (
-        <PoVCompetition
-          players={players}
-          selectedPlayers={selectedPlayers}
-          onPlayerSelect={onPlayerSelect}
-          onAction={onAction}
-          hoh={hoh}
-          nominees={nominees}
-        />
-      );
-      
-    case 'Special Competition':
-      return (
-        <SpecialCompetition
-          players={players}
-          selectedPlayers={selectedPlayers}
-          onPlayerSelect={onPlayerSelect}
-          onAction={onAction}
-        />
-      );
-      
-    default:
-      return null;
-  }
-};
-
-// Group 2: Nomination and Veto Phases
-const renderNominationPhase = (props: PhaseRendererProps) => {
-  const { phase, players, hoh, nominees, veto, selectedPlayers, onPlayerSelect, onAction } = props;
-  
-  switch (phase) {
-    case 'Nomination Ceremony':
-      return (
-        <NominationCeremony
-          players={players}
-          hoh={hoh}
-          selectedPlayers={selectedPlayers}
-          onPlayerSelect={onPlayerSelect}
-          onAction={onAction}
-        />
-      );
-      
-    case 'Veto Ceremony':
-      return (
-        <VetoCeremony
-          players={players}
-          veto={veto}
-          nominees={nominees}
-          onAction={onAction}
-        />
-      );
-      
-    default:
-      return null;
-  }
-};
-
-// Group 3: Eviction Phases
-const renderEvictionPhase = (props: PhaseRendererProps) => {
-  const { phase, players, nominees, alliances, selectedPlayers, statusMessage, week, onAction } = props;
-  
-  switch (phase) {
-    case 'Eviction Voting':
-      return (
-        <EvictionVoting
-          players={players}
-          nominees={nominees}
-          alliances={alliances || []}
-          onAction={onAction}
-        />
-      );
-      
-    case 'Eviction':
-      return (
-        <Eviction
-          players={players}
-          selectedPlayers={selectedPlayers}
-          statusMessage={statusMessage}
-          week={week}
-          onAction={onAction}
-        />
-      );
-      
-    default:
-      return null;
-  }
-};
-
-// Group 4: Summary and Statistics Phases
-const renderSummaryPhase = (props: PhaseRendererProps) => {
-  const { phase, players, week, weekSummaries, finalists, jurors, votes, onAction, alliances } = props;
-  
-  switch (phase) {
-    case 'Weekly Summary':
-      return (
-        <WeeklySummary
-          players={players}
-          weekSummaries={weekSummaries || []}
-          currentWeek={week - 1}
-          onAction={onAction}
-          alliances={alliances}
-        />
-      );
-      
-    case 'Placements':
-      return (
-        <PlacementsChart
-          players={players}
-          finalists={finalists || []}
-          jurors={jurors || []}
-          votes={votes || {}}
-          onAction={onAction}
-        />
-      );
-      
-    case 'Statistics':
-    case 'Finale':
-      return (
-        <FinaleStats
-          players={players}
-          onAction={onAction}
-        />
-      );
-      
-    default:
-      return null;
-  }
-};
-
-// Group 5: Finale and Jury Phases
-const renderFinalePhase = (props: PhaseRendererProps) => {
-  const { phase, players, finalists, jurors, votes, statusMessage, onAction } = props;
-  
-  switch (phase) {
-    case 'Jury Questions':
-      return (
-        <JuryQuestions
-          players={players}
-          finalists={finalists || []}
-          jurors={jurors || []}
-          statusMessage={statusMessage}
-          onAction={onAction}
-        />
-      );
-      
-    case 'Jury Voting':
-      return (
-        <JuryVoting
-          players={players}
-          finalists={finalists || []}
-          jurors={jurors || []}
-          votes={votes || {}}
-          statusMessage={statusMessage}
-          onAction={onAction}
-        />
-      );
-      
-    case 'The Winner':
-      return (
-        <WinnerReveal
-          players={players}
-          votes={votes || {}}
-          finalists={finalists || []}
-          onAction={onAction}
-        />
-      );
-      
-    default:
-      return null;
-  }
-};
-
 const PhaseRenderer: React.FC<PhaseRendererProps> = (props) => {
-  const { phase, statusMessage } = props;
+  const { 
+    phase, 
+    players, 
+    hoh, 
+    nominees, 
+    veto, 
+    selectedPlayers, 
+    onPlayerSelect, 
+    onAction,
+    week,
+    statusMessage,
+    alliances,
+    finalists,
+    jurors,
+    votes,
+    weekSummaries
+  } = props;
   
-  // Try rendering the phase using each group
-  const competitionPhase = renderCompetitionPhase(props);
-  if (competitionPhase) return competitionPhase;
+  // Try rendering the phase using each specialized renderer
   
-  const nominationPhase = renderNominationPhase(props);
-  if (nominationPhase) return nominationPhase;
+  // Competition phases (HoH, PoV, Special)
+  const competitionPhase = (
+    <CompetitionPhaseRenderer
+      phase={phase}
+      players={players}
+      hoh={hoh}
+      nominees={nominees}
+      selectedPlayers={selectedPlayers}
+      onPlayerSelect={onPlayerSelect}
+      onAction={onAction}
+    />
+  );
+  if (competitionPhase.props.children) return competitionPhase;
   
-  const evictionPhase = renderEvictionPhase(props);
-  if (evictionPhase) return evictionPhase;
+  // Nomination phases (Nomination, Veto)
+  const nominationPhase = (
+    <NominationPhaseRenderer
+      phase={phase}
+      players={players}
+      hoh={hoh}
+      nominees={nominees}
+      veto={veto}
+      selectedPlayers={selectedPlayers}
+      onPlayerSelect={onPlayerSelect}
+      onAction={onAction}
+    />
+  );
+  if (nominationPhase.props.children) return nominationPhase;
   
-  const summaryPhase = renderSummaryPhase(props);
-  if (summaryPhase) return summaryPhase;
+  // Eviction phases (Voting, Eviction)
+  const evictionPhase = (
+    <EvictionPhaseRenderer
+      phase={phase}
+      players={players}
+      nominees={nominees}
+      alliances={alliances}
+      selectedPlayers={selectedPlayers}
+      statusMessage={statusMessage}
+      week={week}
+      onAction={onAction}
+    />
+  );
+  if (evictionPhase.props.children) return evictionPhase;
   
-  const finalePhase = renderFinalePhase(props);
-  if (finalePhase) return finalePhase;
+  // Summary phases (Weekly Summary, Placements, Statistics)
+  const summaryPhase = (
+    <SummaryPhaseRenderer
+      phase={phase}
+      players={players}
+      week={week}
+      weekSummaries={weekSummaries}
+      finalists={finalists}
+      jurors={jurors}
+      votes={votes}
+      onAction={onAction}
+      alliances={alliances}
+    />
+  );
+  if (summaryPhase.props.children) return summaryPhase;
   
-  // If no group handles this phase, use the default renderer
+  // Finale phases (Jury Questions, Jury Voting, Winner)
+  const finalePhase = (
+    <FinalePhaseRenderer
+      phase={phase}
+      players={players}
+      finalists={finalists}
+      jurors={jurors}
+      votes={votes}
+      statusMessage={statusMessage}
+      onAction={onAction}
+    />
+  );
+  if (finalePhase.props.children) return finalePhase;
+  
+  // If no specialized renderer handles this phase, use the default renderer
   return (
     <DefaultPhase
       phase={phase}

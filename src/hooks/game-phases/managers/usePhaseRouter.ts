@@ -1,132 +1,141 @@
+import { WeekSummary } from '@/hooks/game-phases/types';
 
-import { WeekSummary } from '../types';
+interface PhaseRouterProps {
+  hohPhase: {
+    handleSelectHoH: () => void;
+  };
+  nominationPhase: {
+    handleNominate: () => void;
+  };
+  povPhase: {
+    handleSelectVeto: () => void;
+  };
+  vetoPhase: {
+    handleVetoAction: (action: string) => void;
+  };
+  evictionPhase: {
+    handleEvict: (evictedId: string) => void;
+  };
+  specialCompPhase: {
+    handleSpecialCompetition: () => void;
+  };
+  finaleManager: {
+    setupFinale: () => void;
+  };
+  juryQuestionsPhase: {
+    handleJuryQuestions: () => void;
+    handleProceedToVoting: () => void;
+  };
+  juryVotingPhase: {
+    handleJuryVote: (jurorId: string, finalistId: string) => void;
+    handleShowResults: () => void;
+  };
+  gameActions: {
+    handleNextWeek: () => void;
+    handleShowPlacements: () => void;
+  };
+  weekSummaries: WeekSummary[];
+  setWeekSummaries: (summaries: WeekSummary[]) => void;
+  week: number;
+  nominees: string[];
+  hoh: string | null;
+  veto: string | null;
+  vetoUsed: boolean;
+  selectedPlayers: string[];
+  setPhase: (phase: string) => void;
+}
 
-/**
- * Manager for routing actions to the appropriate phase handler
- */
-export function usePhaseRouter({
-  hohPhase,
-  nominationPhase,
-  povPhase,
-  vetoPhase,
-  evictionPhase,
-  specialCompPhase,
-  finaleManager,
-  juryQuestionsPhase,
-  juryVotingPhase,
-  gameActions,
-  weekSummaries,
-  setWeekSummaries,
-  week,
-  nominees,
-  hoh,
-  veto,
-  vetoUsed,
-  selectedPlayers,
-  setPhase
-}: {
-  hohPhase: { handleSelectHoH: () => void },
-  nominationPhase: { handleNominate: () => void },
-  povPhase: { handleSelectVeto: () => void },
-  vetoPhase: { handleVetoAction: (data: any) => void },
-  evictionPhase: { handleEvict: (playerId: string) => void },
-  specialCompPhase: { handleSpecialCompetition: () => void },
-  finaleManager: { setupFinale: () => void },
-  juryQuestionsPhase: { handleJuryQuestions: () => void, handleProceedToVoting: () => void },
-  juryVotingPhase: { handleJuryVote: (jurorId: string, finalistId: string) => void, handleShowResults: () => void },
-  gameActions: { handleNextWeek: () => void },
-  weekSummaries: WeekSummary[],
-  setWeekSummaries: (summaries: WeekSummary[]) => void,
-  week: number,
-  nominees: string[],
-  hoh: string | null,
-  veto: string | null,
-  vetoUsed: boolean,
-  selectedPlayers: string[],
-  setPhase: (phase: string) => void
-}) {
-  // Main action handler that routes to the appropriate phase handler
+export function usePhaseRouter(props: PhaseRouterProps) {
+  const { 
+    hohPhase, 
+    nominationPhase, 
+    povPhase, 
+    vetoPhase, 
+    evictionPhase,
+    specialCompPhase,
+    finaleManager,
+    juryQuestionsPhase,
+    juryVotingPhase,
+    gameActions,
+    weekSummaries,
+    setWeekSummaries,
+    week,
+    nominees,
+    hoh,
+    veto,
+    vetoUsed,
+    selectedPlayers,
+    setPhase
+  } = props;
+
   const handleAction = (action: string, data?: any) => {
     switch (action) {
-      case 'selectHOH':
+      case 'selectHoH':
         hohPhase.handleSelectHoH();
         break;
-        
-      case 'nominate':
+      case 'nominatePlayers':
         nominationPhase.handleNominate();
         break;
-        
       case 'selectVeto':
         povPhase.handleSelectVeto();
         break;
-        
       case 'vetoAction':
         vetoPhase.handleVetoAction(data);
         break;
-        
-      case 'evict':
+      case 'evictPlayer':
         evictionPhase.handleEvict(data);
         break;
-        
-      case 'nextWeek':
-        // Add current week's summary before moving to next week
-        const currentWeekSummary: WeekSummary = {
-          week: week,
-          hoh: hoh,
-          nominees: nominees,
-          vetoPlayers: nominees.concat(hoh ? [hoh] : []).concat(veto ? [veto] : []),
-          vetoWinner: veto,
-          veto: veto, // Add for compatibility
-          vetoUsed: vetoUsed,
-          finalNominees: nominees,
-          evicted: selectedPlayers[0],
-          evictionVotes: "5-2" // Mock voting result
-        };
-        
-        setWeekSummaries([...weekSummaries, currentWeekSummary]);
-        
-        // Now proceed to next week
-        gameActions.handleNextWeek();
-        break;
-        
       case 'specialCompetition':
         specialCompPhase.handleSpecialCompetition();
         break;
-        
       case 'setupFinale':
         finaleManager.setupFinale();
         break;
-        
       case 'juryQuestions':
         juryQuestionsPhase.handleJuryQuestions();
         break;
-        
       case 'proceedToVoting':
         juryQuestionsPhase.handleProceedToVoting();
         break;
-        
       case 'juryVote':
         if (data && data.jurorId && data.finalistId) {
           juryVotingPhase.handleJuryVote(data.jurorId, data.finalistId);
         }
         break;
-        
       case 'showResults':
         juryVotingPhase.handleShowResults();
         break;
-        
-      case 'showFinaleStats':
-        setPhase('Statistics');
+      case 'nextWeek':
+        createWeekSummary();
+        gameActions.handleNextWeek();
         break;
-        
       case 'showPlacements':
-        setPhase('Placements');
+        gameActions.handleShowPlacements();
         break;
-        
-      case 'reSimulate':
-        window.location.reload();
-        break;
+      default:
+        console.warn(`Unhandled action: ${action}`);
     }
+  };
+
+  const createWeekSummary = () => {
+    // Ensure that weekSummaries is not undefined
+    const existingSummary = weekSummaries && weekSummaries.find(s => s.week === week);
+    
+    if (existingSummary) {
+      console.warn(`Summary for week ${week} already exists.`);
+      return;
+    }
+    
+    const weekSummary: WeekSummary = {
+      week: props.week,
+      hoh: props.hoh,
+      nominees: [...props.nominees],
+      vetoWinner: props.veto, // Properly assign this property
+      vetoUsed: props.vetoUsed || false,
+      evicted: props.selectedPlayers.length === 1 ? props.selectedPlayers[0] : null
+    };
+    
+    setWeekSummaries([...weekSummaries, weekSummary]);
   };
 
   return {

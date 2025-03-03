@@ -1,16 +1,18 @@
 
 // Re-export all types from the different files
 export * from './player';
+
 // Explicitly re-export the types from common to avoid ambiguity
 export { 
   WeekSummary,
   ToastProps
 } from './common';
+
+// Re-export types properly with 'export type'
 export type { 
   GamePhaseProps,
   GamePhaseState, 
   GamePhaseSetters, 
-  // Add missing Props types
   GameActionsProps,
   HoHPhaseProps,
   NominationPhaseProps,
@@ -22,6 +24,7 @@ export type {
   JuryQuestionsProps,
   JuryVotingProps
 } from './common';
+
 // Re-export component props types
 export type { 
   HoHCompetitionProps,
