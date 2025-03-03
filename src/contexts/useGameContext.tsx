@@ -48,9 +48,11 @@ export const useGameContext = () => {
     isAuthenticated: playerAuth.isAuthenticated,
     currentPlayer: playerAuth.currentPlayer,
     isGuest: playerAuth.isGuest,
+    isAdmin: playerAuth.isAdmin,
     login: playerAuth.login,
     register: playerAuth.register,
     loginAsGuest: playerAuth.loginAsGuest,
+    loginAsAdmin: playerAuth.loginAsAdmin,
     logout: playerAuth.logout,
     updateProfile: playerAuth.updateProfile,
     updateSettings: playerAuth.updateSettings,
@@ -71,6 +73,10 @@ export const useGameContext = () => {
     countdownTimer: gameState.countdownTimer,
     createSinglePlayerGame: gameState.createSinglePlayerGame,
     createMultiplayerGame: gameState.createMultiplayerGame,
-    joinMultiplayerGame: gameState.joinMultiplayerGame
+    joinMultiplayerGame: gameState.joinMultiplayerGame,
+    
+    // Admin control
+    adminTakeControl: gameState.adminTakeControl,
+    isAdminControl: gameState.isAdminControl
   };
 };

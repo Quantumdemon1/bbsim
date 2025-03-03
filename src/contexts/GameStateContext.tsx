@@ -1,7 +1,11 @@
-import React, { createContext, useContext, ReactNode, useState } from 'react';
-import { useGameStateManager } from '@/hooks/useGameStateManager';
+
+import React, { createContext, useContext, ReactNode } from 'react';
 import { usePlayerManagerContext } from './PlayerManagerContext';
 import { PlayerData } from '@/components/PlayerProfileTypes';
+import { useGameCore } from '@/hooks/gameState/useGameCore';
+import { useGameModes } from '@/hooks/gameState/useGameModes';
+import { useAdminControl } from '@/hooks/gameState/useAdminControl';
+import { useChatState } from '@/hooks/gameState/useChatState';
 
 interface GameStateContextType {
   gameId: string | null;
@@ -33,30 +37,13 @@ const GameStateContext = createContext<GameStateContextType>({} as GameStateCont
 
 export const GameStateProvider = ({ children }: { children: ReactNode }) => {
   const { players, setPlayers } = usePlayerManagerContext();
-  const gameStateManager = useGameStateManager(players);
-  const [showChat, setShowChat] = useState(false);
-  const [gameMode, setGameMode] = useState<'singleplayer' | 'multiplayer' | null>(null);
-  const [humanPlayers, setHumanPlayers] = useState<PlayerData[]>([]);
-  const [countdownTimer, setCountdownTimer] = useState<number | null>(null);
-  const [isAdminControl, setIsAdminControl] = useState(false);
   
-  // Import hooks from other contexts
-  const { 
-    gameId,
-    isHost,
-    playerName,
-    setPlayerName,
-    gameState,
-    currentWeek,
-    setCurrentWeek,
-    createGame,
-    joinGame,
-    startGame: gameStateStart,
-    endGame,
-    resetGame: gameStateReset
-  } = gameStateManager;
+  // Use our custom hooks
+  const gameCore = useGameCore();
+  const chatState = useChatState();
+  const adminControl = useAdminControl({ gameState: gameCore.gameState });
   
-  // Use the PlayerManagerContext
+  // Handle game start to initialize alliances and player attributes
   const handleGameStart = () => {
     // Setup some starting alliances randomly for more interesting gameplay
     const newAlliances = [
@@ -71,9 +58,6 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
         members: [players[3].id, players[4].id, players[5].id]
       }
     ];
-    
-    // This will be handled by the Alliance context, but we need to reference it here
-    // Will be integrated with useAllianceContext() later in the component tree
     
     // Initialize default attributes for all players
     const defaultAttributes = {
@@ -123,7 +107,7 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
     });
     
     setPlayers(updatedPlayers);
-    setShowChat(true); // Auto-show chat when game starts
+    chatState.setShowChat(true); // Auto-show chat when game starts
   };
 
   // Handle game reset to initial state
@@ -136,172 +120,58 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
       attributes: undefined,
       relationships: undefined
     })));
-    setShowChat(false);
-    setGameMode(null);
-    setHumanPlayers([]);
-    setCountdownTimer(null);
-    setIsAdminControl(false); // Reset admin control
+    chatState.setShowChat(false);
   };
+
+  // Initialize game modes hook with core game functions
+  const gameModes = useGameModes({
+    createGame: gameCore.createGame,
+    joinGame: gameCore.joinGame,
+    startGame: gameCore.startGame
+  });
 
   // Wrapped game state functions
   const startGame = () => {
-    gameStateStart(handleGameStart);
+    gameCore.startGame(handleGameStart);
   };
 
   const resetGame = () => {
-    gameStateReset(handleGameReset);
-  };
-
-  // Create single player game
-  const createSinglePlayerGame = (bypassAuth = false) => {
-    // We'll use useAuthContext in the component tree to get auth state
-    // but for now this is just a placeholder. This will be integrated later.
-    const authState = { isAuthenticated: true, currentPlayer: null };
-
-    // If bypassAuth is true, skip the authentication check
-    if (!bypassAuth && !authState.isAuthenticated) {
-      return false;
-    }
-    
-    setGameMode('singleplayer');
-    
-    // If player is authenticated, use their profile
-    if (authState.currentPlayer) {
-      const humanPlayer = authState.currentPlayer;
-      setHumanPlayers([humanPlayer]);
-    } else {
-      // For admin bypass, create a temporary player
-      const tempPlayer: PlayerData = {
-        id: `admin-${Date.now()}`,
-        name: 'Admin',
-        isAdmin: true,
-        stats: { hohWins: 0, povWins: 0, timesNominated: 0, daysInHouse: 0 }
-      };
-      setHumanPlayers([tempPlayer]);
-    }
-    
-    // Start game immediately since it's just one player
-    gameStateStart(handleGameStart);
-    return true;
-  };
-  
-  // Create multiplayer game
-  const createMultiplayerGame = (hostName: string) => {
-    setGameMode('multiplayer');
-    
-    // Initialize with host player
-    const hostPlayer: PlayerData = {
-      id: `host-${Date.now()}`,
-      name: hostName,
-      stats: { hohWins: 0, povWins: 0, timesNominated: 0, daysInHouse: 0 }
-    };
-    
-    setHumanPlayers([hostPlayer]);
-    
-    // Start 30 second countdown to launch game
-    setCountdownTimer(30);
-    const countdownInterval = setInterval(() => {
-      setCountdownTimer(prev => {
-        if (prev === null || prev <= 1) {
-          clearInterval(countdownInterval);
-          if (humanPlayers.length >= 2) {
-            // Launch game automatically if we have at least 2 human players
-            gameStateStart(handleGameStart);
-          } else {
-            // Reset if not enough players joined
-            setGameMode(null);
-            setHumanPlayers([]);
-          }
-          return null;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    
-    createGame(hostName);
-    return true;
-  };
-  
-  // Join multiplayer game
-  const joinMultiplayerGame = (gameId: string, playerName: string) => {
-    // Add the player to human players
-    const joiningPlayer: PlayerData = {
-      id: `player-${Date.now()}`,
-      name: playerName,
-      stats: { hohWins: 0, povWins: 0, timesNominated: 0, daysInHouse: 0 }
-    };
-    
-    setHumanPlayers(prev => [...prev, joiningPlayer]);
-    
-    // If we now have 2+ players and timer is still running, we're ready
-    if (humanPlayers.length >= 2 && countdownTimer && countdownTimer > 0) {
-      // Notify all players that the game will start soon
-    }
-    
-    joinGame(joinGameId, playerName);
-    return true;
-  };
-
-  // Admin functions
-  const adminTakeControl = (phaseToSkipTo?: string) => {
-    if (gameState !== 'playing') return;
-    
-    setIsAdminControl(true);
-    
-    // If a specific phase is provided, set it
-    if (phaseToSkipTo) {
-      // This will be handled by the game phase manager
-      // You need to implement this functionality in the game phase components
-      
-      // Notify players about admin intervention
-      const notification = {
-        type: 'system_message' as const,
-        message: 'Game Admin has taken control of the game.'
-      };
-      
-      // This will be handled by the notification system
-      // You need to implement this functionality
-    }
-    
-    toast({
-      title: "Admin Control",
-      description: "You now have control of the game.",
-    });
-  };
-
-  // Login as admin (to be connected to PlayerAuthContext)
-  const loginAsAdmin = () => {
-    // This will be connected to the PlayerAuthContext in the component tree
-    // For now, we'll just set the admin control flag
-    setIsAdminControl(true);
+    gameCore.resetGame(handleGameReset);
   };
 
   return (
     <GameStateContext.Provider
       value={{
-        gameId,
-        isHost,
-        playerName,
-        setPlayerName,
-        gameState,
-        currentWeek,
-        setCurrentWeek,
-        createGame,
-        joinGame,
+        // Game core state
+        gameId: gameCore.gameId,
+        isHost: gameCore.isHost,
+        playerName: gameCore.playerName,
+        setPlayerName: gameCore.setPlayerName,
+        gameState: gameCore.gameState,
+        currentWeek: gameCore.currentWeek,
+        setCurrentWeek: gameCore.setCurrentWeek,
+        createGame: gameCore.createGame,
+        joinGame: gameCore.joinGame,
         startGame,
-        endGame,
+        endGame: gameCore.endGame,
         resetGame,
-        showChat,
-        setShowChat,
-        gameMode,
-        humanPlayers,
-        countdownTimer,
-        createSinglePlayerGame,
-        createMultiplayerGame,
-        joinMultiplayerGame,
-        adminTakeControl,
-        isAdminControl,
-        loginAsAdmin
+        
+        // Chat state
+        showChat: chatState.showChat,
+        setShowChat: chatState.setShowChat,
+        
+        // Game modes
+        gameMode: gameModes.gameMode,
+        humanPlayers: gameModes.humanPlayers,
+        countdownTimer: gameModes.countdownTimer,
+        createSinglePlayerGame: gameModes.createSinglePlayerGame,
+        createMultiplayerGame: gameModes.createMultiplayerGame,
+        joinMultiplayerGame: gameModes.joinMultiplayerGame,
+        
+        // Admin control
+        adminTakeControl: adminControl.adminTakeControl,
+        isAdminControl: adminControl.isAdminControl,
+        loginAsAdmin: adminControl.loginAsAdmin
       }}
     >
       {children}
