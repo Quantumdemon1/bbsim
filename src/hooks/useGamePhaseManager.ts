@@ -140,7 +140,8 @@ export function useGamePhaseManager({
     setJurors: setters.setJurors,
     setStatusMessage: setters.setStatusMessage,
     setPhase: setters.setPhase,
-    setSelectedPlayers: setters.setSelectedPlayers
+    setSelectedPlayers: setters.setSelectedPlayers,
+    toast  // Add toast here
   });
 
   const juryVotingPhase = useJuryVotingPhase({
@@ -151,7 +152,8 @@ export function useGamePhaseManager({
     setVotes: setters.setVotes,
     setStatusMessage: setters.setStatusMessage,
     setPhase: setters.setPhase,
-    setSelectedPlayers: setters.setSelectedPlayers
+    setSelectedPlayers: setters.setSelectedPlayers,
+    toast  // Add toast here
   });
 
   // Main action handler that routes to the appropriate phase handler
