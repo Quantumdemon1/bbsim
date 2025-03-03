@@ -61,12 +61,41 @@ export function useAuthActions(
     });
   };
   
+  const loginAsAdmin = () => {
+    const adminPlayer: PlayerData = {
+      id: `admin-${Date.now()}`,
+      name: 'Game Admin',
+      image: '/placeholder.svg',
+      isAdmin: true, // Add this new flag
+      stats: {
+        hohWins: 0,
+        povWins: 0,
+        timesNominated: 0,
+        daysInHouse: 0
+      }
+    };
+    
+    setAuthState({
+      ...authState,
+      isAuthenticated: true,
+      isGuest: false,
+      isAdmin: true, // Add this new flag
+      currentPlayer: adminPlayer
+    });
+    
+    toast({
+      title: "Admin Mode Activated",
+      description: "You are now logged in with admin privileges.",
+    });
+  };
+  
   const logout = () => {
     setAuthState({
       ...authState,
       isAuthenticated: false,
       currentPlayer: null,
-      isGuest: false
+      isGuest: false,
+      isAdmin: false // Reset admin flag
     });
     
     toast({
@@ -79,6 +108,7 @@ export function useAuthActions(
     login,
     register,
     loginAsGuest,
+    loginAsAdmin, // Export the new function
     logout
   };
 }

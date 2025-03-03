@@ -16,6 +16,7 @@ export function usePlayerAuth() {
     isAuthenticated: boolean;
     currentPlayer: PlayerData | null;
     isGuest: boolean;
+    isAdmin: boolean;
     friends: string[];
     notifications: Array<{
       id: string;
@@ -35,6 +36,7 @@ export function usePlayerAuth() {
     isAuthenticated: false,
     currentPlayer: null,
     isGuest: false,
+    isAdmin: false,
     friends: [],
     notifications: [],
     settings: {
@@ -50,18 +52,20 @@ export function usePlayerAuth() {
   const { addFriend, removeFriend } = useFriends(authState, setAuthState);
   const { updateSettings } = useSettings(authState, setAuthState);
   const { updateProfile } = useProfile(authState, setAuthState);
-  const { login, register, loginAsGuest, logout } = useAuthActions(authState, setAuthState);
+  const { login, register, loginAsGuest, loginAsAdmin, logout } = useAuthActions(authState, setAuthState);
 
   return {
     // Auth state
     isAuthenticated: authState.isAuthenticated,
     currentPlayer: authState.currentPlayer,
     isGuest: authState.isGuest,
+    isAdmin: authState.isAdmin,
     
     // Auth actions
     login,
     register, 
     loginAsGuest,
+    loginAsAdmin,
     logout,
     
     // Profile

@@ -1,16 +1,17 @@
 
 import { PlayerData } from '@/components/PlayerProfileTypes';
 
-export type AuthState = {
+export interface AuthState {
   isAuthenticated: boolean;
   currentPlayer: PlayerData | null;
   isGuest: boolean;
+  isAdmin?: boolean; // Add this new property
   friends: string[];
   notifications: Notification[];
   settings: PlayerSettings;
 }
 
-export type Notification = {
+export interface Notification {
   id: string;
   type: 'friend_request' | 'game_invite' | 'system_message';
   message: string;
@@ -19,16 +20,9 @@ export type Notification = {
   read: boolean;
 }
 
-export type PlayerSettings = {
+export interface PlayerSettings {
   theme: 'light' | 'dark';
   notifications: boolean;
   privacy: 'public' | 'friends' | 'private';
   autoDeclineInvites: boolean;
 }
-
-export const defaultSettings: PlayerSettings = {
-  theme: 'dark',
-  notifications: true,
-  privacy: 'public',
-  autoDeclineInvites: false
-};

@@ -17,10 +17,12 @@ const SinglePlayerTab: React.FC<SinglePlayerTabProps> = ({
   onStartSinglePlayer 
 }) => {
   const navigate = useNavigate();
-  const { createSinglePlayerGame } = useGameContext();
+  const { createSinglePlayerGame, loginAsAdmin } = useGameContext();
 
   // Special admin bypass function to test single player without registration
   const handleAdminBypass = () => {
+    // Login as admin first, then create the game
+    loginAsAdmin();
     if (createSinglePlayerGame(true)) { // Pass true to bypass auth check
       navigate('/game');
     }

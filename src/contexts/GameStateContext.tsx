@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, ReactNode, useState } from 'react';
 import { useGameStateManager } from '@/hooks/useGameStateManager';
 import { usePlayerManagerContext } from './PlayerManagerContext';
@@ -25,6 +24,9 @@ interface GameStateContextType {
   createSinglePlayerGame: (bypassAuth?: boolean) => boolean;
   createMultiplayerGame: (hostName: string) => boolean;
   joinMultiplayerGame: (gameId: string, playerName: string) => boolean;
+  adminTakeControl: (phaseToSkipTo?: string) => void;
+  isAdminControl: boolean;
+  loginAsAdmin: () => void;
 }
 
 const GameStateContext = createContext<GameStateContextType>({} as GameStateContextType);
@@ -36,6 +38,7 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
   const [gameMode, setGameMode] = useState<'singleplayer' | 'multiplayer' | null>(null);
   const [humanPlayers, setHumanPlayers] = useState<PlayerData[]>([]);
   const [countdownTimer, setCountdownTimer] = useState<number | null>(null);
+  const [isAdminControl, setIsAdminControl] = useState(false);
   
   // Import hooks from other contexts
   const { 
@@ -137,6 +140,7 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
     setGameMode(null);
     setHumanPlayers([]);
     setCountdownTimer(null);
+    setIsAdminControl(false); // Reset admin control
   };
 
   // Wrapped game state functions
@@ -170,6 +174,7 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
       const tempPlayer: PlayerData = {
         id: `admin-${Date.now()}`,
         name: 'Admin',
+        isAdmin: true,
         stats: { hohWins: 0, povWins: 0, timesNominated: 0, daysInHouse: 0 }
       };
       setHumanPlayers([tempPlayer]);
@@ -218,7 +223,7 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
   };
   
   // Join multiplayer game
-  const joinMultiplayerGame = (joinGameId: string, playerName: string) => {
+  const joinMultiplayerGame = (gameId: string, playerName: string) => {
     // Add the player to human players
     const joiningPlayer: PlayerData = {
       id: `player-${Date.now()}`,
@@ -235,6 +240,40 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
     
     joinGame(joinGameId, playerName);
     return true;
+  };
+
+  // Admin functions
+  const adminTakeControl = (phaseToSkipTo?: string) => {
+    if (gameState !== 'playing') return;
+    
+    setIsAdminControl(true);
+    
+    // If a specific phase is provided, set it
+    if (phaseToSkipTo) {
+      // This will be handled by the game phase manager
+      // You need to implement this functionality in the game phase components
+      
+      // Notify players about admin intervention
+      const notification = {
+        type: 'system_message' as const,
+        message: 'Game Admin has taken control of the game.'
+      };
+      
+      // This will be handled by the notification system
+      // You need to implement this functionality
+    }
+    
+    toast({
+      title: "Admin Control",
+      description: "You now have control of the game.",
+    });
+  };
+
+  // Login as admin (to be connected to PlayerAuthContext)
+  const loginAsAdmin = () => {
+    // This will be connected to the PlayerAuthContext in the component tree
+    // For now, we'll just set the admin control flag
+    setIsAdminControl(true);
   };
 
   return (
@@ -259,7 +298,10 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
         countdownTimer,
         createSinglePlayerGame,
         createMultiplayerGame,
-        joinMultiplayerGame
+        joinMultiplayerGame,
+        adminTakeControl,
+        isAdminControl,
+        loginAsAdmin
       }}
     >
       {children}

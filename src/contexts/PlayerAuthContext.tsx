@@ -7,9 +7,11 @@ interface PlayerAuthContextType {
   isAuthenticated: boolean;
   currentPlayer: PlayerData | null;
   isGuest: boolean;
+  isAdmin: boolean;
   login: (player: PlayerData) => void;
   register: (player: PlayerData) => void;
   loginAsGuest: (guestName: string) => void;
+  loginAsAdmin: () => void;
   logout: () => void;
   updateProfile: (updatedProfile: Partial<PlayerData>) => void;
   updateSettings: (newSettings: Partial<PlayerSettings>) => void;
@@ -34,9 +36,11 @@ export const PlayerAuthProvider = ({ children }: { children: ReactNode }) => {
         isAuthenticated: playerAuth.isAuthenticated,
         currentPlayer: playerAuth.currentPlayer,
         isGuest: playerAuth.isGuest,
+        isAdmin: playerAuth.isAdmin,
         login: playerAuth.login,
         register: playerAuth.register,
         loginAsGuest: playerAuth.loginAsGuest,
+        loginAsAdmin: playerAuth.loginAsAdmin,
         logout: playerAuth.logout,
         updateProfile: playerAuth.updateProfile,
         updateSettings: playerAuth.updateSettings,

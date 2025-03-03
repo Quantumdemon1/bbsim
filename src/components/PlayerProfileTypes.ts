@@ -13,6 +13,7 @@ export interface PlayerData {
   age?: number;
   hometown?: string;
   occupation?: string;
+  isAdmin?: boolean; // Add this new property
   stats?: {
     hohWins?: number;
     povWins?: number;
