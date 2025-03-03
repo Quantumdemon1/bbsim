@@ -1,8 +1,15 @@
 
 import React from 'react';
-import { Button } from "@/components/ui/button";
-import PlayerProfile, { PlayerData } from './PlayerProfile';
-import { Shield, Star, Trophy, Users } from 'lucide-react';
+import { PlayerData } from './PlayerProfile';
+import { Alliance } from '@/contexts/types';
+import HoHCompetition from './game-phases/HoHCompetition';
+import NominationCeremony from './game-phases/NominationCeremony';
+import PoVCompetition from './game-phases/PoVCompetition';
+import VetoCeremony from './game-phases/VetoCeremony';
+import EvictionVoting from './game-phases/EvictionVoting';
+import Eviction from './game-phases/Eviction';
+import SpecialCompetition from './game-phases/SpecialCompetition';
+import DefaultPhase from './game-phases/DefaultPhase';
 
 interface GamePhaseDisplayProps {
   phase: string;
@@ -15,7 +22,7 @@ interface GamePhaseDisplayProps {
   statusMessage: string;
   selectedPlayers: string[];
   onPlayerSelect: (playerId: string) => void;
-  alliances?: { id: string, name: string, members: string[] }[];
+  alliances?: Alliance[];
 }
 
 const GamePhaseDisplay: React.FC<GamePhaseDisplayProps> = ({
@@ -35,288 +42,82 @@ const GamePhaseDisplay: React.FC<GamePhaseDisplayProps> = ({
     switch (phase) {
       case 'HoH Competition':
         return (
-          <div className="glass-panel p-6 w-full max-w-4xl mx-auto animate-scale-in">
-            <h2 className="text-2xl font-bold text-center mb-6">Head of Household Competition</h2>
-            <p className="text-center mb-8 text-gray-300">Select a player to be the new Head of Household:</p>
-            
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-8">
-              {players
-                .filter(p => p.status !== 'evicted')
-                .map(player => (
-                  <PlayerProfile
-                    key={player.id}
-                    player={player}
-                    onClick={() => onPlayerSelect(player.id)}
-                    selected={selectedPlayers.includes(player.id)}
-                    showDetails={true}
-                  />
-                ))}
-            </div>
-            
-            <div className="flex justify-center mt-4">
-              <Button 
-                className="bg-game-accent hover:bg-game-highlight text-black px-8 py-6 text-lg rounded-md button-glow"
-                onClick={() => onAction('selectHOH')}
-                disabled={selectedPlayers.length !== 1}
-              >
-                Confirm Selection
-              </Button>
-            </div>
-          </div>
+          <HoHCompetition 
+            players={players}
+            selectedPlayers={selectedPlayers}
+            onPlayerSelect={onPlayerSelect}
+            onAction={onAction}
+          />
         );
         
       case 'Nomination Ceremony':
         return (
-          <div className="glass-panel p-6 w-full max-w-4xl mx-auto animate-scale-in">
-            <h2 className="text-2xl font-bold text-center mb-6">Nomination Ceremony</h2>
-            
-            {hoh && (
-              <div className="mb-8">
-                <p className="text-center text-gray-300 mb-4">Current Head of Household:</p>
-                <div className="flex justify-center">
-                  {players.filter(p => p.id === hoh).map(player => (
-                    <PlayerProfile key={player.id} player={player} size="lg" showDetails={true} />
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            <p className="text-center mb-8 text-gray-300">Select two houseguests to nominate for eviction:</p>
-            
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-8">
-              {players
-                .filter(p => p.id !== hoh && p.status !== 'evicted')
-                .map(player => (
-                  <PlayerProfile
-                    key={player.id}
-                    player={player}
-                    onClick={() => onPlayerSelect(player.id)}
-                    selected={selectedPlayers.includes(player.id)}
-                    showDetails={true}
-                  />
-                ))}
-            </div>
-            
-            <div className="flex justify-center mt-4">
-              <Button 
-                className="bg-game-accent hover:bg-game-highlight text-black px-8 py-6 text-lg rounded-md button-glow"
-                onClick={() => onAction('nominate')}
-                disabled={selectedPlayers.length !== 2}
-              >
-                Confirm Nominations
-              </Button>
-            </div>
-          </div>
+          <NominationCeremony
+            players={players}
+            hoh={hoh}
+            selectedPlayers={selectedPlayers}
+            onPlayerSelect={onPlayerSelect}
+            onAction={onAction}
+          />
         );
         
       case 'PoV Competition':
         return (
-          <div className="glass-panel p-6 w-full max-w-4xl mx-auto animate-scale-in">
-            <h2 className="text-2xl font-bold text-center mb-6">Power of Veto Competition</h2>
-            <p className="text-center mb-8 text-gray-300">Select a player to win the Power of Veto:</p>
-            
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-8">
-              {players
-                .filter(p => p.status !== 'evicted')
-                .map(player => (
-                  <PlayerProfile
-                    key={player.id}
-                    player={player}
-                    onClick={() => onPlayerSelect(player.id)}
-                    selected={selectedPlayers.includes(player.id)}
-                    showDetails={true}
-                  />
-                ))}
-            </div>
-            
-            <div className="flex justify-center mt-4">
-              <Button 
-                className="bg-game-accent hover:bg-game-highlight text-black px-8 py-6 text-lg rounded-md button-glow"
-                onClick={() => onAction('selectVeto')}
-                disabled={selectedPlayers.length !== 1}
-              >
-                Confirm Selection
-              </Button>
-            </div>
-          </div>
+          <PoVCompetition
+            players={players}
+            selectedPlayers={selectedPlayers}
+            onPlayerSelect={onPlayerSelect}
+            onAction={onAction}
+          />
         );
         
       case 'Veto Ceremony':
         return (
-          <div className="glass-panel p-6 w-full max-w-4xl mx-auto animate-scale-in">
-            <h2 className="text-2xl font-bold text-center mb-6">Veto Ceremony</h2>
-            
-            {veto && (
-              <div className="mb-8">
-                <p className="text-center text-gray-300 mb-4">Current Veto Holder:</p>
-                <div className="flex justify-center">
-                  {players.filter(p => p.id === veto).map(player => (
-                    <PlayerProfile key={player.id} player={player} size="lg" showDetails={true} />
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            <div className="flex flex-col items-center mb-8">
-              <p className="text-center text-gray-300 mb-4">Current Nominees:</p>
-              <div className="flex gap-8">
-                {players
-                  .filter(p => nominees.includes(p.id))
-                  .map(player => (
-                    <PlayerProfile key={player.id} player={player} showDetails={true} />
-                  ))}
-              </div>
-            </div>
-            
-            <p className="text-center mb-8 text-gray-300">
-              Choose an action for the Power of Veto:
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                className="bg-game-accent hover:bg-game-highlight text-black px-8 py-6 text-lg rounded-md button-glow"
-                onClick={() => onAction('vetoAction', 'use')}
-              >
-                Use Veto
-              </Button>
-              
-              <Button 
-                className="bg-game-medium hover:bg-game-light border border-white/20 text-white px-8 py-6 text-lg rounded-md button-glow"
-                onClick={() => onAction('vetoAction', 'dontUse')}
-              >
-                Don't Use Veto
-              </Button>
-            </div>
-          </div>
+          <VetoCeremony
+            players={players}
+            veto={veto}
+            nominees={nominees}
+            onAction={onAction}
+          />
         );
         
       case 'Eviction Voting':
         return (
-          <div className="glass-panel p-6 w-full max-w-4xl mx-auto animate-scale-in">
-            <h2 className="text-2xl font-bold text-center mb-6">Eviction Voting</h2>
-            
-            <div className="flex flex-col items-center mb-8">
-              <p className="text-center text-gray-300 mb-4">Final Nominees:</p>
-              <div className="flex gap-8">
-                {players
-                  .filter(p => nominees.includes(p.id))
-                  .map(player => (
-                    <PlayerProfile key={player.id} player={player} size="lg" showDetails={true} />
-                  ))}
-              </div>
-            </div>
-            
-            {alliances && alliances.length > 0 && (
-              <div className="mb-8">
-                <p className="text-center text-gray-300 mb-2">Current Alliances:</p>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {alliances.map(alliance => (
-                    <div key={alliance.id} className="bg-game-dark/50 rounded px-3 py-1 text-sm flex items-center">
-                      <Users size={14} className="mr-1" />
-                      {alliance.name}
-                      <span className="ml-1 text-xs text-gray-400">({alliance.members.length})</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            <p className="text-center mb-8 text-gray-300">
-              Select a nominee to evict from the Big Brother house:
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-8 justify-center">
-              {players
-                .filter(p => nominees.includes(p.id))
-                .map(player => (
-                  <div key={player.id} className="flex flex-col items-center">
-                    <PlayerProfile player={player} showDetails={true} />
-                    <Button 
-                      className="mt-4 bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-md button-glow"
-                      onClick={() => onAction('evict', player.id)}
-                    >
-                      Evict {player.name}
-                    </Button>
-                  </div>
-                ))}
-            </div>
-          </div>
+          <EvictionVoting
+            players={players}
+            nominees={nominees}
+            alliances={alliances}
+            onAction={onAction}
+          />
         );
         
       case 'Eviction':
         return (
-          <div className="glass-panel p-6 w-full max-w-4xl mx-auto animate-scale-in">
-            <h2 className="text-2xl font-bold text-center mb-6">Eviction Results</h2>
-            
-            <p className="text-center mb-8 text-xl">
-              {statusMessage}
-            </p>
-            
-            <div className="flex justify-center mb-8">
-              {players
-                .filter(p => p.status === 'evicted' && p.id === selectedPlayers[0])
-                .map(player => (
-                  <PlayerProfile key={player.id} player={player} size="lg" />
-                ))}
-            </div>
-            
-            <div className="flex justify-center">
-              <Button 
-                className="bg-game-accent hover:bg-game-highlight text-black px-8 py-6 text-lg rounded-md button-glow"
-                onClick={() => onAction('nextWeek')}
-              >
-                Continue to Week {week + 1}
-              </Button>
-            </div>
-          </div>
+          <Eviction
+            players={players}
+            selectedPlayers={selectedPlayers}
+            statusMessage={statusMessage}
+            week={week}
+            onAction={onAction}
+          />
         );
         
       case 'Special Competition':
         return (
-          <div className="glass-panel p-6 w-full max-w-4xl mx-auto animate-scale-in">
-            <h2 className="text-2xl font-bold text-center mb-6">Special Competition</h2>
-            
-            <div className="flex items-center justify-center mb-6">
-              <Trophy className="text-yellow-400 h-14 w-14 mr-3" />
-              <p className="text-xl text-yellow-300">Winner gets a special power!</p>
-            </div>
-            
-            <p className="text-center mb-8 text-gray-300">Select a player to win the special competition:</p>
-            
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-8">
-              {players
-                .filter(p => p.status !== 'evicted')
-                .map(player => (
-                  <PlayerProfile
-                    key={player.id}
-                    player={player}
-                    onClick={() => onPlayerSelect(player.id)}
-                    selected={selectedPlayers.includes(player.id)}
-                    showDetails={true}
-                  />
-                ))}
-            </div>
-            
-            <div className="flex justify-center mt-4">
-              <Button 
-                className="bg-yellow-500 hover:bg-yellow-600 text-black px-8 py-6 text-lg rounded-md button-glow"
-                onClick={() => onAction('specialCompetition')}
-                disabled={selectedPlayers.length !== 1}
-              >
-                Award Power-Up
-              </Button>
-            </div>
-          </div>
+          <SpecialCompetition
+            players={players}
+            selectedPlayers={selectedPlayers}
+            onPlayerSelect={onPlayerSelect}
+            onAction={onAction}
+          />
         );
         
       default:
         return (
-          <div className="glass-panel p-6 w-full max-w-4xl mx-auto animate-scale-in">
-            <h2 className="text-2xl font-bold text-center mb-6">{phase}</h2>
-            <p className="text-center text-gray-300">
-              {statusMessage || `This phase is not yet implemented.`}
-            </p>
-          </div>
+          <DefaultPhase
+            phase={phase}
+            statusMessage={statusMessage}
+          />
         );
     }
   };
