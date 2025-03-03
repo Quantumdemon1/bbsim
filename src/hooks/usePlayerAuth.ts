@@ -1,7 +1,6 @@
 
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { toast } from "@/components/ui/use-toast";
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { useNotifications } from './auth/useNotifications';
 import { useFriends } from './auth/useFriends';
@@ -51,7 +50,7 @@ export function usePlayerAuth() {
   const { addFriend, removeFriend } = useFriends(authState, setAuthState);
   const { updateSettings } = useSettings(authState, setAuthState);
   const { updateProfile } = useProfile(authState, setAuthState);
-  const { login, register, loginAsGuest, logout } = useAuthActions(authState, setAuthState, toast);
+  const { login, register, loginAsGuest, logout } = useAuthActions(authState, setAuthState);
 
   return {
     // Auth state

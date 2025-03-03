@@ -17,7 +17,7 @@ export function useAuthActions(
     
     toast({
       title: "Welcome back!",
-      description: `You are now logged in as ${player.username}.`,
+      description: `You are now logged in as ${player.name}.`,
     });
   };
   
@@ -31,20 +31,20 @@ export function useAuthActions(
     
     toast({
       title: "Registration successful!",
-      description: `Welcome to the game, ${player.username}!`,
+      description: `Welcome to the game, ${player.name}!`,
     });
   };
   
   const loginAsGuest = (guestName: string) => {
     const guestPlayer: PlayerData = {
       id: `guest-${Date.now()}`,
-      username: guestName,
-      avatar: '/placeholder.svg',
-      level: 1,
+      name: guestName,
+      image: '/placeholder.svg',
       stats: {
-        wins: 0,
-        losses: 0,
-        totalGames: 0
+        hohWins: 0,
+        povWins: 0,
+        timesNominated: 0,
+        daysInHouse: 0
       }
     };
     
