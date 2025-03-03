@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useGameContext } from '@/contexts/GameContext';
+import { useGameContext } from '@/contexts/useGameContext';
 import Logo from '@/components/Logo';
 import { Award } from 'lucide-react';
 import PlayerAuth from '@/components/PlayerAuth';
@@ -39,13 +40,13 @@ const Index = () => {
     }
   }, [isAuthenticated, currentPlayer]);
 
-  const handleCreateSinglePlayer = (bypassAuth = false) => {
-    if (!bypassAuth && (!isAuthenticated || isGuest)) {
+  const handleCreateSinglePlayer = () => {
+    if ((!isAuthenticated || isGuest)) {
       setShowAuth(true);
       return;
     }
     
-    if (createSinglePlayerGame(bypassAuth)) {
+    if (createSinglePlayerGame(false)) {
       navigate('/game');
     }
   };
@@ -119,7 +120,7 @@ const Index = () => {
                 onPlayerNameChange={(e) => setPlayerName(e.target.value)}
                 isAuthenticated={isAuthenticated}
                 isGuest={isGuest}
-                onStartSinglePlayer={() => handleCreateSinglePlayer(false)}
+                onStartSinglePlayer={handleCreateSinglePlayer}
                 onCreateMultiplayerGame={handleCreateMultiplayerGame}
                 onJoinMultiplayerGame={handleJoinMultiplayerGame}
               />
