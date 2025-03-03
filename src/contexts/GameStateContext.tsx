@@ -1,17 +1,12 @@
-import React, { createContext, useContext, ReactNode, useState } from 'react';
+
+import React, { createContext, useContext, ReactNode } from 'react';
 import { usePlayerManagerContext } from './PlayerManagerContext';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { useGameCore } from '@/hooks/gameState/useGameCore';
 import { useGameModes } from '@/hooks/gameState/useGameModes';
 import { useAdminControl } from '@/hooks/gameState/useAdminControl';
 import { useChatState } from '@/hooks/gameState/useChatState';
-
-type PhaseProgress = {
-  [phase: string]: {
-    playersReady: string[];
-    completed: boolean;
-  }
-};
+import { usePhaseProgress } from '@/hooks/gameState/usePhaseProgress';
 
 interface GameStateContextType {
   gameId: string | null;
@@ -38,10 +33,17 @@ interface GameStateContextType {
   isAdminControl: boolean;
   loginAsAdmin: () => void;
   
-  phaseProgress: PhaseProgress;
+  phaseProgress: Record<string, { playersReady: string[], completed: boolean }>;
   phaseCountdown: number | null;
   markPhaseProgress: (phase: string, playerId: string) => void;
-  getPhaseProgress: (phase: string) => { playersReady: string[], completed: boolean } | null;
+  getPhaseProgress: (phase: string) => { 
+    playersReady: string[]; 
+    completed: boolean;
+    completedCount: number;
+    totalCount: number;
+    percentage: number;
+    hasStartedCountdown: boolean;
+  } | null;
   startPhaseCountdown: (seconds: number) => void;
   clearPhaseProgress: (phase: string) => void;
 }
@@ -51,94 +53,23 @@ const GameStateContext = createContext<GameStateContextType>({} as GameStateCont
 export const GameStateProvider = ({ children }: { children: ReactNode }) => {
   const { players, setPlayers } = usePlayerManagerContext();
   
-  const [phaseProgress, setPhaseProgress] = useState<PhaseProgress>({});
-  const [phaseCountdown, setPhaseCountdown] = useState<number | null>(null);
-  const [countdownInterval, setCountdownInterval] = useState<number | null>(null);
-  
   const gameCore = useGameCore();
   const chatState = useChatState();
-  const adminControl = useAdminControl({ 
-    gameState: gameCore.gameState,
-    clearPhaseProgress: (phase: string) => clearPhaseProgress(phase)
-  });
-  
   const gameModes = useGameModes({
     createGame: gameCore.createGame,
     joinGame: gameCore.joinGame,
     startGame: gameCore.startGame
   });
   
-  const markPhaseProgress = (phase: string, playerId: string) => {
-    setPhaseProgress(prev => {
-      const phaseObj = prev[phase] || { playersReady: [], completed: false };
-      
-      if (!phaseObj.playersReady.includes(playerId)) {
-        const updatedPlayersReady = [...phaseObj.playersReady, playerId];
-        
-        const humanPlayerCount = players.filter(p => p.isAdmin || p.isHuman).length;
-        const isCompleted = gameModes.gameMode === 'singleplayer' || 
-                           (updatedPlayersReady.length >= Math.ceil(humanPlayerCount / 2));
-        
-        if (isCompleted && gameModes.gameMode === 'multiplayer' && !phaseObj.completed) {
-          startPhaseCountdown(30);
-        }
-        
-        return {
-          ...prev,
-          [phase]: {
-            playersReady: updatedPlayersReady,
-            completed: isCompleted
-          }
-        };
-      }
-      
-      return prev;
-    });
-  };
+  const phaseProgressTracker = usePhaseProgress({
+    gameMode: gameModes.gameMode,
+    humanPlayerCount: players.filter(p => p.isAdmin || p.isHuman).length
+  });
   
-  const getPhaseProgress = (phase: string) => {
-    return phaseProgress[phase] || null;
-  };
-  
-  const clearPhaseProgress = (phase: string) => {
-    if (countdownInterval) {
-      window.clearInterval(countdownInterval);
-      setCountdownInterval(null);
-    }
-    setPhaseCountdown(null);
-    
-    if (phase === '*') {
-      setPhaseProgress({});
-      return;
-    }
-    
-    setPhaseProgress(prev => {
-      const newProgress = { ...prev };
-      delete newProgress[phase];
-      return newProgress;
-    });
-  };
-  
-  const startPhaseCountdown = (seconds: number) => {
-    if (countdownInterval) {
-      window.clearInterval(countdownInterval);
-    }
-    
-    setPhaseCountdown(seconds);
-    
-    const interval = window.setInterval(() => {
-      setPhaseCountdown(prev => {
-        if (prev === null || prev <= 1) {
-          window.clearInterval(interval);
-          setCountdownInterval(null);
-          return null;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    
-    setCountdownInterval(interval);
-  };
+  const adminControl = useAdminControl({ 
+    gameState: gameCore.gameState,
+    clearPhaseProgress: phaseProgressTracker.clearPhaseProgress
+  });
 
   const handleGameStart = () => {
     const newAlliances = [
@@ -211,7 +142,7 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
       relationships: undefined
     })));
     chatState.setShowChat(false);
-    clearPhaseProgress('*');
+    phaseProgressTracker.clearPhaseProgress('*');
   };
 
   const startGame = () => {
@@ -225,6 +156,7 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
   return (
     <GameStateContext.Provider
       value={{
+        // Game core state
         gameId: gameCore.gameId,
         isHost: gameCore.isHost,
         playerName: gameCore.playerName,
@@ -238,9 +170,11 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
         endGame: gameCore.endGame,
         resetGame,
         
+        // Chat state
         showChat: chatState.showChat,
         setShowChat: chatState.setShowChat,
         
+        // Game modes
         gameMode: gameModes.gameMode,
         humanPlayers: gameModes.humanPlayers,
         countdownTimer: gameModes.countdownTimer,
@@ -248,16 +182,18 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
         createMultiplayerGame: gameModes.createMultiplayerGame,
         joinMultiplayerGame: gameModes.joinMultiplayerGame,
         
+        // Admin control
         adminTakeControl: adminControl.adminTakeControl,
         isAdminControl: adminControl.isAdminControl,
         loginAsAdmin: adminControl.loginAsAdmin,
         
-        phaseProgress,
-        phaseCountdown,
-        markPhaseProgress,
-        getPhaseProgress,
-        startPhaseCountdown,
-        clearPhaseProgress
+        // Phase progress tracking
+        phaseProgress: phaseProgressTracker.phaseProgress,
+        phaseCountdown: phaseProgressTracker.phaseCountdown,
+        markPhaseProgress: phaseProgressTracker.markPhaseProgress,
+        getPhaseProgress: phaseProgressTracker.getPhaseProgress,
+        startPhaseCountdown: phaseProgressTracker.startPhaseCountdown,
+        clearPhaseProgress: phaseProgressTracker.clearPhaseProgress
       }}
     >
       {children}
