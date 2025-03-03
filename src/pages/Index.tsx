@@ -6,19 +6,36 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGameContext } from '@/contexts/GameContext';
 import Logo from '@/components/Logo';
-import { Users, Award, Crown } from 'lucide-react';
+import { Users, Award, Crown, LogIn, UserPlus } from 'lucide-react';
+import PlayerAuth from '@/components/PlayerAuth';
+import { usePlayerAuth } from '@/hooks/usePlayerAuth';
+import { PlayerData } from '@/components/PlayerProfileTypes';
 
 const Index = () => {
   const [hostName, setHostName] = useState('');
   const [gameId, setGameId] = useState('');
   const [playerName, setPlayerName] = useState('');
   const [activeTab, setActiveTab] = useState<'create' | 'join'>('create');
+  const [showAuth, setShowAuth] = useState(false);
   
   const { createGame, joinGame } = useGameContext();
+  const { authState, login, register, loginAsGuest } = usePlayerAuth();
   const navigate = useNavigate();
+
+  // Set player name if already authenticated
+  React.useEffect(() => {
+    if (authState.isAuthenticated && authState.currentPlayer) {
+      setPlayerName(authState.currentPlayer.name);
+      setHostName(authState.currentPlayer.name);
+    }
+  }, [authState]);
 
   const handleCreateGame = () => {
     if (hostName.trim()) {
+      if (!authState.isAuthenticated) {
+        // Login as guest if not authenticated
+        loginAsGuest(hostName);
+      }
       createGame(hostName);
       navigate('/lobby');
     }
@@ -26,9 +43,25 @@ const Index = () => {
 
   const handleJoinGame = () => {
     if (gameId.trim() && playerName.trim()) {
+      if (!authState.isAuthenticated) {
+        // Login as guest if not authenticated
+        loginAsGuest(playerName);
+      }
       joinGame(gameId, playerName);
       navigate('/lobby');
     }
+  };
+
+  const handleLogin = (player: PlayerData) => {
+    login(player);
+    setPlayerName(player.name);
+    setHostName(player.name);
+  };
+
+  const handleRegister = (player: PlayerData) => {
+    register(player);
+    setPlayerName(player.name);
+    setHostName(player.name);
   };
 
   return (
@@ -48,6 +81,17 @@ const Index = () => {
             </CardHeader>
             
             <CardContent>
+              {/* Auth Status Banner */}
+              {authState.isAuthenticated && authState.currentPlayer && (
+                <div className="mb-4 p-2 bg-game-dark/50 rounded-md text-center">
+                  <p className="text-sm text-white">
+                    {authState.isGuest 
+                      ? `Playing as guest: ${authState.currentPlayer.name}` 
+                      : `Logged in as: ${authState.currentPlayer.name}`}
+                  </p>
+                </div>
+              )}
+
               <div className="flex mb-6">
                 <Button 
                   variant={activeTab === 'create' ? 'default' : 'outline'}
@@ -104,6 +148,27 @@ const Index = () => {
                   </div>
                 </div>
               )}
+
+              {/* Login/Register buttons */}
+              <div className="mt-4 flex space-x-2">
+                <Button 
+                  variant="outline" 
+                  className="flex-1 bg-game-dark/40 border-white/20 text-white/90 hover:bg-game-light/20"
+                  onClick={() => setShowAuth(true)}
+                >
+                  {authState.isAuthenticated ? (
+                    <>
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      Profile
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="w-4 h-4 mr-2" />
+                      Login
+                    </>
+                  )}
+                </Button>
+              </div>
             </CardContent>
             
             <CardFooter>
@@ -136,6 +201,14 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* Login/Registration Dialog */}
+      <PlayerAuth 
+        open={showAuth} 
+        onClose={() => setShowAuth(false)}
+        onLogin={handleLogin}
+        onRegister={handleRegister}
+      />
     </div>
   );
 };

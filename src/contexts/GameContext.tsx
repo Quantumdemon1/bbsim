@@ -7,6 +7,7 @@ import { usePlayerManager } from '@/hooks/usePlayerManager';
 import { useGameStateManager } from '@/hooks/useGameStateManager';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { PlayerAttributes, PlayerRelationship, RelationshipType } from '@/hooks/game-phases/types';
+import { usePlayerAuth } from '@/hooks/usePlayerAuth';
 
 // Create the context with a default empty object
 const GameContext = createContext<GameContextType>({} as GameContextType);
@@ -15,6 +16,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   // Use our new hooks for player and game state management
   const playerManager = usePlayerManager(mockPlayers);
   const gameStateManager = useGameStateManager(mockPlayers);
+  const playerAuth = usePlayerAuth();
   
   // Import our modular managers
   const allianceManager = useAllianceManager(playerManager.players, playerManager.setPlayers);
@@ -118,7 +120,10 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         startGame,
         resetGame,
         ...allianceManager,
-        ...powerupManager
+        ...powerupManager,
+        isAuthenticated: playerAuth.authState.isAuthenticated,
+        currentPlayer: playerAuth.authState.currentPlayer,
+        isGuest: playerAuth.authState.isGuest
       }}
     >
       {children}

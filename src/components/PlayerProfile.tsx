@@ -108,6 +108,10 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       {showDetails && (
         <div className="mt-2 text-center">
           <div className="font-semibold text-sm">{player.name}</div>
+          <div className="text-xs text-gray-400 mt-1">
+            {player.age && <span className="mr-1">{player.age},</span>}
+            {player.hometown && <span>{player.hometown}</span>}
+          </div>
           {player.stats && (
             <div className="text-xs text-gray-400 mt-1">
               {player.stats.hohWins > 0 && <span className="mr-2">HoH: {player.stats.hohWins}</span>}
