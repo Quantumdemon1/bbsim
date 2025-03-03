@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Shield, Star } from 'lucide-react';
+import { Shield, Star, UserRound } from 'lucide-react';
 import { PlayerAttributes, PlayerRelationship } from '@/hooks/game-phases/types';
 
 export interface PlayerData {
@@ -22,6 +23,23 @@ interface PlayerProfileProps {
   className?: string;
   showDetails?: boolean;
 }
+
+const DefaultAvatar = ({ size }: { size: 'sm' | 'md' | 'lg' }) => {
+  const sizeMap = {
+    sm: 16,
+    md: 24,
+    lg: 32
+  };
+  
+  return (
+    <div className={cn(
+      'flex items-center justify-center w-full h-full bg-game-medium',
+      'text-gray-400'
+    )}>
+      <UserRound size={sizeMap[size]} strokeWidth={1.5} />
+    </div>
+  );
+};
 
 const PlayerProfile: React.FC<PlayerProfileProps> = ({ 
   player, 
@@ -58,6 +76,9 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
     nullify: <Shield className="text-red-400" />
   };
 
+  // Check if image exists or is placeholder
+  const hasValidImage = player.image && player.image !== '/placeholder.svg';
+
   return (
     <div 
       className={cn(
@@ -72,11 +93,27 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
         sizeClasses[size],
         selected ? 'border-game-accent' : 'border-transparent group-hover:border-white/30'
       )}>
-        <img 
-          src={player.image || '/placeholder.svg'} 
-          alt={player.name}
-          className="w-full h-full object-cover"
-        />
+        {hasValidImage ? (
+          <img 
+            src={player.image} 
+            alt={player.name}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              const parent = target.parentElement;
+              if (parent) {
+                parent.querySelector('.fallback-avatar')?.classList.remove('hidden');
+              }
+            }}
+          />
+        ) : (
+          <DefaultAvatar size={size} />
+        )}
+        
+        <div className={cn('fallback-avatar hidden', hasValidImage ? 'hidden' : '')}>
+          <DefaultAvatar size={size} />
+        </div>
         
         {player.status && (
           <div className={cn(

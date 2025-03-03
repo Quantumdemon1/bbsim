@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { PlayerData } from '@/components/PlayerProfile';
+import PlayerProfile from '@/components/PlayerProfile';
 
 interface PlayerSelectionGridProps {
   players: PlayerData[];
@@ -23,14 +24,11 @@ const PlayerSelectionGrid: React.FC<PlayerSelectionGridProps> = ({
           }`}
           onClick={() => setSelectedPlayer(player.id)}
         >
-          <div className="flex flex-col items-center text-center">
-            <img 
-              src={player.image} 
-              alt={player.name} 
-              className="w-20 h-20 object-cover rounded-md mb-2" 
-            />
-            <h3 className="font-medium">{player.name}</h3>
-          </div>
+          <PlayerProfile 
+            player={player} 
+            size="sm"
+            selected={selectedPlayer === player.id}
+          />
         </div>
       ))}
     </div>
