@@ -28,7 +28,8 @@ export interface AIPlayerAttributes {
  * Memory entry for storing game events and interactions
  */
 export interface AIMemoryEntry {
-  type: 'nomination' | 'veto' | 'eviction' | 'hoh' | 'alliance' | 'betrayal' | 'conversation';
+  type: 'nomination' | 'veto' | 'eviction' | 'hoh' | 'alliance' | 'betrayal' | 'conversation' | 
+        'competition_win' | 'competition_loss' | 'argument' | 'celebration' | 'strategy_discussion' | 'private_conversation';
   week: number;
   description: string;
   relatedPlayerId?: string;  // Other player involved in this memory
@@ -49,3 +50,4 @@ export interface AIPlayerDecision {
  * Player relationship types
  */
 export type RelationshipType = 'Enemy' | 'Rival' | 'Neutral' | 'Friend' | 'Ally';
+

@@ -2,7 +2,7 @@
 import React from 'react';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { useGameContext } from '@/contexts/GameContext';
-import { Bot, Brain, Database, MessageSquare } from 'lucide-react';
+import { Bot, Brain, Database, MessageSquare, Star, Users, Shield, Activity } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -19,6 +19,42 @@ const AIPlayerProfile: React.FC<AIPlayerProfileProps> = ({ player }) => {
     archetype: 'floater',
     traits: ['adaptable', 'quiet', 'observant'],
     background: 'No detailed background provided.'
+  };
+  
+  // Helper to get icon based on memory type
+  const getMemoryIcon = (type: string) => {
+    switch (type) {
+      case 'hoh':
+        return <Star className="h-3 w-3 text-yellow-500" />;
+      case 'alliance':
+        return <Users className="h-3 w-3 text-blue-500" />;
+      case 'betrayal':
+        return <Shield className="h-3 w-3 text-red-500" />;
+      case 'competition_win':
+        return <Activity className="h-3 w-3 text-green-500" />;
+      default:
+        return <MessageSquare className="h-3 w-3 text-gray-500" />;
+    }
+  };
+  
+  // Get archetype description
+  const getArchetypeDescription = (archetype: string) => {
+    switch (archetype) {
+      case 'mastermind':
+        return "Strategic player who plans several moves ahead and manipulates situations to their advantage.";
+      case 'social-butterfly':
+        return "Excels at forming connections and maintaining relationships with other houseguests.";
+      case 'comp-beast':
+        return "Focuses on winning competitions as their primary strategy for advancing in the game.";
+      case 'floater':
+        return "Adaptable player who shifts alliances as needed and avoids being seen as a threat.";
+      case 'villain':
+        return "Embraces conflict and isn't afraid to make controversial moves that upset others.";
+      case 'underdog':
+        return "Often in a disadvantaged position but fights against the odds to stay in the game.";
+      default:
+        return "Balanced player with no strongly defined gameplay style.";
+    }
   };
   
   return (
@@ -46,6 +82,9 @@ const AIPlayerProfile: React.FC<AIPlayerProfileProps> = ({ player }) => {
                 <Badge variant="outline" className="ml-2 capitalize">
                   {personality.archetype || 'Unknown'}
                 </Badge>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  {getArchetypeDescription(personality.archetype || '')}
+                </p>
               </div>
               
               <div>
@@ -97,9 +136,12 @@ const AIPlayerProfile: React.FC<AIPlayerProfileProps> = ({ player }) => {
                         }`}>
                           Week {entry.week}
                         </span>
-                        <span className="text-xs text-gray-500">
-                          • {entry.type}
-                        </span>
+                        <div className="flex items-center gap-1">
+                          {getMemoryIcon(entry.type)}
+                          <span className="text-xs text-gray-500 capitalize">
+                            {entry.type.replace('_', ' ')}
+                          </span>
+                        </div>
                       </div>
                       <p>{entry.description}</p>
                     </div>
