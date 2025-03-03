@@ -37,7 +37,7 @@ const PlayerProfileDetails: React.FC<PlayerProfileDetailsProps> = ({
   isCurrentPlayer = false,
   onEdit
 }) => {
-  const { authState } = useGameContext();
+  const { currentPlayer, isGuest } = useGameContext();
   const [activeTab, setActiveTab] = useState('info');
   
   const handleFriendRequest = () => {
@@ -84,7 +84,7 @@ const PlayerProfileDetails: React.FC<PlayerProfileDetailsProps> = ({
           <div>
             <CardTitle className="text-xl text-game-accent">
               {player.name}
-              {authState?.isGuest && isCurrentPlayer && " (Guest)"}
+              {isGuest && isCurrentPlayer && " (Guest)"}
             </CardTitle>
             <CardDescription className="text-gray-400">
               {player.age && `${player.age} years old • `}

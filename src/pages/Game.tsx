@@ -82,7 +82,7 @@ const Game = () => {
         </Button>
       </div>
       
-      <GameActionsToolbar />
+      <GameActionsToolbar players={players} />
       <GameRoom players={players} />
       
       {showChat && <ChatPanel minimizable />}

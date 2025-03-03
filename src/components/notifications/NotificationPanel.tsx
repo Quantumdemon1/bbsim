@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bell, UserPlus, GameController, Info, Clock, CheckCircle, Trash } from 'lucide-react';
+import { Bell, UserPlus, Gamepad, Info, Clock, CheckCircle, Trash } from 'lucide-react';
 import { Notification } from '@/hooks/usePlayerAuth';
 
 interface NotificationPanelProps {
@@ -48,7 +48,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({
       case 'friend_request':
         return <UserPlus className="h-5 w-5 text-blue-500" />;
       case 'game_invite':
-        return <GameController className="h-5 w-5 text-green-500" />;
+        return <Gamepad className="h-5 w-5 text-green-500" />;
       case 'system_message':
       default:
         return <Info className="h-5 w-5 text-yellow-500" />;
