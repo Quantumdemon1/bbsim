@@ -1,17 +1,8 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { toast } from "@/hooks/use-toast";
+import { Wand2, RotateCcw, Lock, Unlock } from 'lucide-react';
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
 interface RelationshipControlsProps {
   handleRandomizeAll: () => void;
@@ -26,165 +17,85 @@ const RelationshipControls: React.FC<RelationshipControlsProps> = ({
   handleMakeAllPermanent,
   handleMakeNonePermanent
 }) => {
-  const [dialogOpen, setDialogOpen] = useState<{
-    randomize: boolean;
-    reset: boolean;
-    makeAllPermanent: boolean;
-    makeNonePermanent: boolean;
-  }>({
-    randomize: false,
-    reset: false,
-    makeAllPermanent: false,
-    makeNonePermanent: false,
-  });
-
-  const closeAllDialogs = () => {
-    setDialogOpen({
-      randomize: false,
-      reset: false,
-      makeAllPermanent: false,
-      makeNonePermanent: false,
-    });
-  };
-
-  const handleConfirmedRandomizeAll = () => {
-    handleRandomizeAll();
-    closeAllDialogs();
-    toast({
-      title: "Relationships Randomized",
-      description: "All player relationships have been randomized.",
-    });
-  };
-
-  const handleConfirmedResetAll = () => {
-    handleResetAll();
-    closeAllDialogs();
-    toast({
-      title: "Relationships Reset",
-      description: "All player relationships have been reset to neutral.",
-    });
-  };
-
-  const handleConfirmedMakeAllPermanent = () => {
-    handleMakeAllPermanent();
-    closeAllDialogs();
-    toast({
-      title: "All Relationships Made Permanent",
-      description: "All relationships have been set to permanent.",
-    });
-  };
-
-  const handleConfirmedMakeNonePermanent = () => {
-    handleMakeNonePermanent();
-    closeAllDialogs();
-    toast({
-      title: "All Relationships Made Non-Permanent",
-      description: "All relationships have been set to non-permanent.",
-    });
-  };
-
+  const [randomizeConfirmOpen, setRandomizeConfirmOpen] = useState(false);
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
+  const [permanentConfirmOpen, setPermanentConfirmOpen] = useState(false);
+  const [nonePermanentConfirmOpen, setNonePermanentConfirmOpen] = useState(false);
+  
   return (
-    <div className="mt-6 flex flex-wrap gap-3 justify-center">
+    <div className="mt-4 space-x-2 flex flex-wrap gap-2">
       <Button 
         variant="outline" 
-        className="bg-game-medium hover:bg-game-light/30"
-        onClick={() => setDialogOpen({ ...dialogOpen, randomize: true })}
+        onClick={() => setRandomizeConfirmOpen(true)}
+        className="flex-1 bg-game-dark/80 text-game-accent border-game-accent hover:bg-game-dark"
       >
+        <Wand2 className="mr-2 h-4 w-4" />
         Randomize All
       </Button>
+      
       <Button 
         variant="outline" 
-        className="bg-game-medium hover:bg-game-light/30"
-        onClick={() => setDialogOpen({ ...dialogOpen, reset: true })}
+        onClick={() => setResetConfirmOpen(true)}
+        className="flex-1 bg-game-dark/80 text-game-accent border-game-accent hover:bg-game-dark"
       >
+        <RotateCcw className="mr-2 h-4 w-4" />
         Reset All
       </Button>
+      
       <Button 
         variant="outline" 
-        className="bg-game-medium hover:bg-game-light/30"
-        onClick={() => setDialogOpen({ ...dialogOpen, makeAllPermanent: true })}
+        onClick={() => setPermanentConfirmOpen(true)}
+        className="flex-1 bg-game-dark/80 text-game-accent border-game-accent hover:bg-game-dark"
       >
+        <Lock className="mr-2 h-4 w-4" />
         Make All Permanent
       </Button>
+      
       <Button 
         variant="outline" 
-        className="bg-game-medium hover:bg-game-light/30"
-        onClick={() => setDialogOpen({ ...dialogOpen, makeNonePermanent: true })}
+        onClick={() => setNonePermanentConfirmOpen(true)}
+        className="flex-1 bg-game-dark/80 text-game-accent border-game-accent hover:bg-game-dark"
       >
+        <Unlock className="mr-2 h-4 w-4" />
         Make None Permanent
       </Button>
-
-      {/* Randomize All Confirmation Dialog */}
-      <AlertDialog open={dialogOpen.randomize} onOpenChange={(open) => setDialogOpen({ ...dialogOpen, randomize: open })}>
-        <AlertDialogContent className="bg-game-dark border-game-accent text-white">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Randomize All Relationships?</AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-300">
-              This will randomize all relationships between players. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-gray-700 hover:bg-gray-600 text-white border-none">Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-game-accent hover:bg-game-highlight text-black" onClick={handleConfirmedRandomizeAll}>
-              Randomize All
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Reset All Confirmation Dialog */}
-      <AlertDialog open={dialogOpen.reset} onOpenChange={(open) => setDialogOpen({ ...dialogOpen, reset: open })}>
-        <AlertDialogContent className="bg-game-dark border-game-accent text-white">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Reset All Relationships?</AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-300">
-              This will reset all relationships to Neutral. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-gray-700 hover:bg-gray-600 text-white border-none">Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-game-accent hover:bg-game-highlight text-black" onClick={handleConfirmedResetAll}>
-              Reset All
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Make All Permanent Confirmation Dialog */}
-      <AlertDialog open={dialogOpen.makeAllPermanent} onOpenChange={(open) => setDialogOpen({ ...dialogOpen, makeAllPermanent: open })}>
-        <AlertDialogContent className="bg-game-dark border-game-accent text-white">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Make All Relationships Permanent?</AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-300">
-              This will make all relationships permanent, preventing them from changing naturally during the game.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-gray-700 hover:bg-gray-600 text-white border-none">Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-game-accent hover:bg-game-highlight text-black" onClick={handleConfirmedMakeAllPermanent}>
-              Make All Permanent
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Make None Permanent Confirmation Dialog */}
-      <AlertDialog open={dialogOpen.makeNonePermanent} onOpenChange={(open) => setDialogOpen({ ...dialogOpen, makeNonePermanent: open })}>
-        <AlertDialogContent className="bg-game-dark border-game-accent text-white">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Make All Relationships Non-Permanent?</AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-300">
-              This will make all relationships non-permanent, allowing them to change naturally during the game.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-gray-700 hover:bg-gray-600 text-white border-none">Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-game-accent hover:bg-game-highlight text-black" onClick={handleConfirmedMakeNonePermanent}>
-              Make None Permanent
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      
+      {/* Confirmation Dialogs */}
+      <ConfirmationDialog
+        open={randomizeConfirmOpen}
+        onOpenChange={setRandomizeConfirmOpen}
+        title="Randomize All Relationships"
+        description="This will randomize all relationships between players. This action cannot be undone. Are you sure you want to continue?"
+        confirmLabel="Randomize All"
+        onConfirm={handleRandomizeAll}
+      />
+      
+      <ConfirmationDialog
+        open={resetConfirmOpen}
+        onOpenChange={setResetConfirmOpen}
+        title="Reset All Relationships"
+        description="This will reset all relationships to Neutral. This action cannot be undone. Are you sure you want to continue?"
+        confirmLabel="Reset All"
+        onConfirm={handleResetAll}
+      />
+      
+      <ConfirmationDialog
+        open={permanentConfirmOpen}
+        onOpenChange={setPermanentConfirmOpen}
+        title="Make All Relationships Permanent"
+        description="This will make all relationships permanent, which means they won't change during gameplay events. Are you sure?"
+        confirmLabel="Make All Permanent"
+        onConfirm={handleMakeAllPermanent}
+      />
+      
+      <ConfirmationDialog
+        open={nonePermanentConfirmOpen}
+        onOpenChange={setNonePermanentConfirmOpen}
+        title="Make No Relationships Permanent"
+        description="This will make all relationships non-permanent, allowing them to change during gameplay events. Are you sure?"
+        confirmLabel="Make None Permanent"
+        onConfirm={handleMakeNonePermanent}
+      />
     </div>
   );
 };

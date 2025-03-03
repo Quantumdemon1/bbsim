@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GameRoom from '@/components/GameRoom';
@@ -15,6 +16,7 @@ import { LoadingState } from '@/components/ui/loading-state';
 import { GamePhase } from '@/types/gameTypes';
 import { adaptGameNotificationToAuthNotification, isGameNotificationArray } from '@/types/notificationTypes';
 import { Notification } from '@/hooks/auth/types';
+import { initPerformanceMonitoring, trackGameLoading, trackPhaseChange } from '@/services/performance-monitoring';
 
 const Game = () => {
   const navigate = useNavigate();
@@ -38,6 +40,7 @@ const Game = () => {
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [currentPhase, setCurrentPhase] = useState<GamePhase>('HoH Competition');
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   
   const adaptedNotifications: Notification[] = React.useMemo(() => {
     if (!notifications || notifications.length === 0) return [];
@@ -49,7 +52,15 @@ const Game = () => {
     return notifications as unknown as Notification[];
   }, [notifications]);
   
+  // Initialize performance monitoring
   useEffect(() => {
+    initPerformanceMonitoring();
+  }, []);
+  
+  useEffect(() => {
+    const gameLoadTracker = trackGameLoading();
+    gameLoadTracker.start();
+    
     const checkRequirements = () => {
       if (!gameMode) {
         navigate('/');
@@ -74,23 +85,46 @@ const Game = () => {
     if (requirementsMet) {
       const timer = setTimeout(() => {
         setIsLoading(false);
+        gameLoadTracker.end();
       }, 500);
       
       return () => clearTimeout(timer);
+    } else {
+      gameLoadTracker.end();
     }
   }, [gameState, isAuthenticated, navigate, gameMode]);
+  
+  const handlePhaseChange = (newPhase: GamePhase) => {
+    const phaseChangeTracker = trackPhaseChange();
+    phaseChangeTracker.start();
+    
+    try {
+      setCurrentPhase(newPhase);
+      phaseChangeTracker.end();
+    } catch (error) {
+      console.error("Error changing phase:", error);
+      setError(error instanceof Error ? error : new Error('Unknown error during phase change'));
+      phaseChangeTracker.end();
+    }
+  };
   
   const handlePhaseComplete = () => {
     console.log("Phase completed:", currentPhase);
     
-    if (clearPhaseProgress) {
-      clearPhaseProgress(currentPhase);
-    }
-    
-    if (saveGame) {
-      saveGame().catch(error => {
-        console.error("Failed to save game:", error);
-      });
+    try {
+      if (clearPhaseProgress) {
+        clearPhaseProgress(currentPhase);
+      }
+      
+      if (saveGame) {
+        saveGame().catch(error => {
+          console.error("Failed to save game:", error);
+          setError(error instanceof Error ? error : new Error('Unknown error during save'));
+        });
+      }
+    } catch (error) {
+      console.error("Error completing phase:", error);
+      setError(error instanceof Error ? error : new Error('Unknown error during phase completion'));
     }
   };
   
@@ -112,6 +146,31 @@ const Game = () => {
 
   if (isLoading || !players || players.length === 0) {
     return <LoadingState fullScreen text="Loading game..." />;
+  }
+
+  if (error) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-game-dark text-white p-4">
+        <div className="max-w-md text-center">
+          <h2 className="text-2xl font-bold text-red-500 mb-4">An error occurred</h2>
+          <p className="mb-6">{error.message}</p>
+          <div className="flex justify-center gap-4">
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-4 py-2 bg-game-accent hover:bg-game-highlight text-black font-medium rounded"
+            >
+              Reload Game
+            </button>
+            <button 
+              onClick={() => navigate('/')} 
+              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded"
+            >
+              Return to Home
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -153,7 +212,7 @@ const Game = () => {
           <GameRoom 
             players={players} 
             initialWeek={1} 
-            onPhaseChange={(phase) => setCurrentPhase(phase as GamePhase)} 
+            onPhaseChange={handlePhaseChange} 
           />
         </ErrorBoundary>
         
