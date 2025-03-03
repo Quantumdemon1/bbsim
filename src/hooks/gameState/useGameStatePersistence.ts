@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { v4 as uuidv4 } from 'uuid';
+import { Json } from '@/integrations/supabase/types';
 
 export interface SavedGameState {
   id: string;
@@ -14,6 +15,20 @@ export interface SavedGameState {
   hoh: string | null;
   veto: string | null;
   nominees: string[];
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface DatabaseGameState {
+  id: string;
+  game_id: string;
+  week: number;
+  phase: string;
+  players: Json;
+  hoh_id: string | null;
+  veto_holder_id: string | null;
+  nominees: Json | null;
+  evicted_id: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -37,7 +52,21 @@ export function useGameStatePersistence() {
 
       if (error) throw error;
       
-      setSavedGames(data || []);
+      // Transform database records to SavedGameState format
+      const transformedData: SavedGameState[] = (data || []).map((item: DatabaseGameState) => ({
+        id: item.id,
+        game_id: item.game_id,
+        week: item.week,
+        phase: item.phase,
+        players: item.players as unknown as PlayerData[],
+        hoh: item.hoh_id,
+        veto: item.veto_holder_id,
+        nominees: item.nominees ? (item.nominees as unknown as string[]) : [],
+        created_at: item.created_at,
+        updated_at: item.updated_at
+      }));
+      
+      setSavedGames(transformedData);
     } catch (err) {
       console.error('Error loading saved games:', err);
       setError('Failed to load saved games');
@@ -157,10 +186,10 @@ export function useGameStatePersistence() {
         gameId: data.game_id,
         week: data.week,
         phase: data.phase,
-        players: data.players,
+        players: data.players as unknown as PlayerData[],
         hoh: data.hoh_id,
         veto: data.veto_holder_id,
-        nominees: data.nominees || []
+        nominees: data.nominees ? (data.nominees as unknown as string[]) : []
       };
     } catch (err) {
       console.error('Error loading game state:', err);
