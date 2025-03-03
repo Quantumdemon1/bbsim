@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { PlayerData } from '@/components/PlayerProfile';
-import { GamePhaseProps, GamePhaseState, GamePhaseSetters } from './types';
+import { GamePhaseProps, GamePhaseState, GamePhaseSetters, WeekSummary } from './types';
 
 export function useGameState({ 
   players: initialPlayers, 
@@ -20,6 +20,7 @@ export function useGameState({
   const [finalists, setFinalists] = useState<string[]>([]);
   const [jurors, setJurors] = useState<string[]>([]);
   const [votes, setVotes] = useState<Record<string, string>>({});
+  const [weekSummaries, setWeekSummaries] = useState<WeekSummary[]>([]);
   const { toast } = useToast();
 
   const gameState: GamePhaseState = {
@@ -33,7 +34,8 @@ export function useGameState({
     selectedPlayers,
     finalists,
     jurors,
-    votes
+    votes,
+    weekSummaries
   };
 
   const setters: GamePhaseSetters = {
@@ -47,7 +49,8 @@ export function useGameState({
     setStatusMessage,
     setFinalists,
     setJurors,
-    setVotes
+    setVotes,
+    setWeekSummaries
   };
 
   return {

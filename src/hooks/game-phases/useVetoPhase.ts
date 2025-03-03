@@ -1,3 +1,4 @@
+
 import { PlayerData } from '@/components/PlayerProfile';
 import { VetoPhaseProps } from './types';
 
@@ -43,7 +44,10 @@ export function useVetoPhase({
     
     if (action === 'use') {
       // If using veto, go to replacement nominee selection
-      // For simplicity, we'll just randomly select a replacement
+      const savedNomineeId = action;
+      const remainingNomineeId = nominees.find(id => id !== savedNomineeId);
+      
+      // For replacement, choose eligible players (not HoH, not veto holder, not already nominated)
       const availablePlayers = players.filter(p => 
         !nominees.includes(p.id) && 
         p.id !== hoh && 
@@ -52,32 +56,32 @@ export function useVetoPhase({
       );
       
       if (availablePlayers.length > 0) {
-        // Randomly select which nominee to save
-        const savedNomineeIndex = Math.floor(Math.random() * nominees.length);
-        const savedNomineeId = nominees[savedNomineeIndex];
-        const remainingNomineeId = nominees.find(id => id !== savedNomineeId)!;
-        
         // Randomly select a replacement nominee
         const replacementIndex = Math.floor(Math.random() * availablePlayers.length);
         const replacementId = availablePlayers[replacementIndex].id;
         
-        const newNominees = [remainingNomineeId, replacementId];
-        setNominees(newNominees);
-        
-        // Update player status
-        setPlayers(players.map(player => ({
-          ...player,
-          status: newNominees.includes(player.id) 
-            ? 'nominated' 
-            : (player.id === savedNomineeId 
-                ? undefined 
-                : player.status)
-        })));
-        
-        const savedName = players.find(p => p.id === savedNomineeId)?.name;
-        const replacementName = players.find(p => p.id === replacementId)?.name;
-        
-        statusMsg = `${players.find(p => p.id === veto)?.name} used the Power of Veto on ${savedName}! ${replacementName} has been named as the replacement nominee.`;
+        // If we have a remaining nominee and a replacement, update the nominees list
+        if (remainingNomineeId && replacementId) {
+          const newNominees = [remainingNomineeId, replacementId];
+          setNominees(newNominees);
+          
+          // Update player status
+          setPlayers(players.map(player => ({
+            ...player,
+            status: newNominees.includes(player.id) 
+              ? 'nominated' 
+              : (player.id === savedNomineeId 
+                  ? undefined 
+                  : player.status)
+          })));
+          
+          const savedName = players.find(p => p.id === savedNomineeId)?.name;
+          const replacementName = players.find(p => p.id === replacementId)?.name;
+          
+          statusMsg = `${players.find(p => p.id === veto)?.name} used the Power of Veto on ${savedName}! ${replacementName} has been named as the replacement nominee.`;
+        } else {
+          statusMsg = `${players.find(p => p.id === veto)?.name} decided not to use the Power of Veto.`;
+        }
       } else {
         statusMsg = `${players.find(p => p.id === veto)?.name} decided not to use the Power of Veto.`;
       }

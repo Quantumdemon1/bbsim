@@ -1,5 +1,4 @@
-import { GameActionsProps, GamePhaseState } from './types';
-import { PlayerData } from '@/components/PlayerProfile';
+import { GameActionsProps } from './types';
 
 export function useGameActions({
   state,
@@ -11,56 +10,97 @@ export function useGameActions({
   setNominees,
   setSelectedPlayers,
   setStatusMessage,
+  setWeekSummaries,
   usePowerup,
   toast
 }: GameActionsProps) {
   
   const handleNextWeek = () => {
-    const { players, week } = state;
+    // Reset phase-specific selections
+    setSelectedPlayers([]);
+    setHoH(null);
+    setVeto(null);
+    setNominees([]);
     
-    // Check if we should have a special competition
-    const hasSpecialComp = week % 3 === 0 || Math.random() < 0.2; // Every 3rd week or 20% chance
+    // Increment week
+    const newWeek = state.week + 1;
+    setWeek(newWeek);
     
-    if (hasSpecialComp) {
-      // Reset player statuses except for evicted players
-      setPlayers(players.map(player => ({
-        ...player,
-        status: player.status === 'evicted' ? 'evicted' : undefined
-      })));
-      
-      setHoH(null);
-      setVeto(null);
-      setNominees([]);
-      setSelectedPlayers([]);
-      setPhase('Special Competition');
-      
+    // Update UI
+    setStatusMessage(`Week ${newWeek} has begun!`);
+    
+    // If we've reached a certain week, start jury phase
+    if (newWeek > 7) {
       toast({
-        title: "Special Competition",
-        description: "A special competition is taking place!",
+        title: "Finale Time!",
+        description: "The game has reached the finale!",
       });
+      setPhase('Jury Questions');
     } else {
-      // Reset game state for next week
-      setWeek(week + 1);
+      // Otherwise continue to next week's HoH competition
       setPhase('HoH Competition');
-      setHoH(null);
-      setVeto(null);
-      setNominees([]);
-      setSelectedPlayers([]);
-      setStatusMessage('');
       
-      // Reset player statuses except for evicted players
-      setPlayers(players.map(player => ({
-        ...player,
-        status: player.status === 'evicted' ? 'evicted' : undefined
-      })));
+      // For testing, we can add a special competition occasionally
+      if (newWeek % 3 === 0) {
+        toast({
+          title: "Special Week!",
+          description: "This week features a special competition!",
+        });
+        setPhase('Special Competition');
+      }
+    }
+    
+    // Update player stats
+    const updatedPlayers = state.players.map(player => {
+      // If they were HoH this week, increment their HoH wins
+      if (player.id === state.hoh) {
+        return {
+          ...player,
+          stats: {
+            ...player.stats,
+            hohWins: (player.stats?.hohWins || 0) + 1,
+          }
+        };
+      }
       
+      // If they won veto this week, increment their PoV wins
+      if (player.id === state.veto) {
+        return {
+          ...player,
+          stats: {
+            ...player.stats,
+            povWins: (player.stats?.povWins || 0) + 1,
+          }
+        };
+      }
+      
+      // If they were nominated, increment times nominated
+      if (state.nominees.includes(player.id)) {
+        return {
+          ...player,
+          stats: {
+            ...player.stats,
+            timesNominated: (player.stats?.timesNominated || 0) + 1,
+          }
+        };
+      }
+      
+      return player;
+    });
+    
+    setPlayers(updatedPlayers);
+    
+    // After eviction, if we're down to 2 players, go to finale
+    const remainingPlayers = updatedPlayers.filter(p => p.status !== 'evicted');
+    if (remainingPlayers.length <= 3) {
       toast({
-        title: `Week ${week + 1}`,
-        description: `Starting week ${week + 1}`,
+        title: "Finale!",
+        description: "We've reached the final players! Time for the finale!",
       });
+      setPhase('Jury Questions');
     }
   };
-
+  
   return {
     handleNextWeek
   };

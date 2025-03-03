@@ -30,6 +30,7 @@ const GameRoom: React.FC<GameRoomProps> = ({
     'Veto Ceremony',
     'Eviction Voting',
     'Eviction',
+    'Weekly Summary',
     'Special Competition'
   ];
 
@@ -64,6 +65,10 @@ const GameRoom: React.FC<GameRoomProps> = ({
         selectedPlayers={gamePhase.selectedPlayers}
         onPlayerSelect={gamePhase.handlePlayerSelect}
         alliances={alliances}
+        finalists={gamePhase.finalists}
+        jurors={gamePhase.jurors}
+        votes={gamePhase.votes}
+        weekSummaries={gamePhase.weekSummaries}
       />
     </div>
   );

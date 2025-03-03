@@ -13,7 +13,10 @@ import JuryQuestions from './game-phases/JuryQuestions';
 import JuryVoting from './game-phases/JuryVoting';
 import WinnerReveal from './game-phases/WinnerReveal';
 import FinaleStats from './game-phases/FinaleStats';
+import WeeklySummary from './game-phases/WeeklySummary';
+import PlacementsChart from './game-phases/PlacementsChart';
 import DefaultPhase from './game-phases/DefaultPhase';
+import { WeekSummary } from '@/hooks/game-phases/types';
 
 interface GamePhaseDisplayProps {
   phase: string;
@@ -30,6 +33,7 @@ interface GamePhaseDisplayProps {
   finalists?: string[];
   jurors?: string[];
   votes?: Record<string, string>;
+  weekSummaries?: WeekSummary[];
 }
 
 const GamePhaseDisplay: React.FC<GamePhaseDisplayProps> = ({
@@ -46,7 +50,8 @@ const GamePhaseDisplay: React.FC<GamePhaseDisplayProps> = ({
   alliances = [],
   finalists = [],
   jurors = [],
-  votes = {}
+  votes = {},
+  weekSummaries = []
 }) => {
   const renderPhaseContent = () => {
     switch (phase) {
@@ -108,6 +113,24 @@ const GamePhaseDisplay: React.FC<GamePhaseDisplayProps> = ({
             selectedPlayers={selectedPlayers}
             statusMessage={statusMessage}
             week={week}
+            onAction={onAction}
+          />
+        );
+        
+      case 'Weekly Summary':
+        return (
+          <WeeklySummary
+            players={players}
+            weekSummaries={weekSummaries}
+            currentWeekIndex={week - 1}
+            onAction={onAction}
+          />
+        );
+        
+      case 'Placements':
+        return (
+          <PlacementsChart
+            players={players}
             onAction={onAction}
           />
         );

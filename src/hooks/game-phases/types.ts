@@ -13,6 +13,8 @@ export type GamePhase =
   | 'Jury Voting'
   | 'The Winner'
   | 'Finale Stats'
+  | 'Weekly Summary'
+  | 'Placements'
   | 'Eviction';
 
 // Game State Types
@@ -28,6 +30,7 @@ export interface GamePhaseState {
   finalists: string[];
   jurors: string[];
   votes: Record<string, string>;
+  weekSummaries: WeekSummary[];
 }
 
 export interface GamePhaseActions {
@@ -43,6 +46,21 @@ export interface GamePhaseProps {
   initialPhase?: string;
 }
 
+// Weekly Summary Type
+export interface WeekSummary {
+  weekNumber: number;
+  hoh: string | null;
+  nominees: string[];
+  vetoPlayers: string[];
+  vetoWinner: string | null;
+  vetoUsed: boolean;
+  saved?: string;
+  replacement?: string;
+  finalNominees: string[];
+  evicted: string | null;
+  evictionVotes?: string;
+}
+
 // Game State Setters
 export interface GamePhaseSetters {
   setWeek: (week: number) => void;
@@ -56,6 +74,7 @@ export interface GamePhaseSetters {
   setFinalists: (finalists: string[]) => void;
   setJurors: (jurors: string[]) => void;
   setVotes: (votes: Record<string, string>) => void;
+  setWeekSummaries: (summaries: WeekSummary[]) => void;
 }
 
 // Toast interface
@@ -221,6 +240,7 @@ export interface GameActionsProps {
   setNominees: (nominees: string[]) => void;
   setSelectedPlayers: (players: string[]) => void;
   setStatusMessage: (message: string) => void;
+  setWeekSummaries?: (summaries: WeekSummary[]) => void;
   usePowerup: (playerId: string) => void;
   toast: (props: ToastProps) => void;
 }

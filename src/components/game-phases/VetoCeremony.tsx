@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import PlayerProfile, { PlayerData } from '@/components/PlayerProfile';
+import { Card, CardContent } from "@/components/ui/card";
 
 interface VetoCeremonyProps {
   players: PlayerData[];
@@ -16,6 +17,10 @@ const VetoCeremony: React.FC<VetoCeremonyProps> = ({
   nominees,
   onAction
 }) => {
+  const [selectedNominee, setSelectedNominee] = useState<string | null>(null);
+  const vetoHolder = players.find(p => p.id === veto);
+  const nomineeProfiles = players.filter(p => nominees.includes(p.id));
+  
   return (
     <div className="glass-panel p-6 w-full max-w-4xl mx-auto animate-scale-in">
       <h2 className="text-2xl font-bold text-center mb-6">Veto Ceremony</h2>
@@ -24,9 +29,9 @@ const VetoCeremony: React.FC<VetoCeremonyProps> = ({
         <div className="mb-8">
           <p className="text-center text-gray-300 mb-4">Current Veto Holder:</p>
           <div className="flex justify-center">
-            {players.filter(p => p.id === veto).map(player => (
-              <PlayerProfile key={player.id} player={player} size="lg" showDetails={true} />
-            ))}
+            {vetoHolder && (
+              <PlayerProfile key={vetoHolder.id} player={vetoHolder} size="lg" showDetails={true} />
+            )}
           </div>
         </div>
       )}
@@ -34,31 +39,30 @@ const VetoCeremony: React.FC<VetoCeremonyProps> = ({
       <div className="flex flex-col items-center mb-8">
         <p className="text-center text-gray-300 mb-4">Current Nominees:</p>
         <div className="flex gap-8">
-          {players
-            .filter(p => nominees.includes(p.id))
-            .map(player => (
-              <PlayerProfile key={player.id} player={player} showDetails={true} />
-            ))}
+          {nomineeProfiles.map(player => (
+            <div 
+              key={player.id} 
+              className={`cursor-pointer ${selectedNominee === player.id ? 'ring-2 ring-game-accent' : ''}`}
+              onClick={() => setSelectedNominee(player.id)}
+            >
+              <PlayerProfile player={player} showDetails={true} />
+              {selectedNominee === player.id && (
+                <div className="text-center mt-2 text-game-accent font-semibold">
+                  Selected to save
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
-      
-      <p className="text-center mb-8 text-gray-300">
-        Choose an action for the Power of Veto:
-      </p>
       
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <Button 
           className="bg-game-accent hover:bg-game-highlight text-black px-8 py-6 text-lg rounded-md button-glow"
-          onClick={() => onAction('vetoAction', 'use')}
+          onClick={() => onAction('vetoAction', selectedNominee ? 'use' : 'dontUse')}
+          disabled={selectedNominee === null && vetoHolder}
         >
-          Use Veto
-        </Button>
-        
-        <Button 
-          className="bg-game-medium hover:bg-game-light border border-white/20 text-white px-8 py-6 text-lg rounded-md button-glow"
-          onClick={() => onAction('vetoAction', 'dontUse')}
-        >
-          Don't Use Veto
+          {selectedNominee ? `Use Veto on ${players.find(p => p.id === selectedNominee)?.name}` : "Don't Use Veto"}
         </Button>
       </div>
     </div>

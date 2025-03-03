@@ -12,7 +12,7 @@ import { useJuryVotingPhase } from './game-phases/useJuryVotingPhase';
 import { useGameActions } from './game-phases/useGameActions';
 import { useGameState } from './game-phases/useGameState';
 import { useFinaleManager } from './game-phases/useFinaleManager';
-import { GamePhaseProps } from './game-phases/types';
+import { GamePhaseProps, WeekSummary } from './game-phases/types';
 
 export function useGamePhaseManager({ 
   players: initialPlayers, 
@@ -46,6 +46,7 @@ export function useGamePhaseManager({
     setNominees: setters.setNominees,
     setSelectedPlayers: setters.setSelectedPlayers,
     setStatusMessage: setters.setStatusMessage,
+    setWeekSummaries: setters.setWeekSummaries,
     usePowerup,
     toast
   });
@@ -141,7 +142,7 @@ export function useGamePhaseManager({
     setStatusMessage: setters.setStatusMessage,
     setPhase: setters.setPhase,
     setSelectedPlayers: setters.setSelectedPlayers,
-    toast  // Add toast here
+    toast
   });
 
   const juryVotingPhase = useJuryVotingPhase({
@@ -153,7 +154,7 @@ export function useGamePhaseManager({
     setStatusMessage: setters.setStatusMessage,
     setPhase: setters.setPhase,
     setSelectedPlayers: setters.setSelectedPlayers,
-    toast  // Add toast here
+    toast
   });
 
   // Main action handler that routes to the appropriate phase handler
@@ -180,6 +181,22 @@ export function useGamePhaseManager({
         break;
         
       case 'nextWeek':
+        // Add current week's summary before moving to next week
+        const currentWeekSummary: WeekSummary = {
+          weekNumber: state.week,
+          hoh: state.hoh,
+          nominees: state.nominees,
+          vetoPlayers: state.players.filter(p => p.id === state.hoh || p.id === state.veto || state.nominees.includes(p.id)).map(p => p.id),
+          vetoWinner: state.veto,
+          vetoUsed: false, // This should be updated when veto is used
+          finalNominees: state.nominees,
+          evicted: state.selectedPlayers[0],
+          evictionVotes: "5-2" // Mock voting result
+        };
+        
+        setters.setWeekSummaries([...state.weekSummaries, currentWeekSummary]);
+        
+        // Now proceed to next week
         gameActions.handleNextWeek();
         break;
         
@@ -211,6 +228,10 @@ export function useGamePhaseManager({
         
       case 'showFinaleStats':
         setters.setPhase('Statistics');
+        break;
+        
+      case 'showPlacements':
+        setters.setPhase('Placements');
         break;
         
       case 'reSimulate':
