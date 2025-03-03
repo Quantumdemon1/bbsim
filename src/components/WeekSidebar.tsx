@@ -20,16 +20,16 @@ const WeekSidebar: React.FC<WeekSidebarProps> = ({
   const weeks = Array.from({ length: weekCount }, (_, i) => i + 1);
 
   return (
-    <div className="bg-game-medium border-r border-game-light/30 w-56 p-4 flex flex-col h-full animate-slide-in">
-      <h2 className="text-xl text-game-accent mb-4 font-bold text-center">Week #{currentWeek}</h2>
+    <div className="bg-game-dark border-r border-game-light/30 w-56 p-4 flex flex-col h-full animate-slide-in">
+      <h2 className="text-xl text-red-500 mb-4 font-bold text-center">Week #{currentWeek}</h2>
       
-      <div className="space-y-2 mb-6">
+      <div className="space-y-1 mb-6">
         {phases.map((phase) => (
           <button
             key={phase}
             className={`w-full text-left px-3 py-2 rounded-md transition-all duration-200
               ${activePhase === phase 
-                ? 'bg-game-accent text-game-dark font-medium' 
+                ? 'bg-red-500 text-white font-medium' 
                 : 'text-gray-300 hover:bg-game-light/40'}`}
             onClick={() => onPhaseChange(phase)}
           >
@@ -46,7 +46,7 @@ const WeekSidebar: React.FC<WeekSidebarProps> = ({
               key={week}
               className={`w-full aspect-square flex items-center justify-center rounded-md transition-all
                 ${currentWeek === week 
-                  ? 'bg-game-accent text-game-dark font-bold' 
+                  ? 'bg-red-500 text-white font-bold' 
                   : 'bg-game-light/20 text-gray-300 hover:bg-game-light/50'}`}
               onClick={() => onWeekChange(week)}
             >
@@ -76,7 +76,7 @@ const WeekButton: React.FC<WeekButtonProps> = ({ label, onClick, isActive }) => 
     <button
       className={`w-full py-2 rounded-md transition-all
         ${isActive 
-          ? 'bg-game-accent text-game-dark font-bold' 
+          ? 'bg-red-500 text-white font-bold' 
           : 'bg-game-light/20 text-gray-300 hover:bg-game-light/50'}`}
       onClick={onClick}
     >

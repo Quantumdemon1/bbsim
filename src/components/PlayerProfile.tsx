@@ -29,21 +29,21 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
   const getStatusIndicator = () => {
     switch (player.status) {
       case 'hoh':
-        return <div className="absolute -top-2 -right-2 bg-yellow-500 text-black text-xs font-bold px-1 rounded">HoH</div>;
+        return <div className="absolute top-1 right-1 bg-yellow-500 text-black text-xs font-bold px-1 rounded">HoH</div>;
       case 'veto':
-        return <div className="absolute -top-2 -right-2 bg-purple-500 text-white text-xs font-bold px-1 rounded">VETO</div>;
+        return <div className="absolute top-1 right-1 bg-purple-500 text-white text-xs font-bold px-1 rounded">VETO</div>;
       case 'nominated':
-        return <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-1 rounded">NOM</div>;
+        return <div className="absolute top-1 right-1 bg-red-500 text-white text-xs font-bold px-1 rounded">NOM</div>;
       case 'evicted':
         return <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-md">
           <span className="text-white font-bold text-sm">EVICTED</span>
         </div>;
       case 'winner':
-        return <div className="absolute -top-2 -right-2 bg-yellow-400 text-black text-xs font-bold px-1 rounded">WINNER</div>;
+        return <div className="absolute top-1 right-1 bg-yellow-400 text-black text-xs font-bold px-1 rounded">WINNER</div>;
       case 'juror':
-        return <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs font-bold px-1 rounded">JURY</div>;
+        return <div className="absolute top-1 right-1 bg-blue-500 text-white text-xs font-bold px-1 rounded">JURY</div>;
       case 'runner-up':
-        return <div className="absolute -top-2 -right-2 bg-gray-400 text-white text-xs font-bold px-1 rounded">RUNNER-UP</div>;
+        return <div className="absolute top-1 right-1 bg-gray-400 text-white text-xs font-bold px-1 rounded">RUNNER-UP</div>;
       default:
         return null;
     }
@@ -61,7 +61,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
     };
     
     return (
-      <div className={`absolute -bottom-2 -left-2 ${powerupColors[player.powerup]} text-white text-xs font-bold px-1 rounded-full`}>
+      <div className={`absolute bottom-1 left-1 ${powerupColors[player.powerup]} text-white text-xs font-bold px-1 rounded-full`}>
         {player.powerup.charAt(0).toUpperCase() + player.powerup.slice(1)}
       </div>
     );
@@ -69,10 +69,10 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
   
   return (
     <div 
-      className={`relative cursor-pointer transition-all duration-200 ${selected ? 'scale-110 ring-2 ring-game-accent' : 'hover:scale-105'}`}
+      className={`relative cursor-pointer transition-all duration-200 ${selected ? 'scale-105 ring-2 ring-red-500' : 'hover:scale-105'}`}
       onClick={onClick}
     >
-      <div className={`relative rounded-md overflow-hidden ${sizeClasses[size]} flex items-center justify-center bg-game-medium ${player.status === 'evicted' ? 'grayscale' : ''}`}>
+      <div className={`relative rounded-md overflow-hidden ${sizeClasses[size]} flex items-center justify-center bg-game-dark ${player.status === 'evicted' ? 'grayscale' : ''}`}>
         {player.image ? (
           <img 
             src={player.image} 
@@ -109,7 +109,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
         <div className="mt-2 text-center">
           <div className="font-semibold text-sm">{player.name}</div>
           <div className="text-xs text-gray-400 mt-1">
-            {player.age && <span className="mr-1">{player.age},</span>}
+            {player.age && <span>{player.age}, </span>}
             {player.hometown && <span>{player.hometown}</span>}
           </div>
           {player.stats && (

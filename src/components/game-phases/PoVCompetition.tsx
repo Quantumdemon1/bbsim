@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import PlayerProfile from '@/components/PlayerProfile';
 import { PlayerData } from '@/components/PlayerProfileTypes';
+import { User } from 'lucide-react';
 
 interface PoVCompetitionProps {
   players: PlayerData[];
@@ -50,28 +50,61 @@ const PoVCompetition: React.FC<PoVCompetitionProps> = ({
   const eligiblePlayers = getEligiblePlayers();
   
   return (
-    <div className="glass-panel p-6 w-full max-w-4xl mx-auto animate-scale-in">
-      <h2 className="text-2xl font-bold text-center mb-6">Power of Veto Competition</h2>
+    <div className="glass-panel p-6 w-full max-w-6xl mx-auto animate-scale-in">
+      <h2 className="text-2xl font-bold text-center mb-4">Power of Veto Competition</h2>
       
       <p className="text-center mb-8 text-gray-300">
         Select a player to win the Power of Veto:
       </p>
       
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-8">
         {eligiblePlayers.map(player => (
-          <PlayerProfile
+          <div
             key={player.id}
-            player={player}
+            className={`bg-game-dark p-4 rounded-lg cursor-pointer transition-all ${
+              selectedPlayers.includes(player.id) ? 'ring-2 ring-purple-500' : 'hover:bg-game-medium/50'
+            }`}
             onClick={() => onPlayerSelect(player.id)}
-            selected={selectedPlayers.includes(player.id)}
-            showDetails={true}
-          />
+          >
+            <div className="flex flex-col items-center space-y-2">
+              <div className={`relative w-full aspect-square rounded-md overflow-hidden ${player.status === 'evicted' ? 'grayscale' : ''}`}>
+                {player.image ? (
+                  <img 
+                    src={player.image} 
+                    alt={player.name} 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-game-medium">
+                    <User className="h-12 w-12 text-gray-400" />
+                  </div>
+                )}
+                {player.id === hoh && (
+                  <div className="absolute top-1 right-1 bg-yellow-500 text-black text-xs font-bold px-1 rounded">HoH</div>
+                )}
+                {nominees.includes(player.id) && (
+                  <div className="absolute top-1 left-1 bg-red-500 text-white text-xs font-bold px-1 rounded">NOM</div>
+                )}
+              </div>
+              
+              <div className="text-center">
+                <div className="font-semibold text-sm">{player.name}</div>
+                <div className="text-xs text-gray-400">
+                  {player.age && <span>{player.age}, </span>}
+                  {player.hometown}
+                </div>
+              </div>
+            </div>
+          </div>
         ))}
       </div>
       
-      <div className="flex justify-center mt-4">
+      <div className="flex justify-center mt-6">
         <Button 
-          className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-6 text-lg rounded-md button-glow"
+          className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 text-lg rounded-md"
           onClick={() => onAction('selectVeto')}
           disabled={selectedPlayers.length !== 1}
         >
