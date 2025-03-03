@@ -1,6 +1,7 @@
 
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { PlayerAttributes, PlayerRelationship } from '@/hooks/game-phases/types';
+import { Notification, PlayerSettings } from '@/hooks/usePlayerAuth';
 
 export interface GameContextType {
   players: PlayerData[];
@@ -28,6 +29,22 @@ export interface GameContextType {
   isAuthenticated: boolean;
   currentPlayer: PlayerData | null;
   isGuest: boolean;
+  login: (player: PlayerData) => void;
+  register: (player: PlayerData) => void;
+  loginAsGuest: (guestName: string) => void;
+  logout: () => void;
+  updateProfile: (updatedProfile: Partial<PlayerData>) => void;
+  updateSettings: (newSettings: Partial<PlayerSettings>) => void;
+  addFriend: (friendId: string) => void;
+  removeFriend: (friendId: string) => void;
+  addNotification: (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => void;
+  markNotificationAsRead: (notificationId: string) => void;
+  clearNotifications: () => void;
+  friends: string[];
+  notifications: Notification[];
+  settings: PlayerSettings;
+  showChat: boolean;
+  setShowChat: (show: boolean) => void;
 }
 
 export interface Alliance {

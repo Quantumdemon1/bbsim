@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useState } from 'react';
 import { GameContextType, mockPlayers } from './types';
 import { useAllianceManager } from './allianceManager';
 import { usePowerupManager } from './powerupManager';
@@ -17,6 +17,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const playerManager = usePlayerManager(mockPlayers);
   const gameStateManager = useGameStateManager(mockPlayers);
   const playerAuth = usePlayerAuth();
+  const [showChat, setShowChat] = useState(false);
   
   // Import our modular managers
   const allianceManager = useAllianceManager(playerManager.players, playerManager.setPlayers);
@@ -88,6 +89,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     });
     
     playerManager.setPlayers(updatedPlayers);
+    setShowChat(true); // Auto-show chat when game starts
   };
 
   // Handle game reset to initial state
@@ -101,6 +103,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       relationships: undefined
     })));
     allianceManager.setAlliances([]);
+    setShowChat(false);
   };
 
   // Wrapper functions to connect the hooks
@@ -123,7 +126,23 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         ...powerupManager,
         isAuthenticated: playerAuth.authState.isAuthenticated,
         currentPlayer: playerAuth.authState.currentPlayer,
-        isGuest: playerAuth.authState.isGuest
+        isGuest: playerAuth.authState.isGuest,
+        login: playerAuth.login,
+        register: playerAuth.register,
+        loginAsGuest: playerAuth.loginAsGuest,
+        logout: playerAuth.logout,
+        updateProfile: playerAuth.updateProfile,
+        updateSettings: playerAuth.updateSettings,
+        addFriend: playerAuth.addFriend,
+        removeFriend: playerAuth.removeFriend,
+        addNotification: playerAuth.addNotification,
+        markNotificationAsRead: playerAuth.markNotificationAsRead,
+        clearNotifications: playerAuth.clearNotifications,
+        friends: playerAuth.authState.friends,
+        notifications: playerAuth.authState.notifications,
+        settings: playerAuth.authState.settings,
+        showChat,
+        setShowChat
       }}
     >
       {children}
