@@ -1,11 +1,17 @@
-
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useState } from 'react';
 import { usePlayerManagerContext } from './PlayerManagerContext';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { useGameCore } from '@/hooks/gameState/useGameCore';
 import { useGameModes } from '@/hooks/gameState/useGameModes';
 import { useAdminControl } from '@/hooks/gameState/useAdminControl';
 import { useChatState } from '@/hooks/gameState/useChatState';
+
+type PhaseProgress = {
+  [phase: string]: {
+    playersReady: string[];
+    completed: boolean;
+  }
+};
 
 interface GameStateContextType {
   gameId: string | null;
@@ -31,6 +37,13 @@ interface GameStateContextType {
   adminTakeControl: (phaseToSkipTo?: string) => void;
   isAdminControl: boolean;
   loginAsAdmin: () => void;
+  
+  phaseProgress: PhaseProgress;
+  phaseCountdown: number | null;
+  markPhaseProgress: (phase: string, playerId: string) => void;
+  getPhaseProgress: (phase: string) => { playersReady: string[], completed: boolean } | null;
+  startPhaseCountdown: (seconds: number) => void;
+  clearPhaseProgress: (phase: string) => void;
 }
 
 const GameStateContext = createContext<GameStateContextType>({} as GameStateContextType);
@@ -38,14 +51,89 @@ const GameStateContext = createContext<GameStateContextType>({} as GameStateCont
 export const GameStateProvider = ({ children }: { children: ReactNode }) => {
   const { players, setPlayers } = usePlayerManagerContext();
   
-  // Use our custom hooks
+  const [phaseProgress, setPhaseProgress] = useState<PhaseProgress>({});
+  const [phaseCountdown, setPhaseCountdown] = useState<number | null>(null);
+  const [countdownInterval, setCountdownInterval] = useState<number | null>(null);
+  
   const gameCore = useGameCore();
   const chatState = useChatState();
-  const adminControl = useAdminControl({ gameState: gameCore.gameState });
+  const adminControl = useAdminControl({ 
+    gameState: gameCore.gameState,
+    clearPhaseProgress: (phase: string) => clearPhaseProgress(phase)
+  });
   
-  // Handle game start to initialize alliances and player attributes
+  const markPhaseProgress = (phase: string, playerId: string) => {
+    setPhaseProgress(prev => {
+      const phaseObj = prev[phase] || { playersReady: [], completed: false };
+      
+      if (!phaseObj.playersReady.includes(playerId)) {
+        const updatedPlayersReady = [...phaseObj.playersReady, playerId];
+        
+        const isCompleted = gameCore.gameMode === 'singleplayer' || 
+                           (updatedPlayersReady.length >= Math.ceil(players.filter(p => p.isHuman).length / 2));
+        
+        if (isCompleted && gameCore.gameMode === 'multiplayer' && !phaseObj.completed) {
+          startPhaseCountdown(30);
+        }
+        
+        return {
+          ...prev,
+          [phase]: {
+            playersReady: updatedPlayersReady,
+            completed: isCompleted
+          }
+        };
+      }
+      
+      return prev;
+    });
+  };
+  
+  const getPhaseProgress = (phase: string) => {
+    return phaseProgress[phase] || null;
+  };
+  
+  const clearPhaseProgress = (phase: string) => {
+    if (countdownInterval) {
+      window.clearInterval(countdownInterval);
+      setCountdownInterval(null);
+    }
+    setPhaseCountdown(null);
+    
+    if (phase === '*') {
+      setPhaseProgress({});
+      return;
+    }
+    
+    setPhaseProgress(prev => {
+      const newProgress = { ...prev };
+      delete newProgress[phase];
+      return newProgress;
+    });
+  };
+  
+  const startPhaseCountdown = (seconds: number) => {
+    if (countdownInterval) {
+      window.clearInterval(countdownInterval);
+    }
+    
+    setPhaseCountdown(seconds);
+    
+    const interval = window.setInterval(() => {
+      setPhaseCountdown(prev => {
+        if (prev === null || prev <= 1) {
+          window.clearInterval(interval);
+          setCountdownInterval(null);
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    setCountdownInterval(interval);
+  };
+
   const handleGameStart = () => {
-    // Setup some starting alliances randomly for more interesting gameplay
     const newAlliances = [
       {
         id: 'alliance1',
@@ -59,7 +147,6 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
       }
     ];
     
-    // Initialize default attributes for all players
     const defaultAttributes = {
       general: 3,
       physical: 3,
@@ -71,7 +158,6 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
       temperament: 3
     };
     
-    // Assign alliances and default attributes to players
     const updatedPlayers = [...players].map(player => {
       const playerAlliances: string[] = [];
       newAlliances.forEach(alliance => {
@@ -80,12 +166,10 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
         }
       });
       
-      // Random powerup for 2 players to start (10% chance for each remaining player)
       const hasPowerup = Math.random() < 0.1;
       const powerupTypes: PlayerData['powerup'][] = ['immunity', 'coup', 'replay', 'nullify'];
       const randomPowerup = hasPowerup ? powerupTypes[Math.floor(Math.random() * powerupTypes.length)] : undefined;
       
-      // Create default relationships
       const relationships = players
         .filter(p => p.id !== player.id)
         .map(target => ({
@@ -107,10 +191,9 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
     });
     
     setPlayers(updatedPlayers);
-    chatState.setShowChat(true); // Auto-show chat when game starts
+    chatState.setShowChat(true);
   };
 
-  // Handle game reset to initial state
   const handleGameReset = () => {
     setPlayers(players.map(player => ({
       ...player,
@@ -121,16 +204,15 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
       relationships: undefined
     })));
     chatState.setShowChat(false);
+    clearPhaseProgress('*');
   };
 
-  // Initialize game modes hook with core game functions
   const gameModes = useGameModes({
     createGame: gameCore.createGame,
     joinGame: gameCore.joinGame,
     startGame: gameCore.startGame
   });
 
-  // Wrapped game state functions
   const startGame = () => {
     gameCore.startGame(handleGameStart);
   };
@@ -142,7 +224,6 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
   return (
     <GameStateContext.Provider
       value={{
-        // Game core state
         gameId: gameCore.gameId,
         isHost: gameCore.isHost,
         playerName: gameCore.playerName,
@@ -156,11 +237,9 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
         endGame: gameCore.endGame,
         resetGame,
         
-        // Chat state
         showChat: chatState.showChat,
         setShowChat: chatState.setShowChat,
         
-        // Game modes
         gameMode: gameModes.gameMode,
         humanPlayers: gameModes.humanPlayers,
         countdownTimer: gameModes.countdownTimer,
@@ -168,10 +247,16 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
         createMultiplayerGame: gameModes.createMultiplayerGame,
         joinMultiplayerGame: gameModes.joinMultiplayerGame,
         
-        // Admin control
         adminTakeControl: adminControl.adminTakeControl,
         isAdminControl: adminControl.isAdminControl,
-        loginAsAdmin: adminControl.loginAsAdmin
+        loginAsAdmin: adminControl.loginAsAdmin,
+        
+        phaseProgress,
+        phaseCountdown,
+        markPhaseProgress,
+        getPhaseProgress,
+        startPhaseCountdown,
+        clearPhaseProgress
       }}
     >
       {children}

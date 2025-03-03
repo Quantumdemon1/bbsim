@@ -17,7 +17,7 @@ const GameRoom: React.FC<GameRoomProps> = ({
   initialWeek = 1,
   onPhaseChange
 }) => {
-  const { alliances } = useGameContext();
+  const { alliances, markPhaseProgress, clearPhaseProgress } = useGameContext();
   
   // Use the hook correctly to get the game phase state and functions
   const gamePhase = useGamePhaseManager({
@@ -40,11 +40,21 @@ const GameRoom: React.FC<GameRoomProps> = ({
     gamePhase.setWeek(newWeek);
     gamePhase.setPhase('HoH Competition');
     if (onPhaseChange) onPhaseChange('HoH Competition');
+    
+    // Clear any phase progress when changing weeks
+    if (clearPhaseProgress) {
+      clearPhaseProgress('*');
+    }
   };
 
   const handlePhaseChange = (newPhase: string) => {
     gamePhase.setPhase(newPhase);
     if (onPhaseChange) onPhaseChange(newPhase);
+    
+    // Clear the previous phase progress when changing phases
+    if (clearPhaseProgress) {
+      clearPhaseProgress(gamePhase.phase);
+    }
   };
 
   // Update parent component when phase changes
@@ -71,8 +81,8 @@ const GameRoom: React.FC<GameRoomProps> = ({
         nominees={gamePhase.nominees}
         hoh={gamePhase.hoh}
         veto={gamePhase.veto}
-        vetoUsed={false} // Default value since it's missing from gamePhase
-        lastHoH={null} // Default value since it's missing from gamePhase
+        vetoUsed={gamePhase.vetoUsed || false} // Provide default value
+        lastHoH={gamePhase.lastHoH || null} // Provide default value
         onAction={gamePhase.handleAction}
         statusMessage={gamePhase.statusMessage}
         selectedPlayers={gamePhase.selectedPlayers}

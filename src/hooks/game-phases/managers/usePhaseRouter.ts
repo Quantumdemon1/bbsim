@@ -44,6 +44,7 @@ interface PhaseRouterProps {
   vetoUsed: boolean;
   selectedPlayers: string[];
   setPhase: (phase: string) => void;
+  clearPhaseProgress?: (phase: string) => void;
 }
 
 export function usePhaseRouter(props: PhaseRouterProps) {
@@ -66,10 +67,16 @@ export function usePhaseRouter(props: PhaseRouterProps) {
     veto,
     vetoUsed,
     selectedPlayers,
-    setPhase
+    setPhase,
+    clearPhaseProgress
   } = props;
 
   const handleAction = (action: string, data?: any) => {
+    // Clear phase progress when an action is taken
+    if (clearPhaseProgress) {
+      clearPhaseProgress('*');
+    }
+    
     switch (action) {
       case 'selectHoH':
         hohPhase.handleSelectHoH();
