@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GameRoom from '@/components/GameRoom';
@@ -20,7 +21,11 @@ const Game = () => {
     currentPlayer,
     gameMode,
     clearPhaseProgress,
-    saveGame
+    saveGame,
+    showChat,
+    notifications,
+    clearNotifications,
+    markNotificationAsRead
   } = useGameContext();
   
   const [showNotifications, setShowNotifications] = useState(false);
@@ -31,14 +36,17 @@ const Game = () => {
   useEffect(() => {
     if (!gameMode) {
       navigate('/');
+      return;
     }
     
     if (!isAuthenticated) {
       navigate('/');
+      return;
     }
     
     if (gameState === 'idle') {
       navigate('/lobby');
+      return;
     }
   }, [gameState, isAuthenticated, navigate, gameMode]);
   
@@ -65,8 +73,12 @@ const Game = () => {
   }, [gameState, saveGame]);
   
   const selectedPlayerData = selectedPlayer ? 
-    players.find(p => p.id === selectedPlayer) || null : 
+    players?.find(p => p.id === selectedPlayer) || null : 
     null;
+
+  if (!players || players.length === 0) {
+    return <div className="flex items-center justify-center h-screen">Loading game...</div>;
+  }
 
   return (
     <div className="h-full relative overflow-hidden">
@@ -100,26 +112,7 @@ const Game = () => {
         />
       )}
       
-      <GamePanels 
-        showNotifications={showNotifications}
-        setShowNotifications={setShowNotifications}
-        selectedPlayerData={selectedPlayerData}
-        setSelectedPlayer={setSelectedPlayer}
-      />
-    </div>
-  );
-};
-
-const GamePanels = ({ 
-  showNotifications, 
-  setShowNotifications, 
-  selectedPlayerData, 
-  setSelectedPlayer 
-}) => {
-  const { showChat, notifications, clearNotifications, markNotificationAsRead } = useGameContext();
-  
-  return (
-    <>
+      {/* Use the moved notifications, chat, and profile data here */}
       {showChat && <ChatPanel minimizable />}
       
       {notifications && (
@@ -139,7 +132,7 @@ const GamePanels = ({
           player={selectedPlayerData}
         />
       )}
-    </>
+    </div>
   );
 };
 

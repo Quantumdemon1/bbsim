@@ -39,7 +39,10 @@ export function useGameContext() {
     // AI Player Management
     ...aiPlayer,
     
-    // Make sure saveGame is consistently available
-    saveGame: gameState.saveGame
+    // Ensure notifications and saveGame are properly exposed
+    notifications: gameState.notifications || [],
+    clearNotifications: gameState.clearNotifications || (() => {}),
+    markNotificationAsRead: gameState.markNotificationAsRead || (() => {}),
+    saveGame: gameState.saveGame || gameState.saveCurrentGame || (() => Promise.resolve())
   };
 }
