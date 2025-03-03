@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Users } from 'lucide-react';
-import { PlayerData } from '@/components/PlayerProfile';
+import { PlayerData } from '@/components/PlayerProfileTypes';
 import { useGameContext } from '@/contexts/GameContext';
 
 interface AllianceManagementDialogProps {

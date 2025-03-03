@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { toast } from "@/components/ui/use-toast";
-import { PlayerData } from '@/components/PlayerProfile';
+import { PlayerData } from '@/components/PlayerProfileTypes';
 import { PlayerAttributes, PlayerRelationship } from '@/hooks/game-phases/types';
 
 export function usePlayerManager(initialPlayers: PlayerData[]) {

@@ -1,8 +1,7 @@
-
 import { useState } from 'react';
 import { toast } from "@/components/ui/use-toast";
 import { Alliance, mockPlayers } from './types';
-import { PlayerData } from '@/components/PlayerProfile';
+import { PlayerData } from '@/components/PlayerProfileTypes';
 
 export function useAllianceManager(
   players: PlayerData[],

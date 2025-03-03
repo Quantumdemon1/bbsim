@@ -1,5 +1,5 @@
 
-import { PlayerData } from '@/components/PlayerProfile';
+import { PlayerData } from '@/components/PlayerProfileTypes';
 import { WeekSummary } from './common';
 
 export interface HoHCompetitionProps {

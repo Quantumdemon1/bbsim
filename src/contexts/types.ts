@@ -1,5 +1,5 @@
 
-import { PlayerData } from '@/components/PlayerProfile';
+import { PlayerData } from '@/components/PlayerProfileTypes';
 import { PlayerAttributes, PlayerRelationship } from '@/hooks/game-phases/types';
 
 export interface GameContextType {

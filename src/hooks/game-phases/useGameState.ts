@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
-import { PlayerData } from '@/components/PlayerProfile';
+import { PlayerData } from '@/components/PlayerProfileTypes';
 import { GamePhaseProps, GamePhaseState, GamePhaseSetters, WeekSummary } from './types';
 
 export function useGameState({ 

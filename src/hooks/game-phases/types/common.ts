@@ -1,5 +1,4 @@
-
-import { PlayerData } from '@/components/PlayerProfile';
+import { PlayerData } from '@/components/PlayerProfileTypes';
 
 // Game Phases
 export type GamePhase = 

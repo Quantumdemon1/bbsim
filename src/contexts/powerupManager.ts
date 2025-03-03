@@ -1,6 +1,5 @@
-
 import { toast } from "@/components/ui/use-toast";
-import { PlayerData } from '@/components/PlayerProfile';
+import { PlayerData } from '@/components/PlayerProfileTypes';
 
 export function usePowerupManager(
   players: PlayerData[],

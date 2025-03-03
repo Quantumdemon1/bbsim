@@ -1,5 +1,5 @@
 
-import { PlayerData } from '@/components/PlayerProfile';
+import { PlayerData } from '@/components/PlayerProfileTypes';
 import { ToastProps, WeekSummary } from './common';
 import { PlayerAttributes, PlayerRelationship } from './player';
 

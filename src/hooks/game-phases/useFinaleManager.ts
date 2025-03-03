@@ -1,5 +1,5 @@
 import { FinaleManagerProps } from './types';
-import { PlayerData } from "@/components/PlayerProfile";
+import { PlayerData } from '@/components/PlayerProfileTypes';
 
 export function useFinaleManager({
   players,

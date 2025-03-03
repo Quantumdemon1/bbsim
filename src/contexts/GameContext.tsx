@@ -1,10 +1,11 @@
+
 import React, { createContext, useContext, ReactNode } from 'react';
 import { GameContextType, mockPlayers } from './types';
 import { useAllianceManager } from './allianceManager';
 import { usePowerupManager } from './powerupManager';
 import { usePlayerManager } from '@/hooks/usePlayerManager';
 import { useGameStateManager } from '@/hooks/useGameStateManager';
-import { PlayerData } from '@/components/PlayerProfile';
+import { PlayerData } from '@/components/PlayerProfileTypes';
 import { PlayerAttributes, PlayerRelationship, RelationshipType } from '@/hooks/game-phases/types';
 
 // Create the context with a default empty object

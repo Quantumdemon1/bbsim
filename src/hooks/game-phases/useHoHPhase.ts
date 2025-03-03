@@ -1,4 +1,5 @@
-import { PlayerData } from '@/components/PlayerProfile';
+
+import { PlayerData } from '@/components/PlayerProfileTypes';
 import { HoHPhaseProps } from './types';
 
 export function useHoHPhase({

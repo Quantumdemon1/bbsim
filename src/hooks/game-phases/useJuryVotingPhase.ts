@@ -1,5 +1,5 @@
 import { JuryVotingProps } from './types';
-import { PlayerData } from "@/components/PlayerProfile";
+import { PlayerData } from '@/components/PlayerProfileTypes';
 
 export function useJuryVotingPhase({
   players,

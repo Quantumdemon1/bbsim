@@ -1,10 +1,9 @@
-
 import React from 'react';
 import AllianceManagementDialog from '../game-dialogs/AllianceManagementDialog';
 import PowerupsDialog from '../game-dialogs/PowerupsDialog';
 import PlayerAttributesDialog from '../game-dialogs/PlayerAttributesDialog';
 import RelationshipsDialog from '../game-dialogs/RelationshipsDialog';
-import { PlayerData } from '@/components/PlayerProfile';
+import { PlayerData } from '@/components/PlayerProfileTypes';
 
 interface GameActionsToolbarProps {
   players: PlayerData[];

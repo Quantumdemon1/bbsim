@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { PlayerData } from './PlayerProfile';
+import { PlayerData } from './PlayerProfileTypes';
 import { Alliance } from '@/contexts/types';
 import PhaseRenderer from './game-phases/PhaseRenderer';
 import { WeekSummary } from '@/hooks/game-phases/types';

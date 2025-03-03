@@ -1,7 +1,6 @@
-
 import { useState } from 'react';
 import { toast } from "@/components/ui/use-toast";
-import { PlayerData } from '@/components/PlayerProfile';
+import { PlayerData } from '@/components/PlayerProfileTypes';
 
 export function useGameStateManager(initialPlayers: PlayerData[]) {
   const [gameId, setGameId] = useState<string | null>(null);
