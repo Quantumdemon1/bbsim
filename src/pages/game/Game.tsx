@@ -21,7 +21,7 @@ const Game = () => {
     currentPlayer,
     gameMode,
     clearPhaseProgress,
-    saveCurrentGame: saveGame
+    saveGame
   } = useGameContext();
   
   const [showNotifications, setShowNotifications] = useState(false);

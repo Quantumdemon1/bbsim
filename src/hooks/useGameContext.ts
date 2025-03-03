@@ -37,6 +37,9 @@ export function useGameContext() {
     ...playerAuth,
     
     // AI Player Management
-    ...aiPlayer
+    ...aiPlayer,
+    
+    // Alias saveCurrentGame to saveGame for consistency
+    saveGame: gameState.saveCurrentGame
   };
 }
