@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import PlayerProfile, { PlayerData } from '@/components/PlayerProfile';
+import PlayerProfile from '@/components/PlayerProfile';
+import { PlayerData } from '@/components/PlayerProfileTypes';
 import { Users } from 'lucide-react';
 import { Alliance } from '@/contexts/types';
 

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { PlayerData } from '@/components/PlayerProfile';
+import { PlayerData } from '@/components/PlayerProfileTypes';
 import PlayerProfile from '@/components/PlayerProfile';
 
 interface PlayerSelectionGridProps {

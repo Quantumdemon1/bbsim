@@ -2,7 +2,7 @@
 import React from 'react';
 import WeekSidebar from './WeekSidebar';
 import GamePhaseDisplay from './GamePhaseDisplay';
-import { PlayerData } from './PlayerProfile';
+import { PlayerData } from './PlayerProfileTypes';
 import { useGameContext } from '@/contexts/GameContext';
 import { useGamePhaseManager } from './game-phases/GamePhaseManager';
 

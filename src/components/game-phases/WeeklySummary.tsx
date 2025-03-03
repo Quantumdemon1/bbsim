@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import PlayerProfile from '@/components/PlayerProfile';
-import { PlayerData } from '@/components/PlayerProfile';
+import { PlayerData } from '@/components/PlayerProfileTypes';
 import { WeekSummary } from '@/hooks/game-phases/types';
 import { Alliance } from '@/contexts/types';
 import { 

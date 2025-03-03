@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { Trophy, Award, Medal } from 'lucide-react';
-import PlayerProfile, { PlayerData } from '@/components/PlayerProfile';
+import PlayerProfile from '@/components/PlayerProfile';
+import { PlayerData } from '@/components/PlayerProfileTypes';
 
 interface PlacementsChartProps {
   players: PlayerData[];

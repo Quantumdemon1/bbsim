@@ -19,5 +19,3 @@ export interface PlayerData {
   };
   alliances?: string[];
 }
-
-export default PlayerData;

@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import PlayerProfile, { PlayerData } from '@/components/PlayerProfile';
+import PlayerProfile from '@/components/PlayerProfile';
+import { PlayerData } from '@/components/PlayerProfileTypes';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface JuryVotingProps {
