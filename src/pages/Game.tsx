@@ -10,6 +10,7 @@ import GameActionsToolbar from '@/components/game-ui/GameActionsToolbar';
 import ChatPanel from '@/components/chat/ChatPanel';
 import NotificationPanel from '@/components/notifications/NotificationPanel';
 import PlayerProfileModal from '@/components/profile/PlayerProfileModal';
+import PhaseProgressTracker from '@/components/game-ui/PhaseProgressTracker';
 
 const Game = () => {
   const navigate = useNavigate();
@@ -26,12 +27,14 @@ const Game = () => {
     gameMode,
     humanPlayers,
     isAdmin,
-    adminTakeControl
+    adminTakeControl,
+    clearPhaseProgress
   } = useGameContext();
   
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [currentPhase, setCurrentPhase] = useState<string>('HoH Competition');
   
   useEffect(() => {
     // Redirect if no game mode is set
@@ -54,6 +57,18 @@ const Game = () => {
   
   const unreadCount = notifications.filter(n => !n.read).length;
 
+  // Handle phase completion
+  const handlePhaseComplete = () => {
+    // This would be handled by the game phase manager
+    // We'll use this as a placeholder for now
+    console.log("Phase completed:", currentPhase);
+    
+    // Clear the progress for the current phase
+    if (clearPhaseProgress) {
+      clearPhaseProgress(currentPhase);
+    }
+  };
+
   // Admin panel for controlling the game
   const AdminPanel = () => {
     const [selectedPhase, setSelectedPhase] = useState('');
@@ -71,6 +86,11 @@ const Game = () => {
     const handleTakeControl = () => {
       adminTakeControl(selectedPhase || undefined);
       setShowAdminPanel(false);
+      
+      // Update the current phase if one is selected
+      if (selectedPhase) {
+        setCurrentPhase(selectedPhase);
+      }
     };
     
     return (
@@ -182,7 +202,17 @@ const Game = () => {
       {showAdminPanel && <AdminPanel />}
       
       <GameActionsToolbar players={players} />
-      <GameRoom players={players} />
+      <GameRoom 
+        players={players} 
+        initialWeek={1} 
+        onPhaseChange={(phase) => setCurrentPhase(phase)} 
+      />
+      
+      {/* Phase Progress Tracker */}
+      <PhaseProgressTracker 
+        currentPhase={currentPhase}
+        onPhaseComplete={handlePhaseComplete}
+      />
       
       {showChat && <ChatPanel minimizable />}
       

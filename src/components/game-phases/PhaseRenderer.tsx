@@ -52,78 +52,88 @@ const PhaseRenderer: React.FC<PhaseRendererProps> = (props) => {
   // Try rendering the phase using each specialized renderer
   
   // Competition phases (HoH, PoV, Special)
-  const competitionPhase = (
-    <CompetitionPhaseRenderer
-      phase={phase}
-      players={players}
-      hoh={hoh}
-      nominees={nominees}
-      selectedPlayers={selectedPlayers}
-      onPlayerSelect={onPlayerSelect}
-      onAction={onAction}
-    />
-  );
-  if (competitionPhase.props.children) return competitionPhase;
+  const competitionPhases = ['HoH Competition', 'PoV Competition', 'Special Competition'];
+  if (competitionPhases.includes(phase)) {
+    return (
+      <CompetitionPhaseRenderer
+        phase={phase}
+        players={players}
+        hoh={hoh}
+        nominees={nominees}
+        selectedPlayers={selectedPlayers}
+        onPlayerSelect={onPlayerSelect}
+        onAction={onAction}
+      />
+    );
+  }
   
   // Nomination phases (Nomination, Veto)
-  const nominationPhase = (
-    <NominationPhaseRenderer
-      phase={phase}
-      players={players}
-      hoh={hoh}
-      nominees={nominees}
-      veto={veto}
-      selectedPlayers={selectedPlayers}
-      onPlayerSelect={onPlayerSelect}
-      onAction={onAction}
-    />
-  );
-  if (nominationPhase.props.children) return nominationPhase;
+  const nominationPhases = ['Nomination Ceremony', 'Veto Ceremony'];
+  if (nominationPhases.includes(phase)) {
+    return (
+      <NominationPhaseRenderer
+        phase={phase}
+        players={players}
+        hoh={hoh}
+        nominees={nominees}
+        veto={veto}
+        selectedPlayers={selectedPlayers}
+        onPlayerSelect={onPlayerSelect}
+        onAction={onAction}
+      />
+    );
+  }
   
   // Eviction phases (Voting, Eviction)
-  const evictionPhase = (
-    <EvictionPhaseRenderer
-      phase={phase}
-      players={players}
-      nominees={nominees}
-      alliances={alliances}
-      selectedPlayers={selectedPlayers}
-      statusMessage={statusMessage}
-      week={week}
-      onAction={onAction}
-    />
-  );
-  if (evictionPhase.props.children) return evictionPhase;
+  const evictionPhases = ['Eviction Voting', 'Eviction'];
+  if (evictionPhases.includes(phase)) {
+    return (
+      <EvictionPhaseRenderer
+        phase={phase}
+        players={players}
+        nominees={nominees}
+        alliances={alliances}
+        selectedPlayers={selectedPlayers}
+        statusMessage={statusMessage}
+        week={week}
+        onAction={onAction}
+      />
+    );
+  }
   
   // Summary phases (Weekly Summary, Placements, Statistics)
-  const summaryPhase = (
-    <SummaryPhaseRenderer
-      phase={phase}
-      players={players}
-      week={week}
-      weekSummaries={weekSummaries}
-      finalists={finalists}
-      jurors={jurors}
-      votes={votes}
-      onAction={onAction}
-      alliances={alliances}
-    />
-  );
-  if (summaryPhase.props.children) return summaryPhase;
+  const summaryPhases = ['Weekly Summary', 'Placements', 'Statistics'];
+  if (summaryPhases.includes(phase)) {
+    return (
+      <SummaryPhaseRenderer
+        phase={phase}
+        players={players}
+        week={week}
+        weekSummaries={weekSummaries}
+        finalists={finalists}
+        jurors={jurors}
+        votes={votes}
+        onAction={onAction}
+        alliances={alliances}
+      />
+    );
+  }
   
   // Finale phases (Jury Questions, Jury Voting, Winner)
-  const finalePhase = (
-    <FinalePhaseRenderer
-      phase={phase}
-      players={players}
-      finalists={finalists}
-      jurors={jurors}
-      votes={votes}
-      statusMessage={statusMessage}
-      onAction={onAction}
-    />
-  );
-  if (finalePhase.props.children) return finalePhase;
+  const finalePhases = ['Jury Questions', 'Jury Voting', 'The Winner'];
+  if (finalePhases.includes(phase)) {
+    return (
+      <FinalePhaseRenderer
+        phase={phase}
+        players={players}
+        finalists={finalists}
+        jurors={jurors}
+        votes={votes}
+        statusMessage={statusMessage}
+        onAction={onAction}
+      />
+    );
+  }
   
   // If no specialized renderer handles this phase, use the default renderer
   return (

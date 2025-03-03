@@ -33,6 +33,14 @@ export const useGameContext = () => {
     endGame: gameState.endGame,
     resetGame: gameState.resetGame,
     
+    // Phase progress tracking
+    phaseProgress: gameState.phaseProgress,
+    phaseCountdown: gameState.phaseCountdown,
+    markPhaseProgress: gameState.markPhaseProgress,
+    getPhaseProgress: gameState.getPhaseProgress,
+    startPhaseCountdown: gameState.startPhaseCountdown,
+    clearPhaseProgress: gameState.clearPhaseProgress,
+    
     // Alliance
     alliances: alliance.alliances,
     setAlliances: alliance.setAlliances,
@@ -79,4 +87,4 @@ export const useGameContext = () => {
     adminTakeControl: gameState.adminTakeControl,
     isAdminControl: gameState.isAdminControl
   };
-};
+}

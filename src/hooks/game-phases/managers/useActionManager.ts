@@ -8,7 +8,8 @@ export function useActionManager({
   state,
   setters,
   usePowerup,
-  toast
+  toast,
+  clearPhaseProgress
 }: {
   state: GameActionsProps['state'],
   setters: {
@@ -23,7 +24,8 @@ export function useActionManager({
     setWeekSummaries: (summaries: any[]) => void
   },
   usePowerup: GameActionsProps['usePowerup'],
-  toast: GameActionsProps['toast']
+  toast: GameActionsProps['toast'],
+  clearPhaseProgress?: (phase: string) => void
 }) {
   const handleNextWeek = () => {
     // Reset phase-specific selections
@@ -31,6 +33,11 @@ export function useActionManager({
     setters.setHoH(null);
     setters.setVeto(null);
     setters.setNominees([]);
+    
+    // Clear any phase progress
+    if (clearPhaseProgress) {
+      clearPhaseProgress('*'); // Clear all phases
+    }
     
     // Increment week
     const newWeek = state.week + 1;

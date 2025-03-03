@@ -5,9 +5,10 @@ import { PlayerData } from '@/components/PlayerProfileTypes';
 
 interface AdminControlProps {
   gameState: 'idle' | 'lobby' | 'playing' | 'ended';
+  clearPhaseProgress?: (phase: string) => void;
 }
 
-export function useAdminControl({ gameState }: AdminControlProps) {
+export function useAdminControl({ gameState, clearPhaseProgress }: AdminControlProps) {
   const [isAdminControl, setIsAdminControl] = useState(false);
   const { toast } = useToast();
 
@@ -18,9 +19,9 @@ export function useAdminControl({ gameState }: AdminControlProps) {
     setIsAdminControl(true);
     
     // If a specific phase is provided, set it
-    if (phaseToSkipTo) {
-      // This will be handled by the game phase manager
-      // You need to implement this functionality in the game phase components
+    if (phaseToSkipTo && clearPhaseProgress) {
+      // Clear progress for any current phases
+      clearPhaseProgress(phaseToSkipTo);
       
       // Notify players about admin intervention
       const notification = {
@@ -28,14 +29,16 @@ export function useAdminControl({ gameState }: AdminControlProps) {
         message: 'Game Admin has taken control of the game.'
       };
       
-      // This will be handled by the notification system
-      // You need to implement this functionality
+      toast({
+        title: "Admin Control",
+        description: `Skipping to phase: ${phaseToSkipTo}`,
+      });
+    } else {
+      toast({
+        title: "Admin Control",
+        description: "You now have control of the game.",
+      });
     }
-    
-    toast({
-      title: "Admin Control",
-      description: "You now have control of the game.",
-    });
   };
 
   // Login as admin (to be connected to PlayerAuthContext)

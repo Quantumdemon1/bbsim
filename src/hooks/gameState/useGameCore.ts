@@ -9,6 +9,8 @@ export function useGameCore() {
   const [playerName, setPlayerName] = useState('');
   const [gameState, setGameState] = useState<'idle' | 'lobby' | 'playing' | 'ended'>('idle');
   const [currentWeek, setCurrentWeek] = useState(1);
+  const [phaseProgress, setPhaseProgress] = useState<Record<string, boolean>>({});
+  const [phaseCountdown, setPhaseCountdown] = useState<number | null>(null);
   const { toast } = useToast();
   
   const createGame = (hostName: string) => {
@@ -66,9 +68,70 @@ export function useGameCore() {
     setPlayerName('');
     setGameState('idle');
     setCurrentWeek(1);
+    setPhaseProgress({});
+    setPhaseCountdown(null);
     
     // Call the onReset callback to perform any additional reset actions
     onReset();
+  };
+
+  // Progress tracking for phases
+  const markPhaseProgress = (phaseId: string, playerId: string) => {
+    const phaseKey = `${phaseId}-${playerId}`;
+    setPhaseProgress(prev => ({
+      ...prev,
+      [phaseKey]: true
+    }));
+    
+    return true;
+  };
+  
+  const getPhaseProgress = (phase: string, playerIds: string[]) => {
+    const playerProgress = playerIds.map(playerId => {
+      const phaseKey = `${phase}-${playerId}`;
+      return !!phaseProgress[phaseKey];
+    });
+    
+    const completedCount = playerProgress.filter(Boolean).length;
+    const totalCount = playerProgress.length;
+    
+    return {
+      completedCount,
+      totalCount,
+      percentage: totalCount > 0 ? (completedCount / totalCount) * 100 : 0,
+      isComplete: completedCount === totalCount,
+      hasStartedCountdown: completedCount >= Math.ceil(totalCount / 2)
+    };
+  };
+  
+  const startPhaseCountdown = (seconds: number = 30) => {
+    setPhaseCountdown(seconds);
+    
+    const interval = setInterval(() => {
+      setPhaseCountdown(prev => {
+        if (prev === null || prev <= 1) {
+          clearInterval(interval);
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  };
+  
+  const clearPhaseProgress = (phase: string) => {
+    const newProgress = { ...phaseProgress };
+    
+    // Remove all entries for this phase
+    Object.keys(newProgress).forEach(key => {
+      if (key.startsWith(`${phase}-`)) {
+        delete newProgress[key];
+      }
+    });
+    
+    setPhaseProgress(newProgress);
+    setPhaseCountdown(null);
   };
 
   return {
@@ -84,6 +147,13 @@ export function useGameCore() {
     startGame,
     endGame,
     resetGame,
-    toast
+    toast,
+    // Phase progress tracking
+    phaseProgress,
+    phaseCountdown,
+    markPhaseProgress,
+    getPhaseProgress,
+    startPhaseCountdown,
+    clearPhaseProgress
   };
 }

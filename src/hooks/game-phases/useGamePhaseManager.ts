@@ -24,7 +24,7 @@ export function useGamePhaseManager({
   week: initialWeek,
   initialPhase = 'HoH Competition'
 }: GamePhaseProps) {
-  const { usePowerup } = useGameContext();
+  const { usePowerup, clearPhaseProgress } = useGameContext();
   
   // Use the game state hook to manage all our state
   const { state, setters, toast } = useGameState({ 
@@ -45,7 +45,8 @@ export function useGamePhaseManager({
     state,
     setters,
     usePowerup,
-    toast
+    toast,
+    clearPhaseProgress
   });
 
   // Import finale manager

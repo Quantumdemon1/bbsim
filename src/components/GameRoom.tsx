@@ -9,11 +9,13 @@ import { useGamePhaseManager } from '@/hooks/game-phases/useGamePhaseManager';
 interface GameRoomProps {
   players: PlayerData[];
   initialWeek?: number;
+  onPhaseChange?: (phase: string) => void;
 }
 
 const GameRoom: React.FC<GameRoomProps> = ({ 
   players: initialPlayers, 
-  initialWeek = 1 
+  initialWeek = 1,
+  onPhaseChange
 }) => {
   const { alliances } = useGameContext();
   
@@ -37,11 +39,20 @@ const GameRoom: React.FC<GameRoomProps> = ({
   const handleWeekChange = (newWeek: number) => {
     gamePhase.setWeek(newWeek);
     gamePhase.setPhase('HoH Competition');
+    if (onPhaseChange) onPhaseChange('HoH Competition');
   };
 
   const handlePhaseChange = (newPhase: string) => {
     gamePhase.setPhase(newPhase);
+    if (onPhaseChange) onPhaseChange(newPhase);
   };
+
+  // Update parent component when phase changes
+  React.useEffect(() => {
+    if (onPhaseChange) {
+      onPhaseChange(gamePhase.phase);
+    }
+  }, [gamePhase.phase, onPhaseChange]);
 
   return (
     <div className="flex h-[calc(100vh-64px)]">
@@ -52,9 +63,6 @@ const GameRoom: React.FC<GameRoomProps> = ({
         activePhase={gamePhase.phase}
         onPhaseChange={handlePhaseChange}
       />
-      
-      {/* Removed the duplicate GameActionsToolbar from here
-          since it's already in the Game component */}
       
       <GamePhaseDisplay 
         phase={gamePhase.phase}
