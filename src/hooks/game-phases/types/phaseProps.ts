@@ -1,6 +1,7 @@
+
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { PlayerAttributes, PlayerRelationship } from './player';
-import { WeekSummary } from '.';
+import { WeekSummary, ToastProps } from './common';
 
 export interface GamePhaseProps {
   players: PlayerData[];
@@ -34,7 +35,7 @@ export interface GamePhaseSetters {
   setVetoUsed: (used: boolean) => void;
   setLastHoH: (hohId: string | null) => void;
   setNominees: (nominees: string[]) => void;
-  setSelectedPlayers: (players: string[]) => void;
+  setSelectedPlayers: (playerIds: string[]) => void;
   setStatusMessage: (message: string) => void;
   setFinalists: (finalists: string[]) => void;
   setJurors: (jurors: string[]) => void;
@@ -46,13 +47,13 @@ export interface HoHPhaseProps {
   players: PlayerData[];
   setPlayers: (players: PlayerData[]) => void;
   selectedPlayers: string[];
-  setHoH: (hohId: string | null) => void;
+  setHoH: (playerId: string | null) => void;
   setStatusMessage: (message: string) => void;
   setPhase: (phase: string) => void;
-  setSelectedPlayers: (players: string[]) => void;
+  setSelectedPlayers: (playerIds: string[]) => void;
   lastHoH: string | null;
-  setLastHoH: (hohId: string | null) => void;
-  toast: any;
+  setLastHoH: (playerId: string | null) => void;
+  toast: (props: ToastProps) => void;
 }
 
 export interface NominationPhaseProps {
@@ -63,23 +64,23 @@ export interface NominationPhaseProps {
   hoh: string | null;
   setStatusMessage: (message: string) => void;
   setPhase: (phase: string) => void;
-  setSelectedPlayers: (players: string[]) => void;
+  setSelectedPlayers: (playerIds: string[]) => void;
   usePowerup: (playerId: string) => void;
-  toast: any;
+  toast: (props: ToastProps) => void;
 }
 
 export interface PoVPhaseProps {
   players: PlayerData[];
   setPlayers: (players: PlayerData[]) => void;
   selectedPlayers: string[];
-  setVeto: (vetoId: string | null) => void;
+  setVeto: (playerId: string | null) => void;
   setStatusMessage: (message: string) => void;
   setPhase: (phase: string) => void;
-  setSelectedPlayers: (players: string[]) => void;
+  setSelectedPlayers: (playerIds: string[]) => void;
   hoh: string | null;
   nominees: string[];
   setVetoUsed: (used: boolean) => void;
-  toast: any;
+  toast: (props: ToastProps) => void;
 }
 
 export interface VetoPhaseProps {
@@ -91,17 +92,17 @@ export interface VetoPhaseProps {
   hoh: string | null;
   setStatusMessage: (message: string) => void;
   setPhase: (phase: string) => void;
-  setSelectedPlayers: (players: string[]) => void;
+  setSelectedPlayers: (playerIds: string[]) => void;
   usePowerup: (playerId: string) => void;
   setVetoUsed: (used: boolean) => void;
-  toast: any;
+  toast: (props: ToastProps) => void;
 }
 
 export interface EvictionPhaseProps {
   players: PlayerData[];
   setPlayers: (players: PlayerData[]) => void;
   nominees: string[];
-  setSelectedPlayers: (players: string[]) => void;
+  setSelectedPlayers: (playerIds: string[]) => void;
   setStatusMessage: (message: string) => void;
   setPhase: (phase: string) => void;
   usePowerup: (playerId: string) => void;
@@ -115,7 +116,7 @@ export interface SpecialCompetitionPhaseProps {
   week: number;
   setWeek: (week: number) => void;
   setPhase: (phase: string) => void;
-  setSelectedPlayers: (players: string[]) => void;
+  setSelectedPlayers: (playerIds: string[]) => void;
   setStatusMessage: (message: string) => void;
   toast: (props: ToastProps) => void;
 }
@@ -124,12 +125,12 @@ export interface JuryQuestionsProps {
   players: PlayerData[];
   setPlayers: (players: PlayerData[]) => void;
   finalists: string[];
-  setFinalists: (finalists: string[]) => void;
+  setFinalists: (finalistIds: string[]) => void;
   jurors: string[];
-  setJurors: (jurors: string[]) => void;
+  setJurors: (jurorIds: string[]) => void;
   setStatusMessage: (message: string) => void;
   setPhase: (phase: string) => void;
-  setSelectedPlayers: (players: string[]) => void;
+  setSelectedPlayers: (playerIds: string[]) => void;
   toast: (props: ToastProps) => void;
 }
 
@@ -141,7 +142,7 @@ export interface JuryVotingProps {
   setVotes: (votes: Record<string, string>) => void;
   setStatusMessage: (message: string) => void;
   setPhase: (phase: string) => void;
-  setSelectedPlayers: (players: string[]) => void;
+  setSelectedPlayers: (playerIds: string[]) => void;
   toast: (props: ToastProps) => void;
 }
 
@@ -154,7 +155,7 @@ export interface FinaleManagerProps {
 
 export interface PlayerSelectionProps {
   selectedPlayers: string[];
-  setSelectedPlayers: (players: string[]) => void;
+  setSelectedPlayers: (playerIds: string[]) => void;
   phase: string;
 }
 
@@ -179,7 +180,7 @@ export interface GameActionsProps {
   setHoH: (hohId: string | null) => void;
   setVeto: (vetoId: string | null) => void;
   setNominees: (nominees: string[]) => void;
-  setSelectedPlayers: (players: string[]) => void;
+  setSelectedPlayers: (playerIds: string[]) => void;
   setStatusMessage: (message: string) => void;
   setWeekSummaries?: (summaries: WeekSummary[]) => void;
   usePowerup: (playerId: string) => void;

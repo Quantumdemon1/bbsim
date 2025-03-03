@@ -1,4 +1,5 @@
 
+
 // Re-export all types from the different files
 export * from './player';
 
@@ -38,3 +39,4 @@ export type {
   FinaleStatsProps,
   DefaultPhaseProps
 } from './componentProps';
+
