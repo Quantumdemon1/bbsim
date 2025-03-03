@@ -1,49 +1,54 @@
 
-import { FinaleManagerProps } from './types';
+import { useState, useEffect } from 'react';
 import { PlayerData } from '@/components/PlayerProfileTypes';
+import { ToastProps } from './types';
 
-export function useFinaleManager({
-  players,
-  setFinalists,
-  setJurors,
-  toast
+interface FinaleManagerProps {
+  players: PlayerData[];
+  setFinalists: (finalists: string[]) => void;
+  setJurors: (jurors: string[]) => void;
+  toast: (props: ToastProps) => void;
+}
+
+export function useFinaleManager({ 
+  players, 
+  setFinalists, 
+  setJurors, 
+  toast 
 }: FinaleManagerProps) {
-  const setupFinale = () => {
-    const activePlayers = players.filter(p => p.status !== 'evicted');
-    const finalist1 = activePlayers[0]?.id;
-    const finalist2 = activePlayers[1]?.id;
-    
-    if (finalist1 && finalist2) {
-      setFinalists([finalist1, finalist2]);
-      
-      // In Big Brother, the jury typically consists of the last 7-9 evicted houseguests
-      const evictedPlayers = players.filter(p => p.status === 'evicted');
-      // Take the last 7 evicted players to form the jury
-      let juryMembers = evictedPlayers.slice(-7).map(p => p.id);
-      
-      // If we don't have enough jury members, add some of the remaining active players
-      if (juryMembers.length < 7) {
-        const remainingPlayers = activePlayers.slice(2).map(p => p.id);
-        juryMembers = [...juryMembers, ...remainingPlayers.slice(0, 7 - juryMembers.length)];
-      }
-      
-      // Update player statuses to show they're jurors
-      const updatedPlayers = players.map(player => ({
-        ...player,
-        status: juryMembers.includes(player.id) ? 'juror' : 
-                finalists.includes(player.id) ? player.status : player.status
-      }));
-      
-      setJurors(juryMembers);
+  const [initialized, setInitialized] = useState(false);
+
+  useEffect(() => {
+    if (!initialized && players.length > 0) {
+      setupFinaleParticipants();
+      setInitialized(true);
     }
+  }, [players, initialized]);
+
+  const setupFinaleParticipants = () => {
+    // Get active players (not evicted)
+    const activePlayers = players.filter(p => p.status !== 'evicted');
+    
+    // Get top 2 players as finalists
+    const finalistsArray = activePlayers.slice(0, 2).map(p => p.id);
+    
+    // Get last 7 evicted players (or as many as available) as jurors
+    const evictedPlayers = players
+      .filter(p => p.status === 'evicted')
+      .slice(-7);  // Get the last 7 evicted players
+    
+    const jurorsArray = evictedPlayers.map(p => p.id);
+    
+    setFinalists(finalistsArray);
+    setJurors(jurorsArray);
     
     toast({
-      title: "Finale Setup",
-      description: "The final 2 houseguests will now face the jury!"
+      title: "Finale Set",
+      description: `Finalists and jury have been determined. ${finalistsArray.length} finalists and ${jurorsArray.length} jury members.`,
     });
   };
 
   return {
-    setupFinale
+    setupFinaleParticipants
   };
 }

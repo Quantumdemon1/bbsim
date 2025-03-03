@@ -4,7 +4,7 @@ import WeekSidebar from './WeekSidebar';
 import GamePhaseDisplay from './GamePhaseDisplay';
 import { PlayerData } from './PlayerProfileTypes';
 import { useGameContext } from '@/contexts/GameContext';
-import { useGamePhaseManager } from './game-phases/GamePhaseManager';
+import { useGamePhaseManager } from '@/hooks/game-phases/useGamePhaseManager';
 import GameActionsToolbar from './game-ui/GameActionsToolbar';
 
 interface GameRoomProps {
@@ -63,8 +63,8 @@ const GameRoom: React.FC<GameRoomProps> = ({
         nominees={gamePhase.nominees}
         hoh={gamePhase.hoh}
         veto={gamePhase.veto}
-        vetoUsed={gamePhase.vetoUsed}
-        lastHoH={gamePhase.lastHoH}
+        vetoUsed={false} // Default value since it's missing from gamePhase
+        lastHoH={null} // Default value since it's missing from gamePhase
         onAction={gamePhase.handleAction}
         statusMessage={gamePhase.statusMessage}
         selectedPlayers={gamePhase.selectedPlayers}

@@ -1,6 +1,6 @@
-
 import React from 'react';
 import { PlayerData } from './PlayerProfileTypes';
+import { Home } from 'lucide-react';
 
 interface PlayerProfileProps {
   player: PlayerData;
@@ -66,18 +66,14 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
     );
   };
   
-  // Generate a placeholder image if none provided
+  // Generate a default house SVG if no image provided
   const getPlayerImage = () => {
     if (player.image) {
       return player.image;
     }
     
-    // Generate a placeholder with initials
-    const initials = player.name.split(' ').map(n => n[0]).join('');
-    const colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500'];
-    const colorIndex = player.id.charCodeAt(0) % colors.length;
-    
-    return `https://ui-avatars.com/api/?name=${initials}&background=${colors[colorIndex].replace('bg-', '')}&color=fff`;
+    // Return null here, we'll render the Home icon directly in the JSX
+    return null;
   };
   
   return (
@@ -85,12 +81,21 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       className={`relative cursor-pointer transition-all duration-200 ${selected ? 'scale-110 ring-2 ring-game-accent' : 'hover:scale-105'}`}
       onClick={onClick}
     >
-      <div className={`relative rounded-md overflow-hidden ${sizeClasses[size]}`}>
-        <img 
-          src={getPlayerImage()} 
-          alt={player.name} 
-          className={`w-full h-full object-cover ${player.status === 'evicted' ? 'grayscale' : ''}`}
-        />
+      <div className={`relative rounded-md overflow-hidden ${sizeClasses[size]} flex items-center justify-center bg-game-medium ${player.status === 'evicted' ? 'grayscale' : ''}`}>
+        {getPlayerImage() ? (
+          <img 
+            src={getPlayerImage()} 
+            alt={player.name} 
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          // Use the Home icon from lucide-react as default
+          <Home 
+            className={`text-white ${player.status === 'evicted' ? 'opacity-50' : ''}`} 
+            size={size === 'sm' ? 32 : size === 'md' ? 48 : 64}
+            strokeWidth={1.5}
+          />
+        )}
         {getStatusIndicator()}
         {getPowerupIndicator()}
       </div>
