@@ -1,102 +1,44 @@
 
-import { useState } from 'react';
-
-type PhaseProgress = {
-  [phase: string]: {
-    playersReady: string[];
-    completed: boolean;
-  }
-};
-
-interface PhaseProgressProps {
-  gameMode: 'singleplayer' | 'multiplayer' | null;
-  humanPlayerCount: number;
-}
+import { usePhaseTracker } from './phase-progress/usePhaseTracker';
+import { usePhaseCountdown } from './phase-progress/usePhaseCountdown';
+import { PhaseProgressProps, PhaseProgressInfo } from './types/phaseProgressTypes';
 
 export function usePhaseProgress({ gameMode, humanPlayerCount }: PhaseProgressProps) {
-  const [phaseProgress, setPhaseProgress] = useState<PhaseProgress>({});
-  const [phaseCountdown, setPhaseCountdown] = useState<number | null>(null);
-  const [countdownInterval, setCountdownInterval] = useState<number | null>(null);
+  const { 
+    phaseProgress, 
+    markPhaseProgress: trackPhaseProgress, 
+    getPhaseProgress: getTrackProgress, 
+    clearPhaseProgress: clearTrackProgress 
+  } = usePhaseTracker();
+  
+  const { 
+    phaseCountdown, 
+    startPhaseCountdown, 
+    clearCountdown 
+  } = usePhaseCountdown();
   
   const markPhaseProgress = (phase: string, playerId: string) => {
-    setPhaseProgress(prev => {
-      const phaseObj = prev[phase] || { playersReady: [], completed: false };
-      
-      if (!phaseObj.playersReady.includes(playerId)) {
-        const updatedPlayersReady = [...phaseObj.playersReady, playerId];
-        
-        const isCompleted = gameMode === 'singleplayer' || 
-                           (updatedPlayersReady.length >= Math.ceil(humanPlayerCount / 2));
-        
-        if (isCompleted && gameMode === 'multiplayer' && !phaseObj.completed) {
-          startPhaseCountdown(30);
-        }
-        
-        return {
-          ...prev,
-          [phase]: {
-            playersReady: updatedPlayersReady,
-            completed: isCompleted
-          }
-        };
-      }
-      
-      return prev;
-    });
+    trackPhaseProgress(phase, playerId, gameMode, humanPlayerCount);
+    
+    // Start countdown if enough players are ready and we're in multiplayer mode
+    const progressData = getTrackProgress(phase, humanPlayerCount);
+    if (progressData.completed && gameMode === 'multiplayer' && phaseCountdown === null) {
+      startPhaseCountdown(30);
+    }
   };
   
-  const getPhaseProgress = (phase: string) => {
-    const progressData = phaseProgress[phase] || { playersReady: [], completed: false };
+  const getPhaseProgress = (phase: string): PhaseProgressInfo => {
+    const progressData = getTrackProgress(phase, humanPlayerCount);
     
     return {
       ...progressData,
-      completedCount: progressData.playersReady.length,
-      totalCount: humanPlayerCount,
-      percentage: humanPlayerCount > 0 
-        ? (progressData.playersReady.length / humanPlayerCount) * 100 
-        : 0,
       hasStartedCountdown: phaseCountdown !== null && progressData.completed
     };
   };
   
   const clearPhaseProgress = (phase: string) => {
-    if (countdownInterval) {
-      window.clearInterval(countdownInterval);
-      setCountdownInterval(null);
-    }
-    setPhaseCountdown(null);
-    
-    if (phase === '*') {
-      setPhaseProgress({});
-      return;
-    }
-    
-    setPhaseProgress(prev => {
-      const newProgress = { ...prev };
-      delete newProgress[phase];
-      return newProgress;
-    });
-  };
-  
-  const startPhaseCountdown = (seconds: number) => {
-    if (countdownInterval) {
-      window.clearInterval(countdownInterval);
-    }
-    
-    setPhaseCountdown(seconds);
-    
-    const interval = window.setInterval(() => {
-      setPhaseCountdown(prev => {
-        if (prev === null || prev <= 1) {
-          window.clearInterval(interval);
-          setCountdownInterval(null);
-          return null;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    
-    setCountdownInterval(interval);
+    clearTrackProgress(phase);
+    clearCountdown();
   };
 
   return {
