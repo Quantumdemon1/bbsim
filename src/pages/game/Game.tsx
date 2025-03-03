@@ -6,7 +6,7 @@ import { useGameContext } from '@/contexts/GameContext';
 import GameHeader from './components/GameHeader';
 import GameControls from './components/GameControls';
 import AdminPanel from './components/AdminPanel';
-import PhaseProgressTracker from '@/components/game-ui/PhaseProgressTracker';
+import { PhaseProgressTracker } from '@/components/game-ui/PhaseProgressTracker';
 import ChatPanel from '@/components/chat/ChatPanel';
 import NotificationPanel from '@/components/notifications/NotificationPanel';
 import PlayerProfileModal from '@/components/profile/PlayerProfileModal';
