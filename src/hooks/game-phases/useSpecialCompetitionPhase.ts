@@ -1,6 +1,4 @@
-
 import { PlayerData } from '@/components/PlayerProfile';
-import { Toast } from '@/components/ui/use-toast';
 
 interface SpecialCompetitionPhaseProps {
   players: PlayerData[];
@@ -11,7 +9,7 @@ interface SpecialCompetitionPhaseProps {
   setPhase: (phase: string) => void;
   setSelectedPlayers: (players: string[]) => void;
   setStatusMessage: (message: string) => void;
-  toast: Toast;
+  toast: (props: { title: string; description: string; variant?: "default" | "destructive" }) => void;
 }
 
 export function useSpecialCompetitionPhase({

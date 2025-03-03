@@ -1,6 +1,4 @@
-
 import { PlayerData } from '@/components/PlayerProfile';
-import { Toast } from '@/components/ui/use-toast';
 
 interface VetoPhaseProps {
   players: PlayerData[];
@@ -13,7 +11,7 @@ interface VetoPhaseProps {
   setPhase: (phase: string) => void;
   setSelectedPlayers: (players: string[]) => void;
   usePowerup: (playerId: string) => void;
-  toast: Toast;
+  toast: (props: { title: string; description: string; variant?: "default" | "destructive" }) => void;
 }
 
 export function useVetoPhase({

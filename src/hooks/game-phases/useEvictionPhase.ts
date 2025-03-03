@@ -1,6 +1,4 @@
-
 import { PlayerData } from '@/components/PlayerProfile';
-import { Toast } from '@/components/ui/use-toast';
 
 interface EvictionPhaseProps {
   players: PlayerData[];
@@ -10,7 +8,7 @@ interface EvictionPhaseProps {
   setStatusMessage: (message: string) => void;
   setPhase: (phase: string) => void;
   usePowerup: (playerId: string) => void;
-  toast: Toast;
+  toast: (props: { title: string; description: string; variant?: "default" | "destructive" }) => void;
 }
 
 export function useEvictionPhase({
