@@ -1,9 +1,9 @@
 
 import { useContext } from 'react';
-import { PlayerAuthContext } from '../../contexts/PlayerAuthContext';
+import { usePlayerAuthContext as useAuthContext } from '../../contexts/PlayerAuthContext';
 
 export function usePlayerAuthContext() {
-  const authContext = useContext(PlayerAuthContext);
+  const authContext = useAuthContext();
   
   if (!authContext) {
     throw new Error('usePlayerAuthContext must be used within a PlayerAuthProvider');
@@ -14,9 +14,11 @@ export function usePlayerAuthContext() {
     isAuthenticated: authContext.isAuthenticated,
     currentPlayer: authContext.currentPlayer,
     isGuest: authContext.isGuest,
+    isAdmin: authContext.isAdmin,
     login: authContext.login,
     register: authContext.register,
     loginAsGuest: authContext.loginAsGuest,
+    loginAsAdmin: authContext.loginAsAdmin,
     logout: authContext.logout,
     
     // Profile

@@ -1,6 +1,5 @@
 
 import { PlayerData } from '@/components/PlayerProfileTypes';
-import { Json } from '@/integrations/supabase/types';
 
 export interface SavedGameState {
   id: string;
@@ -20,13 +19,12 @@ export interface DatabaseGameState {
   game_id: string;
   week: number;
   phase: string;
-  players?: Json;
+  players: unknown;
   hoh_id: string | null;
   veto_holder_id: string | null;
-  nominees: Json | null;
-  evicted_id: string | null;
-  created_at?: string;
-  updated_at?: string;
+  nominees: unknown;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface GameStateService {
@@ -34,15 +32,7 @@ export interface GameStateService {
   error: string | null;
   savedGames: SavedGameState[];
   saveGameState: (state: Omit<SavedGameState, 'id' | 'created_at' | 'updated_at'>) => Promise<any>;
-  loadGameState: (gameId: string) => Promise<{
-    gameId: string;
-    week: number;
-    phase: string;
-    players: PlayerData[];
-    hoh: string | null;
-    veto: string | null;
-    nominees: string[];
-  } | null>;
+  loadGameState: (gameId: string) => Promise<any>;
   deleteGameState: (gameId: string) => Promise<boolean>;
   loadSavedGames: () => Promise<void>;
 }

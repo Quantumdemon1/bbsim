@@ -1,11 +1,4 @@
 
-export type PhaseProgress = {
-  [phase: string]: {
-    playersReady: string[];
-    completed: boolean;
-  }
-};
-
 export interface PhaseProgressProps {
   gameMode: 'singleplayer' | 'multiplayer' | null;
   humanPlayerCount: number;

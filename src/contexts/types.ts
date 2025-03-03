@@ -1,11 +1,18 @@
 
 import { PlayerData } from '@/components/PlayerProfileTypes';
-import { PlayerAttributes, PlayerRelationship } from '@/hooks/game-phases/types';
+import { PlayerAttributes, PlayerRelationship, BotEmotions, AIMemoryEntry } from '@/hooks/game-phases/types';
 import { Notification, PlayerSettings } from '@/hooks/usePlayerAuth';
+import { PhaseProgressInfo } from '@/hooks/gameState/types/phaseProgressTypes';
+import { SavedGameState } from '@/hooks/gameState/types/gameStatePersistenceTypes';
 
 export interface GameContextType {
+  // Player Management
   players: PlayerData[];
   setPlayers: (players: PlayerData[]) => void;
+  updatePlayerAttributes: (playerId: string, attributes: PlayerAttributes) => void;
+  updatePlayerRelationships: (playerId: string, relationships: PlayerRelationship[]) => void;
+  
+  // Game State
   gameId: string | null;
   createGame: (hostName: string) => void;
   joinGame: (gameId: string, playerName: string) => void;
@@ -18,14 +25,47 @@ export interface GameContextType {
   resetGame: () => void;
   currentWeek: number;
   setCurrentWeek: (week: number) => void;
+  showChat: boolean;
+  setShowChat: (show: boolean) => void;
+  gameMode: 'singleplayer' | 'multiplayer' | null;
+  humanPlayers: PlayerData[];
+  countdownTimer: number | null;
+  createSinglePlayerGame: (bypassAuth?: boolean) => boolean;
+  createMultiplayerGame: (hostName: string) => boolean;
+  joinMultiplayerGame: (gameId: string, playerName: string) => boolean;
+  
+  // Admin Control
+  adminTakeControl: (phaseToSkipTo?: string) => void;
+  isAdminControl: boolean;
+  loginAsAdmin: () => void;
+  isAdmin: boolean;
+  
+  // Phase Progress
+  phaseProgress: Record<string, { playersReady: string[], completed: boolean }>;
+  phaseCountdown: number | null;
+  markPhaseProgress: (phase: string, playerId: string) => void;
+  getPhaseProgress: (phase: string) => PhaseProgressInfo | null;
+  startPhaseCountdown: (seconds: number) => void;
+  clearPhaseProgress: (phase: string) => void;
+  
+  // Game Persistence
+  saveGame: () => Promise<void>;
+  loadGame: (gameId: string) => Promise<boolean>;
+  savedGames: SavedGameState[];
+  deleteSavedGame: (gameId: string) => Promise<boolean>;
+  isLoadingSave: boolean;
+  
+  // Alliance Management
   alliances: Alliance[];
   createAlliance: (name: string, members: string[]) => void;
   addToAlliance: (allianceId: string, playerId: string) => void;
   removeFromAlliance: (allianceId: string, playerId: string) => void;
+  
+  // Powerup Management
   awardPowerup: (playerId: string, powerup: PlayerData['powerup']) => void;
   usePowerup: (playerId: string) => void;
-  updatePlayerAttributes: (playerId: string, attributes: PlayerAttributes) => void;
-  updatePlayerRelationships: (playerId: string, relationships: PlayerRelationship[]) => void;
+  
+  // Player Authentication
   isAuthenticated: boolean;
   currentPlayer: PlayerData | null;
   isGuest: boolean;
@@ -35,22 +75,30 @@ export interface GameContextType {
   logout: () => void;
   updateProfile: (updatedProfile: Partial<PlayerData>) => void;
   updateSettings: (newSettings: Partial<PlayerSettings>) => void;
+  
+  // Friends
+  friends: string[];
   addFriend: (friendId: string) => void;
   removeFriend: (friendId: string) => void;
+  
+  // Notifications
+  notifications: Notification[];
   addNotification: (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => void;
   markNotificationAsRead: (notificationId: string) => void;
   clearNotifications: () => void;
-  friends: string[];
-  notifications: Notification[];
   settings: PlayerSettings;
-  showChat: boolean;
-  setShowChat: (show: boolean) => void;
-  gameMode: 'singleplayer' | 'multiplayer' | null;
-  humanPlayers: PlayerData[];
-  countdownTimer: number | null;
-  createSinglePlayerGame: () => boolean;
-  createMultiplayerGame: (hostName: string) => boolean;
-  joinMultiplayerGame: (gameId: string, playerName: string) => boolean;
+  
+  // AI Player Management
+  makeAIDecision: (playerId: string, decisionType: string, options: any) => Promise<any>;
+  generateAIDialogue: (playerId: string, eventType: string, context: any) => Promise<string>;
+  addAIMemoryEntry: (playerId: string, entry: AIMemoryEntry) => void;
+  clearAIMemory: (playerId: string) => void;
+  getPlayerMemory: (playerId: string) => AIMemoryEntry[];
+  isUsingLLM: boolean;
+  toggleLLMDecisionMaking: () => void;
+  isThinking: boolean;
+  botEmotions: BotEmotions;
+  updateBotEmotion: (playerId: string, emotion: string) => void;
 }
 
 export interface Alliance {

@@ -1,44 +1,36 @@
-
-import { HoHPhaseProps, PoVPhaseProps, NominationPhaseProps, VetoPhaseProps, EvictionPhaseProps, SpecialCompetitionPhaseProps, JuryQuestionsProps, JuryVotingProps, WeekSummary } from '../types';
+import { UseNominationPhaseResult, UseVetoPhaseResult } from '../types';
 
 interface PhaseRouterProps {
   hohPhase: {
     handleSelectHoH: () => void;
   };
-  nominationPhase: {
-    nominate?: (nominees: string[]) => void;
-  };
+  nominationPhase: UseNominationPhaseResult;
   povPhase: {
     handleSelectVeto: () => void;
-    selectVetoPlayers: () => string[];
   };
-  vetoPhase: {
-    handleUseVeto?: (nomineeId: string) => void;
-    handleDoNotUseVeto?: () => void;
-  };
+  vetoPhase: UseVetoPhaseResult;
   evictionPhase: {
-    handleEvict: (evictedId: string) => void;
+    handleCastVote: (voterId: string, nomineeId: string) => void;
+    handleEvict: () => void;
   };
   specialCompPhase: {
-    handleSpecialCompetition?: () => void;
+    handleSpecialCompetition: (competitionType: string) => void;
   };
   finaleManager: {
     setupFinale: () => void;
   };
   juryQuestionsPhase: {
-    handleJuryQuestions?: () => void;
-    handleProceedToVoting?: () => void;
+    handleQuestion: (jurorId: string, finalistId: string, question: string) => void;
   };
   juryVotingPhase: {
-    handleJuryVote?: (jurorId: string, finalistId: string) => void;
-    handleShowResults?: () => void;
+    handleJuryVote: (jurorId: string, finalistId: string) => void;
   };
   gameActions: {
-    handleNextWeek: () => void;
-    handleResetGame?: () => void;
+    advanceWeek: () => void;
+    finishGame: () => void;
   };
-  weekSummaries: WeekSummary[];
-  setWeekSummaries: (summaries: WeekSummary[]) => void;
+  weekSummaries: any[];
+  setWeekSummaries: (summary: any[]) => void;
   week: number;
   nominees: string[];
   hoh: string | null;
@@ -48,132 +40,64 @@ interface PhaseRouterProps {
   setPhase: (phase: string) => void;
 }
 
-export function usePhaseRouter(props: PhaseRouterProps) {
-  const {
-    hohPhase,
-    nominationPhase,
-    povPhase,
-    vetoPhase,
-    evictionPhase,
-    specialCompPhase,
-    finaleManager,
-    juryQuestionsPhase,
-    juryVotingPhase,
-    gameActions,
-    weekSummaries,
-    setWeekSummaries,
-    week,
-    nominees,
-    hoh,
-    veto,
-    vetoUsed,
-    selectedPlayers,
-    setPhase
-  } = props;
+export function usePhaseRouter({
+  hohPhase,
+  nominationPhase,
+  povPhase,
+  vetoPhase,
+  evictionPhase,
+  specialCompPhase,
+  finaleManager,
+  juryQuestionsPhase,
+  juryVotingPhase,
+  gameActions,
+  weekSummaries,
+  setWeekSummaries,
+  week,
+  nominees,
+  hoh,
+  veto,
+  vetoUsed,
+  selectedPlayers,
+  setPhase
+}: PhaseRouterProps) {
 
   const handleAction = (action: string, data?: any) => {
-    console.log("Handling action:", action, data);
-    
     switch (action) {
       case 'selectHoH':
-        if (hohPhase.handleSelectHoH) {
-          hohPhase.handleSelectHoH();
-        } else {
-          console.warn("Unhandled action:", action);
-        }
+        hohPhase.handleSelectHoH();
         break;
-        
       case 'nominate':
-        if (nominationPhase.nominate) {
-          nominationPhase.nominate(selectedPlayers);
-        } else {
-          console.warn("Unhandled action:", action);
-        }
+        nominationPhase.handleNominate();
         break;
-        
       case 'selectVeto':
-        if (povPhase.handleSelectVeto) {
-          povPhase.handleSelectVeto();
-        } else {
-          console.warn("Unhandled action:", action);
-        }
+        povPhase.handleSelectVeto();
         break;
-        
-      case 'vetoAction':
-        if (data === 'use' && vetoPhase.handleUseVeto) {
-          vetoPhase.handleUseVeto(selectedPlayers[0]);
-        } else if (data === 'noUse' && vetoPhase.handleDoNotUseVeto) {
-          vetoPhase.handleDoNotUseVeto();
-        } else {
-          console.warn("Unhandled veto action:", data);
-        }
+      case 'castVote':
+        evictionPhase.handleCastVote(data.voterId, data.nomineeId);
         break;
-        
       case 'evict':
-        evictionPhase.handleEvict(data);
+        evictionPhase.handleEvict();
         break;
-        
-      case 'specialComp':
-        if (specialCompPhase.handleSpecialCompetition) {
-          specialCompPhase.handleSpecialCompetition();
-        } else {
-          console.warn("Unhandled action:", action);
-        }
+      case 'specialCompetition':
+        specialCompPhase.handleSpecialCompetition(data.competitionType);
         break;
-        
-      case 'setupFinale':
-        finaleManager.setupFinale();
+      case 'juryQuestion':
+        juryQuestionsPhase.handleQuestion(data.jurorId, data.finalistId, data.question);
         break;
-        
-      case 'juryQuestions':
-        if (juryQuestionsPhase.handleJuryQuestions) {
-          juryQuestionsPhase.handleJuryQuestions();
-        } else {
-          console.warn("Unhandled action:", action);
-        }
-        break;
-        
-      case 'proceedToVoting':
-        if (juryQuestionsPhase.handleProceedToVoting) {
-          juryQuestionsPhase.handleProceedToVoting();
-        } else {
-          console.warn("Unhandled action:", action);
-        }
-        break;
-        
       case 'juryVote':
-        if (juryVotingPhase.handleJuryVote) {
-          const { jurorId, finalistId } = data;
-          juryVotingPhase.handleJuryVote(jurorId, finalistId);
-        } else {
-          console.warn("Unhandled action:", action);
-        }
+        juryVotingPhase.handleJuryVote(data.jurorId, data.finalistId);
         break;
-        
-      case 'showResults':
-        if (juryVotingPhase.handleShowResults) {
-          juryVotingPhase.handleShowResults();
-        } else {
-          console.warn("Unhandled action:", action);
-        }
+      case 'advanceWeek':
+        gameActions.advanceWeek();
         break;
-        
-      case 'nextWeek':
-        gameActions.handleNextWeek();
+      case 'finishGame':
+        gameActions.finishGame();
         break;
-        
-      case 'resetGame':
-        if (gameActions.handleResetGame) {
-          gameActions.handleResetGame();
-        } else {
-          console.warn("Unhandled action:", action);
-        }
-        break;
-        
       default:
-        console.warn("Unknown action:", action);
+        console.warn(`Unhandled action: ${action}`);
     }
-  };
+  }
 
   return {
     handleAction
