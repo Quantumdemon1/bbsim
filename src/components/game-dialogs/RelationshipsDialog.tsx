@@ -207,7 +207,7 @@ const RelationshipsDialog: React.FC<RelationshipsDialogProps> = ({ players }) =>
                             <label className="text-xs text-gray-400 block mb-1">Relationship</label>
                             <select 
                               className="w-full bg-game-light/20 border border-gray-700 rounded p-1 text-sm"
-                              value={getRelationshipValue(target.id, 'type') || 'Neutral'}
+                              value={getRelationshipValue(target.id, 'type') as string || 'Neutral'}
                               onChange={(e) => handleUpdateRelationship(target.id, 'type', e.target.value)}
                             >
                               {relationshipTypes.map(type => (
@@ -222,7 +222,7 @@ const RelationshipsDialog: React.FC<RelationshipsDialogProps> = ({ players }) =>
                             <label className="text-xs text-gray-400 block mb-1">Extra Points</label>
                             <select 
                               className="w-full bg-game-light/20 border border-gray-700 rounded p-1 text-sm"
-                              value={getRelationshipValue(target.id, 'extraPoints') || 0}
+                              value={getRelationshipValue(target.id, 'extraPoints') as number || 0}
                               onChange={(e) => handleUpdateRelationship(target.id, 'extraPoints', parseInt(e.target.value))}
                             >
                               {extraOptions.map(value => (
@@ -238,23 +238,23 @@ const RelationshipsDialog: React.FC<RelationshipsDialogProps> = ({ players }) =>
                           <div className="flex items-center">
                             <Checkbox 
                               id={`mutual-${target.id}`}
-                              checked={getRelationshipValue(target.id, 'isMutual') || false}
+                              checked={getRelationshipValue(target.id, 'isMutual') as boolean || false}
                               onCheckedChange={(checked) => 
-                                handleUpdateRelationship(target.id, 'isMutual', !!checked)
+                                handleUpdateRelationship(target.id, 'isMutual', checked)
                               }
                               className="border-gray-500"
                             />
                             <label htmlFor={`mutual-${target.id}`} className="ml-2 text-sm">
-                              Non-Mutual?
+                              Mutual?
                             </label>
                           </div>
                           
                           <div className="flex items-center">
                             <Checkbox 
                               id={`permanent-${target.id}`}
-                              checked={getRelationshipValue(target.id, 'isPermanent') || false}
+                              checked={getRelationshipValue(target.id, 'isPermanent') as boolean || false}
                               onCheckedChange={(checked) => 
-                                handleUpdateRelationship(target.id, 'isPermanent', !!checked)
+                                handleUpdateRelationship(target.id, 'isPermanent', checked)
                               }
                               className="border-gray-500"
                             />
