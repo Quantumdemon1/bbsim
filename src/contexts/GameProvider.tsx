@@ -5,6 +5,7 @@ import { GameStateProvider } from './GameStateContext';
 import { AllianceProvider } from './AllianceContext';
 import { PowerupProvider } from './PowerupContext';
 import { PlayerAuthProvider } from './PlayerAuthContext';
+import { AIPlayerProvider } from './AIPlayerContext';
 import { mockPlayers } from './types';
 
 interface GameProviderProps {
@@ -18,7 +19,9 @@ export const GameProvider = ({ children }: GameProviderProps) => {
         <GameStateProvider>
           <AllianceProvider>
             <PowerupProvider>
-              {children}
+              <AIPlayerProvider>
+                {children}
+              </AIPlayerProvider>
             </PowerupProvider>
           </AllianceProvider>
         </GameStateProvider>

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { PlayerData } from '@/components/PlayerProfileTypes';
-import { User } from 'lucide-react';
+import { User, Bot } from 'lucide-react';
 
 interface PlayerSelectionGridProps {
   players: PlayerData[];
@@ -38,6 +38,13 @@ const PlayerSelectionGrid: React.FC<PlayerSelectionGridProps> = ({
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-game-medium">
                   <User className="h-12 w-12 text-gray-400" />
+                </div>
+              )}
+              
+              {/* New: Show AI indicator */}
+              {!player.isHuman && !player.isAdmin && (
+                <div className="absolute top-1 right-1 bg-blue-500 rounded-full p-1">
+                  <Bot size={14} className="text-white" />
                 </div>
               )}
             </div>

@@ -1,9 +1,9 @@
-
 import { usePlayerManagerContext } from './PlayerManagerContext';
 import { useGameStateContext } from './GameStateContext';
 import { useAllianceContext } from './AllianceContext';
 import { usePowerupContext } from './PowerupContext';
 import { usePlayerAuthContext } from './PlayerAuthContext';
+import { useAIPlayerContext } from './AIPlayerContext';
 
 export const useGameContext = () => {
   const playerManager = usePlayerManagerContext();
@@ -11,6 +11,7 @@ export const useGameContext = () => {
   const alliance = useAllianceContext();
   const powerup = usePowerupContext();
   const playerAuth = usePlayerAuthContext();
+  const aiPlayer = useAIPlayerContext();
 
   return {
     // Player Manager
@@ -85,6 +86,13 @@ export const useGameContext = () => {
     
     // Admin control
     adminTakeControl: gameState.adminTakeControl,
-    isAdminControl: gameState.isAdminControl
+    isAdminControl: gameState.isAdminControl,
+    
+    // AI Player
+    makeAIDecision: aiPlayer.makeAIDecision,
+    generateAIDialogue: aiPlayer.generateAIDialogue,
+    addAIMemoryEntry: aiPlayer.addMemoryEntry,
+    clearAIMemory: aiPlayer.clearAIMemory,
+    getPlayerMemory: aiPlayer.getPlayerMemory
   };
 }

@@ -14,7 +14,14 @@ export interface PlayerData {
   hometown?: string;
   occupation?: string;
   isAdmin?: boolean;
-  isHuman?: boolean; // Add this property for human players in multiplayer
+  isHuman?: boolean; // True for human players, false for AI players
+  isAI?: boolean;    // Explicit flag for AI players
+  personality?: {    // AI personality traits
+    archetype?: 'mastermind' | 'social-butterfly' | 'comp-beast' | 'floater' | 'villain';
+    traits?: string[];
+    background?: string;
+    motivation?: string;
+  };
   stats?: {
     hohWins?: number;
     povWins?: number;
