@@ -12,8 +12,8 @@ export function useJuryActions(
       handleQuestion: (jurorId: string, finalistId: string, question: string) => {
         console.log(`${jurorId} asks ${finalistId}: ${question}`);
       },
-      handleJuryQuestions,
-      handleProceedToVoting
+      handleJuryQuestions: (data?: any) => handleJuryQuestions(),
+      handleProceedToVoting: (data?: any) => handleProceedToVoting()
     };
   };
 

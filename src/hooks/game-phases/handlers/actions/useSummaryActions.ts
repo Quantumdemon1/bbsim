@@ -10,14 +10,14 @@ export function useSummaryActions(
 
   const getActions = () => {
     return {
-      advanceWeek: () => {
+      advanceWeek: (data?: any) => {
         handleNextWeek();
       },
-      finishGame: () => {
+      finishGame: (data?: any) => {
         setPhase('Placements');
       },
-      handleNextWeek,
-      handleShowPlacements: () => setPhase('Placements')
+      handleNextWeek: (data?: any) => handleNextWeek(),
+      handleShowPlacements: (data?: any) => setPhase('Placements')
     };
   };
 

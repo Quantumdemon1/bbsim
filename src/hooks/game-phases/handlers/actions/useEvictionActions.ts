@@ -14,14 +14,17 @@ export function useEvictionActions(
         console.log(`${voterId} votes to evict ${nomineeId}`);
       },
       handleEvict,
-      castVote: (data: { nominee: string }) => {
+      castVote: (data: { nominee: string } | undefined = undefined) => {
         if (data && data.nominee) {
           // Handle voting
+          console.log(`Casting vote for nominee: ${data.nominee}`);
         }
       },
-      evict: (data: { evictedId: string }) => {
+      evict: (data: { evictedId: string } | undefined = undefined) => {
         if (data && data.evictedId) {
           handleEvict(data.evictedId);
+        } else {
+          console.error("Eviction attempted without specifying player ID");
         }
       }
     };

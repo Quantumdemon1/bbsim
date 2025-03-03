@@ -54,15 +54,15 @@ export function usePhaseActionHandler(
     // Route actions based on current phase
     switch (phase) {
       case 'Nomination Ceremony':
-        return getNominationActions();
+        return getNominationActions()[action]();
       case 'Veto Ceremony':
-        return getVetoActions();
+        return getVetoActions()[action]();
       case 'Eviction Voting':
-        return getEvictionActions();
+        return getEvictionActions()[action](data);  // Pass data to eviction actions
       case 'Jury Questions':
-        return getJuryActions();
+        return getJuryActions()[action](data);  // Pass data to jury actions
       case 'Weekly Summary':
-        return getSummaryActions();
+        return getSummaryActions()[action]();
       default:
         // Handle generic actions based on action type
         switch (action) {
@@ -73,20 +73,20 @@ export function usePhaseActionHandler(
             return getCompetitionActions()[action]();
           case 'startNominations':
           case 'nominate':
-            return getNominationActions()[action]();
+            return getNominationActions()[action](data);  // Pass data to nomination actions
           case 'startVetoCeremony':
           case 'useVeto':
           case 'replaceNominee':
           case 'doNotUseVeto':
-            return getVetoActions()[action]();
+            return getVetoActions()[action](data);  // Pass data to veto actions
           case 'startEvictionVoting':
           case 'castVote':
           case 'finalizeVotes':
           case 'evict':
             if (action === 'evict' && data && data.evictedId) {
-              handleEvict(data.evictedId);
+              return handleEvict(data.evictedId);
             }
-            break;
+            return getEvictionActions()[action](data);  // Pass data to eviction actions
           case 'nextWeek':
             handleNextWeek();
             break;

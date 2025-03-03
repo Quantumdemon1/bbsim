@@ -11,12 +11,13 @@ export function useNominationActions(
 
   const getActions = () => {
     return {
-      nominate: (nominees: string[]) => {
+      nominate: (data?: any) => {
+        const nominees = data?.nominees || [];
         setSelectedPlayers([]);
         return handleNominate();
       },
-      handleNominate,
-      startNominations: () => handleNominate()
+      handleNominate: (data?: any) => handleNominate(),
+      startNominations: (data?: any) => handleNominate()
     };
   };
 
