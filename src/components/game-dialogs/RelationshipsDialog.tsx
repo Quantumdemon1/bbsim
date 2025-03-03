@@ -8,6 +8,17 @@ import { useRelationshipManager } from '@/hooks/useRelationshipManager';
 import PlayerSelectionGrid from './relationships/PlayerSelectionGrid';
 import PlayerRelationships from './relationships/PlayerRelationships';
 import RelationshipControls from './relationships/RelationshipControls';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "@/hooks/use-toast";
 
 interface RelationshipsDialogProps {
   players: PlayerData[];
@@ -16,6 +27,8 @@ interface RelationshipsDialogProps {
 
 const RelationshipsDialog: React.FC<RelationshipsDialogProps> = ({ players, onClose }) => {
   const [open, setOpen] = useState<boolean>(onClose ? true : false);
+  const [submitConfirmOpen, setSubmitConfirmOpen] = useState<boolean>(false);
+  
   const {
     selectedPlayer,
     setSelectedPlayer,
@@ -34,6 +47,18 @@ const RelationshipsDialog: React.FC<RelationshipsDialogProps> = ({ players, onCl
     if (!isOpen && onClose) {
       onClose();
     }
+  };
+  
+  const handleSubmit = () => {
+    setSubmitConfirmOpen(false);
+    setOpen(false);
+    if (onClose) {
+      onClose();
+    }
+    toast({
+      title: "Relationships Saved",
+      description: "Your relationship changes have been applied.",
+    });
   };
 
   return (
@@ -82,10 +107,30 @@ const RelationshipsDialog: React.FC<RelationshipsDialogProps> = ({ players, onCl
         />
         
         <div className="mt-4">
-          <Button className="w-full bg-game-accent hover:bg-game-highlight text-black">
+          <Button 
+            className="w-full bg-game-accent hover:bg-game-highlight text-black"
+            onClick={() => setSubmitConfirmOpen(true)}
+          >
             Submit
           </Button>
         </div>
+        
+        <AlertDialog open={submitConfirmOpen} onOpenChange={setSubmitConfirmOpen}>
+          <AlertDialogContent className="bg-game-dark border-game-accent text-white">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirm Relationship Changes</AlertDialogTitle>
+              <AlertDialogDescription className="text-gray-300">
+                Are you sure you want to apply all relationship changes? This will affect how players interact in the game.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="bg-gray-700 hover:bg-gray-600 text-white border-none">Cancel</AlertDialogCancel>
+              <AlertDialogAction className="bg-game-accent hover:bg-game-highlight text-black" onClick={handleSubmit}>
+                Confirm Changes
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </DialogContent>
     </Dialog>
   );
