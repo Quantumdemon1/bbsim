@@ -43,7 +43,7 @@ const RelationshipRow: React.FC<RelationshipRowProps> = ({
           <select 
             className="w-full bg-game-light/20 border border-gray-700 rounded p-1 text-sm"
             value={relationshipType || 'Neutral'}
-            onChange={(e) => onUpdateRelationship(targetId, 'type', e.target.value)}
+            onChange={(e) => onUpdateRelationship(targetId, 'type', e.target.value as RelationshipType)}
           >
             {relationshipTypes.map(type => (
               <option key={`type-${targetId}-${type}`} value={type}>

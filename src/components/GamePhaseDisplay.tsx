@@ -17,20 +17,9 @@ import PlacementsChart from './game-phases/PlacementsChart';
 import DefaultPhase from './game-phases/DefaultPhase';
 import { WeekSummary } from '@/hooks/game-phases/types';
 import {
-  HoHCompetitionProps,
-  NominationCeremonyProps,
-  PoVCompetitionProps,
-  VetoCeremonyProps,
-  EvictionVotingProps,
-  EvictionProps,
-  WeeklySummaryProps,
-  PlacementsChartProps,
-  SpecialCompetitionProps,
-  JuryQuestionsProps,
-  JuryVotingProps,
-  WinnerRevealProps,
-  FinaleStatsProps,
-  DefaultPhaseProps
+  ComponentJuryQuestionsProps,
+  ComponentJuryVotingProps,
+  PlacementsChartProps
 } from '@/hooks/game-phases/types';
 
 interface GamePhaseDisplayProps {
@@ -146,6 +135,9 @@ const GamePhaseDisplay: React.FC<GamePhaseDisplayProps> = ({
         return (
           <PlacementsChart
             players={players}
+            finalists={finalists}
+            jurors={jurors}
+            votes={votes}
             onAction={onAction}
           />
         );

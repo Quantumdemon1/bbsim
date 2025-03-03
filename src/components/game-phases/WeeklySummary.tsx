@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import PlayerProfile, { PlayerData } from '@/components/PlayerProfile';
@@ -24,20 +23,18 @@ import { Alliance } from '@/contexts/types';
 
 interface WeeklySummaryProps {
   players: PlayerData[];
-  week: number;
   weekSummaries: WeekSummary[];
-  alliances?: Alliance[];
+  currentWeek: number;
   onAction: (action: string) => void;
 }
 
 const WeeklySummary: React.FC<WeeklySummaryProps> = ({
   players,
-  week,
   weekSummaries,
-  alliances,
+  currentWeek,
   onAction
 }) => {
-  const currentSummary = weekSummaries.find(summary => summary.weekNumber === week) || weekSummaries[weekSummaries.length - 1];
+  const currentSummary = weekSummaries.find(summary => summary.weekNumber === currentWeek) || weekSummaries[weekSummaries.length - 1];
   
   if (!currentSummary) {
     return <div className="text-center p-8">No summary available for this week</div>;
@@ -185,14 +182,14 @@ const WeeklySummary: React.FC<WeeklySummaryProps> = ({
         <Button 
           className="bg-game-accent hover:bg-game-highlight text-black px-8 py-6 text-lg rounded-md button-glow"
           onClick={() => {
-            if (week === weekSummaries.length) {
+            if (currentWeek === weekSummaries.length) {
               onAction('nextWeek'); // Go to next week if we're at the current week
             } else {
               onAction('showPlacements'); // Otherwise show placements
             }
           }}
         >
-          {week === weekSummaries.length ? "Continue to Next Week" : "View Final Placements"}
+          {currentWeek === weekSummaries.length ? "Continue to Next Week" : "View Final Placements"}
         </Button>
       </div>
     </div>
