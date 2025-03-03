@@ -36,7 +36,7 @@ export const AIPlayerProvider = ({ children }: { children: ReactNode }) => {
         generateAIDialogue: aiManager.generateAIDialogue,
         addMemoryEntry: aiManager.addMemoryEntry,
         clearAIMemory: aiManager.clearAIMemory,
-        getPlayerMemory: (playerId: string) => aiManager.aiMemory[playerId] || [],
+        getPlayerMemory: (playerId: string) => aiManager.getPlayerMemory(playerId),
         isUsingLLM: aiManager.isUsingLLM,
         toggleLLMDecisionMaking: aiManager.toggleLLMDecisionMaking
       }}

@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { useGameContext } from '@/contexts/GameContext';
-import { Button } from '@/components/ui/button';
+import { useAIPlayerContext } from '@/contexts/AIPlayerContext';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Bot, Brain } from 'lucide-react';
@@ -11,7 +10,7 @@ interface AISettingsToggleProps {
 }
 
 const AISettingsToggle = ({ className = '' }: AISettingsToggleProps) => {
-  const { isUsingLLM, toggleLLMDecisionMaking } = useGameContext();
+  const { isUsingLLM, toggleLLMDecisionMaking } = useAIPlayerContext();
   
   return (
     <div className={`flex items-center space-x-2 ${className}`}>
