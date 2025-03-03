@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -35,19 +36,12 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -96,6 +90,42 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-game-dark text-gray-100 font-sans antialiased;
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+  }
+
+  .glass-panel {
+    @apply bg-white/10 backdrop-blur-md border border-white/20 rounded-lg shadow-lg;
+  }
+
+  .action-button {
+    @apply transition-all duration-300 ease-out transform hover:scale-[1.03] active:scale-[0.97];
+  }
+
+  .game-container {
+    @apply min-h-screen flex flex-col;
+    background-image: linear-gradient(to bottom, #2A2A2A, #212121);
+  }
+}
+
+/* Animation classes */
+.hover-lift {
+  @apply transition-transform duration-300 hover:translate-y-[-2px];
+}
+
+.button-glow {
+  @apply relative overflow-hidden;
+}
+
+.button-glow::after {
+  content: '';
+  @apply absolute inset-0 rounded-lg opacity-0 transition-opacity duration-500;
+  background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%);
+}
+
+.button-glow:hover::after {
+  @apply opacity-100;
 }
