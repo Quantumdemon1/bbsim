@@ -4,7 +4,7 @@ import WeekSidebar from './WeekSidebar';
 import GamePhaseDisplay from './GamePhaseDisplay';
 import { PlayerData } from './PlayerProfile';
 import { useGameContext } from '@/contexts/GameContext';
-import GamePhaseManager from './game-phases/GamePhaseManager';
+import { useGamePhaseManager } from './game-phases/GamePhaseManager';
 
 interface GameRoomProps {
   players: PlayerData[];
@@ -17,7 +17,8 @@ const GameRoom: React.FC<GameRoomProps> = ({
 }) => {
   const { alliances } = useGameContext();
   
-  const gamePhase = GamePhaseManager({
+  // Use the hook correctly to get the game phase state and functions
+  const gamePhase = useGamePhaseManager({
     players: initialPlayers,
     week: initialWeek
   });

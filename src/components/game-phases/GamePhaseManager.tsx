@@ -11,11 +11,12 @@ interface GamePhaseManagerProps {
   initialPhase?: string;
 }
 
-const GamePhaseManager: React.FC<GamePhaseManagerProps> = ({ 
+// Renamed to useGamePhaseManager to follow hooks naming convention
+export function useGamePhaseManager({ 
   players: initialPlayers, 
   week: initialWeek,
   initialPhase = 'HoH Competition'
-}) => {
+}: GamePhaseManagerProps) {
   const [week, setWeek] = React.useState(initialWeek);
   const [players, setPlayers] = React.useState(initialPlayers);
   const [phase, setPhase] = React.useState(initialPhase);
@@ -402,6 +403,6 @@ const GamePhaseManager: React.FC<GamePhaseManagerProps> = ({
     setWeek,
     setPhase
   };
-};
+}
 
-export default GamePhaseManager;
+export default useGamePhaseManager;
