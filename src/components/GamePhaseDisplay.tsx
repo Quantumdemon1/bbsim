@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { PlayerData } from './PlayerProfile';
 import { Alliance } from '@/contexts/types';
@@ -17,6 +16,22 @@ import WeeklySummary from './game-phases/WeeklySummary';
 import PlacementsChart from './game-phases/PlacementsChart';
 import DefaultPhase from './game-phases/DefaultPhase';
 import { WeekSummary } from '@/hooks/game-phases/types';
+import {
+  HoHCompetitionProps,
+  NominationCeremonyProps,
+  PoVCompetitionProps,
+  VetoCeremonyProps,
+  EvictionVotingProps,
+  EvictionProps,
+  WeeklySummaryProps,
+  PlacementsChartProps,
+  SpecialCompetitionProps,
+  JuryQuestionsProps,
+  JuryVotingProps,
+  WinnerRevealProps,
+  FinaleStatsProps,
+  DefaultPhaseProps
+} from '@/hooks/game-phases/types';
 
 interface GamePhaseDisplayProps {
   phase: string;
@@ -122,7 +137,7 @@ const GamePhaseDisplay: React.FC<GamePhaseDisplayProps> = ({
           <WeeklySummary
             players={players}
             weekSummaries={weekSummaries}
-            currentWeekIndex={week - 1}
+            currentWeek={week - 1}
             onAction={onAction}
           />
         );

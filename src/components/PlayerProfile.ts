@@ -1,18 +1,14 @@
 
+import { PlayerAttributes, PlayerRelationship } from '@/hooks/game-phases/types/player';
+
 export interface PlayerData {
   id: string;
   name: string;
   image?: string;
   status?: 'hoh' | 'nominated' | 'veto' | 'safe' | 'evicted' | 'winner' | 'juror' | 'runner-up';
   powerup?: 'immunity' | 'nullify' | 'coup' | 'replay';
-  attributes?: {
-    [key: string]: number;
-  };
-  relationships?: Array<{
-    targetId: string;
-    type: string;
-    value: number;
-  }>;
+  attributes?: PlayerAttributes;
+  relationships?: PlayerRelationship[];
   stats?: {
     hohWins?: number;
     povWins?: number;
@@ -21,4 +17,7 @@ export interface PlayerData {
     juryVotes?: number;
     placement?: number;
   };
+  alliances?: string[];
 }
+
+export default PlayerData;
