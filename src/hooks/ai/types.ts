@@ -37,7 +37,7 @@ export interface AIMemoryEntry {
   relatedPlayerId?: string;  // Other player involved in this memory
   impact: 'positive' | 'negative' | 'neutral';
   importance: number;        // 1-5 scale of how important this memory is
-  timestamp: number;         // When this memory was created
+  timestamp: string | number;         // When this memory was created - updated to accept both string and number
 }
 
 /**
@@ -54,7 +54,7 @@ export interface AIPlayerDecision {
 export type RelationshipType = 'Enemy' | 'Rival' | 'Neutral' | 'Friend' | 'Ally';
 
 /**
- * Player archetype types
+ * Player archetype types - Ensure this matches what's in PlayerData
  */
 export type PlayerArchetype = 'mastermind' | 'social-butterfly' | 'comp-beast' | 'floater' | 'villain' | 'underdog';
 

@@ -39,11 +39,18 @@ export function useAIMemoryManager() {
    */
   const addMemoryEntry = async (playerId: string, entry: AIMemoryEntry) => {
     try {
+      // Set timestamp to current time if not provided
+      const memoryEntry = {
+        ...entry,
+        player_id: playerId,
+        timestamp: entry.timestamp || new Date().toISOString()
+      };
+      
       // Add to local state
       setAIMemory(prev => {
         const playerMemory = prev[playerId] || [];
         // Keep memory buffer limited to most recent events
-        const updatedMemory = [...playerMemory, entry].slice(-20);
+        const updatedMemory = [...playerMemory, memoryEntry].slice(-20);
         
         return {
           ...prev,
@@ -52,10 +59,7 @@ export function useAIMemoryManager() {
       });
       
       // Persist to database
-      await AIPlayerService.addMemoryEntry({
-        ...entry,
-        player_id: playerId
-      } as AIMemoryEntry);
+      await AIPlayerService.addMemoryEntry(memoryEntry);
     } catch (error) {
       console.error("Error adding memory entry:", error);
     }
