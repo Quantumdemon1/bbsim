@@ -76,6 +76,7 @@ export function usePhaseRouter({
           nominees: nominees,
           vetoPlayers: nominees.concat(hoh ? [hoh] : []).concat(veto ? [veto] : []),
           vetoWinner: veto,
+          veto: veto, // Add for compatibility
           vetoUsed: vetoUsed,
           finalNominees: nominees,
           evicted: selectedPlayers[0],

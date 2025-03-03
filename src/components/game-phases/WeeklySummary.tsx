@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import PlayerProfile from '@/components/PlayerProfile';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { WeekSummary } from '@/hooks/game-phases/types';
 import { Alliance } from '@/contexts/types';
@@ -12,16 +11,12 @@ import {
   UserX, 
   ArrowRight, 
   Hourglass,
-  Users
 } from 'lucide-react';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow,
-} from "@/components/ui/table";
+
+// Import the new components
+import SummarySection from './summary/SummarySection';
+import PlayerStatsTable from './summary/PlayerStatsTable';
+import AllianceSection from './summary/AllianceSection';
 
 interface WeeklySummaryProps {
   players: PlayerData[];
@@ -46,7 +41,7 @@ const WeeklySummary: React.FC<WeeklySummaryProps> = ({
   
   // Get player objects from IDs in the summary
   const hohPlayer = players.find(p => p.id === currentSummary.hoh);
-  const vetoWinner = players.find(p => p.id === currentSummary.vetoWinner || p.id === currentSummary.veto);
+  const vetoWinner = players.find(p => p.id === currentSummary.vetoWinner);
   const initialNominees = currentSummary.nominees.map(id => players.find(p => p.id === id)).filter(Boolean) as PlayerData[];
   const finalNominees = (currentSummary.finalNominees || currentSummary.nominees).map(id => players.find(p => p.id === id)).filter(Boolean) as PlayerData[];
   const evictedPlayer = players.find(p => p.id === currentSummary.evicted);
@@ -123,63 +118,13 @@ const WeeklySummary: React.FC<WeeklySummaryProps> = ({
         />
         
         {/* Current Alliances */}
-        {alliances && alliances.length > 0 && (
-          <div className="bg-game-dark/30 rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-3 flex items-center">
-              <Users className="text-teal-500 mr-2" size={20} />
-              Current Alliances
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {alliances.map(alliance => (
-                <div key={alliance.id} className="bg-game-dark/50 rounded-full px-3 py-1 text-sm">
-                  {alliance.name} 
-                  <span className="ml-1 text-xs text-gray-400">
-                    ({alliance.members.length})
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        <AllianceSection alliances={alliances} />
         
         {/* Player Stats Table */}
-        <div className="bg-game-dark/30 rounded-lg p-4 overflow-x-auto">
-          <h3 className="text-lg font-semibold mb-3">Player Statistics</h3>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Player</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>HoH Wins</TableHead>
-                <TableHead>Veto Wins</TableHead>
-                <TableHead>Times Nominated</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {players
-                .filter(p => p.status !== 'evicted' || p.id === currentSummary.evicted)
-                .map(player => (
-                  <TableRow key={player.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center">
-                        <PlayerProfile player={player} size="sm" />
-                        <span className="ml-2">{player.name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {player.id === currentSummary.hoh ? 'HoH' : 
-                       player.id === currentSummary.evicted ? 'Evicted' :
-                       finalNominees.some(n => n.id === player.id) ? 'Nominated' :
-                       player.id === currentSummary.vetoWinner ? 'Veto' : 'Safe'}
-                    </TableCell>
-                    <TableCell>{player.stats?.hohWins || 0}</TableCell>
-                    <TableCell>{player.stats?.povWins || 0}</TableCell>
-                    <TableCell>{player.stats?.timesNominated || 0}</TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
-        </div>
+        <PlayerStatsTable 
+          players={players} 
+          currentSummary={currentSummary}
+        />
       </div>
       
       <div className="flex justify-center mt-8">
@@ -196,44 +141,6 @@ const WeeklySummary: React.FC<WeeklySummaryProps> = ({
           {currentWeek === weekSummaries.length ? "Continue to Next Week" : "View Final Placements"}
         </Button>
       </div>
-    </div>
-  );
-};
-
-interface SummarySectionProps {
-  title: string;
-  icon: React.ReactNode;
-  players: PlayerData[];
-  details?: string;
-}
-
-const SummarySection: React.FC<SummarySectionProps> = ({
-  title,
-  icon,
-  players,
-  details
-}) => {
-  return (
-    <div className="bg-game-dark/30 rounded-lg p-4">
-      <h3 className="text-lg font-semibold mb-3 flex items-center">
-        <span className="mr-2">{icon}</span>
-        {title}
-      </h3>
-      
-      <div className="flex flex-wrap gap-6 justify-center">
-        {players.map(player => (
-          <div key={player.id} className="flex flex-col items-center">
-            <PlayerProfile player={player} size="md" />
-            <div className="mt-2 text-center">
-              <div className="text-sm font-semibold">{player.name}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-      
-      {details && (
-        <p className="text-center text-sm text-gray-400 mt-3">{details}</p>
-      )}
     </div>
   );
 };

@@ -1,4 +1,3 @@
-
 import { PlayerData } from '@/components/PlayerProfileTypes';
 
 export interface WeekSummary {
@@ -61,7 +60,6 @@ export interface GamePhaseSetters {
   setWeekSummaries: (summaries: WeekSummary[]) => void;
 }
 
-// Add all the missing props interfaces
 export interface GameActionsProps {
   state: {
     week: number;
@@ -80,6 +78,7 @@ export interface GameActionsProps {
   setStatusMessage: (message: string) => void;
   usePowerup: (playerId: string) => void;
   toast: (props: ToastProps) => void;
+  setWeekSummaries: (summaries: WeekSummary[]) => void;
 }
 
 export interface HoHPhaseProps {
