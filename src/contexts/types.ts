@@ -45,6 +45,12 @@ export interface GameContextType {
   settings: PlayerSettings;
   showChat: boolean;
   setShowChat: (show: boolean) => void;
+  gameMode: 'singleplayer' | 'multiplayer' | null;
+  humanPlayers: PlayerData[];
+  countdownTimer: number | null;
+  createSinglePlayerGame: () => boolean;
+  createMultiplayerGame: (hostName: string) => boolean;
+  joinMultiplayerGame: (gameId: string, playerName: string) => boolean;
 }
 
 export interface Alliance {

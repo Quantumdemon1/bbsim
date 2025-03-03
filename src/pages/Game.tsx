@@ -22,13 +22,20 @@ const Game = () => {
     markNotificationAsRead,
     clearNotifications,
     showChat,
-    setShowChat
+    setShowChat,
+    gameMode,
+    humanPlayers
   } = useGameContext();
   
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   
   useEffect(() => {
+    // Redirect if no game mode is set
+    if (!gameMode) {
+      navigate('/');
+    }
+    
     if (!isAuthenticated) {
       navigate('/');
     }
@@ -36,7 +43,7 @@ const Game = () => {
     if (gameState === 'idle') {
       navigate('/lobby');
     }
-  }, [gameState, isAuthenticated, navigate]);
+  }, [gameState, isAuthenticated, navigate, gameMode]);
   
   const selectedPlayerData = selectedPlayer ? 
     players.find(p => p.id === selectedPlayer) || null : 
@@ -80,6 +87,16 @@ const Game = () => {
             </>
           )}
         </Button>
+      </div>
+      
+      {/* Game mode indicator */}
+      <div className="absolute left-4 top-4 z-10">
+        <Badge variant="outline" className="bg-game-dark/80 border-game-accent text-white px-3 py-1">
+          {gameMode === 'singleplayer' ? 'Single Player' : 'Multiplayer'}
+          {gameMode === 'multiplayer' && humanPlayers.length > 0 && (
+            <span className="ml-2">({humanPlayers.length} human players)</span>
+          )}
+        </Badge>
       </div>
       
       <GameActionsToolbar players={players} />

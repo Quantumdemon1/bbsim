@@ -18,6 +18,9 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const gameStateManager = useGameStateManager(mockPlayers);
   const playerAuth = usePlayerAuth();
   const [showChat, setShowChat] = useState(false);
+  const [gameMode, setGameMode] = useState<'singleplayer' | 'multiplayer' | null>(null);
+  const [humanPlayers, setHumanPlayers] = useState<PlayerData[]>([]);
+  const [countdownTimer, setCountdownTimer] = useState<number | null>(null);
   
   // Import our modular managers
   const allianceManager = useAllianceManager(playerManager.players, playerManager.setPlayers);
@@ -104,6 +107,109 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     })));
     allianceManager.setAlliances([]);
     setShowChat(false);
+    setGameMode(null);
+    setHumanPlayers([]);
+    setCountdownTimer(null);
+  };
+
+  // Create single player game
+  const createSinglePlayerGame = () => {
+    if (!playerAuth.authState.isAuthenticated || playerAuth.authState.isGuest) {
+      playerAuth.addNotification({
+        type: 'system_message',
+        message: 'You need to be registered to play single player mode.'
+      });
+      return false;
+    }
+    
+    setGameMode('singleplayer');
+    if (playerAuth.authState.currentPlayer) {
+      const humanPlayer = playerAuth.authState.currentPlayer;
+      setHumanPlayers([humanPlayer]);
+    }
+    
+    // Start game immediately since it's just one player
+    gameStateManager.startGame(handleGameStart);
+    return true;
+  };
+  
+  // Create multiplayer game
+  const createMultiplayerGame = (hostName: string) => {
+    setGameMode('multiplayer');
+    
+    // Initialize with host player
+    let hostPlayer: PlayerData;
+    
+    if (playerAuth.authState.isAuthenticated && playerAuth.authState.currentPlayer) {
+      hostPlayer = playerAuth.authState.currentPlayer;
+    } else {
+      hostPlayer = {
+        id: `host-${Date.now()}`,
+        name: hostName,
+        stats: { hohWins: 0, povWins: 0, timesNominated: 0, daysInHouse: 0 }
+      };
+      playerAuth.loginAsGuest(hostName);
+    }
+    
+    setHumanPlayers([hostPlayer]);
+    
+    // Start 30 second countdown to launch game
+    setCountdownTimer(30);
+    const countdownInterval = setInterval(() => {
+      setCountdownTimer(prev => {
+        if (prev === null || prev <= 1) {
+          clearInterval(countdownInterval);
+          if (humanPlayers.length >= 2) {
+            // Launch game automatically if we have at least 2 human players
+            gameStateManager.startGame(handleGameStart);
+          } else {
+            // Reset if not enough players joined
+            playerAuth.addNotification({
+              type: 'system_message',
+              message: 'Not enough players joined. Please try again.'
+            });
+            setGameMode(null);
+            setHumanPlayers([]);
+          }
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    gameStateManager.createGame(hostName);
+    return true;
+  };
+  
+  // Join multiplayer game
+  const joinMultiplayerGame = (joinGameId: string, playerName: string) => {
+    // Add the player to human players
+    let joiningPlayer: PlayerData;
+    
+    if (playerAuth.authState.isAuthenticated && playerAuth.authState.currentPlayer) {
+      joiningPlayer = playerAuth.authState.currentPlayer;
+    } else {
+      joiningPlayer = {
+        id: `player-${Date.now()}`,
+        name: playerName,
+        stats: { hohWins: 0, povWins: 0, timesNominated: 0, daysInHouse: 0 }
+      };
+      playerAuth.loginAsGuest(playerName);
+    }
+    
+    setHumanPlayers(prev => [...prev, joiningPlayer]);
+    
+    // If we now have 2+ players and timer is still running, we're ready
+    if (humanPlayers.length >= 2 && countdownTimer && countdownTimer > 0) {
+      // Notify all players that the game will start soon
+      playerAuth.addNotification({
+        type: 'system_message',
+        message: `Game will launch in ${countdownTimer} seconds.`
+      });
+    }
+    
+    gameStateManager.joinGame(joinGameId, playerName);
+    return true;
   };
 
   // Wrapper functions to connect the hooks
@@ -142,7 +248,13 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         notifications: playerAuth.authState.notifications,
         settings: playerAuth.authState.settings,
         showChat,
-        setShowChat
+        setShowChat,
+        gameMode,
+        humanPlayers,
+        countdownTimer,
+        createSinglePlayerGame,
+        createMultiplayerGame,
+        joinMultiplayerGame
       }}
     >
       {children}
