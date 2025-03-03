@@ -47,7 +47,7 @@ export const SaveGameManager = ({ onClose }: { onClose?: () => void }) => {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <div className="flex gap-2">
         <DialogTrigger asChild>
-          <Button variant="outline" className="gap-1">
+          <Button variant="outline" className="gap-1 whitespace-nowrap">
             <Save className="h-4 w-4" />
             Saved Games
           </Button>
@@ -58,10 +58,10 @@ export const SaveGameManager = ({ onClose }: { onClose?: () => void }) => {
             variant="default" 
             onClick={handleSaveGame}
             disabled={isLoadingSave}
-            className="gap-1"
+            className="gap-1 whitespace-nowrap"
           >
             {isLoadingSave ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Save Game
+            Save
           </Button>
         )}
       </div>
