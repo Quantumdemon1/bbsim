@@ -27,7 +27,7 @@ export const useGameContext = () => {
     // Powerup
     ...powerup,
     
-    // Auth
+    // Auth (including admin properties)
     ...playerAuth,
     
     // AI Player

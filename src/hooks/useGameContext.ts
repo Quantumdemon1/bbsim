@@ -33,7 +33,7 @@ export function useGameContext() {
     // Powerup Management
     ...powerup,
     
-    // Player Authentication
+    // Player Authentication (including admin properties)
     ...playerAuth,
     
     // AI Player Management

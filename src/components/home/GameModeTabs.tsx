@@ -22,6 +22,7 @@ const GameModeTabs: React.FC<GameModeTabsProps> = ({
   isGuest, 
   onStartSinglePlayer 
 }) => {
+  // Get the isAdmin property through the PlayerAuthContext
   const { isAdmin } = useGameContext();
   
   return (
