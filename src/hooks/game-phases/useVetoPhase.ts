@@ -53,6 +53,8 @@ export function useVetoPhase({
       return;
     }
     
+    let statusMsg = ''; // Create a local variable to store the status message
+    
     if (action === 'use') {
       // If using veto, go to replacement nominee selection
       // For simplicity, we'll just randomly select a replacement
@@ -89,21 +91,21 @@ export function useVetoPhase({
         const savedName = players.find(p => p.id === savedNomineeId)?.name;
         const replacementName = players.find(p => p.id === replacementId)?.name;
         
-        const statusMsg = `${players.find(p => p.id === veto)?.name} used the Power of Veto on ${savedName}! ${replacementName} has been named as the replacement nominee.`;
-        setStatusMessage(statusMsg);
+        statusMsg = `${players.find(p => p.id === veto)?.name} used the Power of Veto on ${savedName}! ${replacementName} has been named as the replacement nominee.`;
       } else {
-        const statusMsg = `${players.find(p => p.id === veto)?.name} decided not to use the Power of Veto.`;
-        setStatusMessage(statusMsg);
+        statusMsg = `${players.find(p => p.id === veto)?.name} decided not to use the Power of Veto.`;
       }
     } else {
       // Not using veto
-      const statusMsg = `${players.find(p => p.id === veto)?.name} decided not to use the Power of Veto.`;
-      setStatusMessage(statusMsg);
+      statusMsg = `${players.find(p => p.id === veto)?.name} decided not to use the Power of Veto.`;
     }
+    
+    // Set the status message
+    setStatusMessage(statusMsg);
     
     toast({
       title: "Veto Ceremony",
-      description: statusMessage,
+      description: statusMsg,
     });
     
     setTimeout(() => {
