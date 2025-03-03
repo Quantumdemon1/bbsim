@@ -1,39 +1,15 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
-import { PlayerData } from '@/components/PlayerProfileTypes';
-import { v4 as uuidv4 } from 'uuid';
-import { Json } from '@/integrations/supabase/types';
+import { GameStateService, SavedGameState } from './types/gameStatePersistenceTypes';
+import { 
+  fetchSavedGames, 
+  persistGameState, 
+  fetchGameState, 
+  deleteGame 
+} from './utils/gameStatePersistenceUtils';
 
-export interface SavedGameState {
-  id: string;
-  game_id: string;
-  week: number;
-  phase: string;
-  players: PlayerData[];
-  hoh: string | null;
-  veto: string | null;
-  nominees: string[];
-  created_at?: string;
-  updated_at?: string;
-}
-
-interface DatabaseGameState {
-  id: string;
-  game_id: string;
-  week: number;
-  phase: string;
-  players?: Json;  // Add this field to match what we're storing
-  hoh_id: string | null;
-  veto_holder_id: string | null;
-  nominees: Json | null;
-  evicted_id: string | null;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export function useGameStatePersistence() {
+export function useGameStatePersistence(): GameStateService {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedGames, setSavedGames] = useState<SavedGameState[]>([]);
@@ -45,28 +21,8 @@ export function useGameStatePersistence() {
     setError(null);
     
     try {
-      const { data, error } = await supabase
-        .from('game_states')
-        .select('*')
-        .order('updated_at', { ascending: false });
-
-      if (error) throw error;
-      
-      // Transform database records to SavedGameState format
-      const transformedData: SavedGameState[] = (data as DatabaseGameState[] || []).map((item: DatabaseGameState) => ({
-        id: item.id,
-        game_id: item.game_id,
-        week: item.week,
-        phase: item.phase,
-        players: item.players as unknown as PlayerData[] || [],
-        hoh: item.hoh_id,
-        veto: item.veto_holder_id,
-        nominees: item.nominees ? (item.nominees as unknown as string[]) : [],
-        created_at: item.created_at,
-        updated_at: item.updated_at
-      }));
-      
-      setSavedGames(transformedData);
+      const games = await fetchSavedGames();
+      setSavedGames(games);
     } catch (err) {
       console.error('Error loading saved games:', err);
       setError('Failed to load saved games');
@@ -86,49 +42,8 @@ export function useGameStatePersistence() {
     setError(null);
     
     try {
-      // Check if this game already has a saved state
-      const { data: existingData } = await supabase
-        .from('game_states')
-        .select('id')
-        .eq('game_id', state.game_id)
-        .maybeSingle();
-
-      let result;
+      const result = await persistGameState(state);
       
-      if (existingData?.id) {
-        // Update existing game state
-        result = await supabase
-          .from('game_states')
-          .update({
-            week: state.week,
-            phase: state.phase,
-            players: state.players,
-            hoh_id: state.hoh,
-            veto_holder_id: state.veto,
-            nominees: state.nominees,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', existingData.id)
-          .select()
-          .single();
-      } else {
-        // Create new game state
-        result = await supabase
-          .from('game_states')
-          .insert({
-            id: uuidv4(),
-            game_id: state.game_id,
-            week: state.week,
-            phase: state.phase,
-            players: state.players,
-            hoh_id: state.hoh,
-            veto_holder_id: state.veto,
-            nominees: state.nominees
-          })
-          .select()
-          .single();
-      }
-
       if (result.error) throw result.error;
       
       toast({
@@ -160,15 +75,9 @@ export function useGameStatePersistence() {
     setError(null);
     
     try {
-      const { data, error } = await supabase
-        .from('game_states')
-        .select('*')
-        .eq('game_id', gameId)
-        .maybeSingle();
-
-      if (error) throw error;
+      const gameState = await fetchGameState(gameId);
       
-      if (!data) {
+      if (!gameState) {
         toast({
           title: 'Game Not Found',
           description: 'The requested game could not be found',
@@ -176,23 +85,13 @@ export function useGameStatePersistence() {
         });
         return null;
       }
-
-      const dbState = data as DatabaseGameState;
       
       toast({
         title: 'Game Loaded',
         description: 'Your game has been loaded successfully',
       });
       
-      return {
-        gameId: dbState.game_id,
-        week: dbState.week,
-        phase: dbState.phase,
-        players: dbState.players as unknown as PlayerData[] || [],
-        hoh: dbState.hoh_id,
-        veto: dbState.veto_holder_id,
-        nominees: dbState.nominees ? (dbState.nominees as unknown as string[]) : []
-      };
+      return gameState;
     } catch (err) {
       console.error('Error loading game state:', err);
       setError('Failed to load game state');
@@ -213,12 +112,7 @@ export function useGameStatePersistence() {
     setError(null);
     
     try {
-      const { error } = await supabase
-        .from('game_states')
-        .delete()
-        .eq('game_id', gameId);
-
-      if (error) throw error;
+      await deleteGame(gameId);
       
       toast({
         title: 'Game Deleted',
@@ -258,3 +152,6 @@ export function useGameStatePersistence() {
     loadSavedGames
   };
 }
+
+// Re-export types for easier imports elsewhere
+export { SavedGameState } from './types/gameStatePersistenceTypes';
