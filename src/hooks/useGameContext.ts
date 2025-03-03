@@ -45,6 +45,7 @@ export function useGameContext() {
     notifications: (gameState.notifications || []) as GameNotification[],
     clearNotifications: gameState.clearNotifications || (() => {}),
     markNotificationAsRead: gameState.markNotificationAsRead || (() => {}),
-    saveGame: gameState.saveCurrentGame || (() => Promise.resolve())
+    saveGame: gameState.saveCurrentGame || (() => Promise.resolve()),
+    savedGames: gameState.savedGames || []
   };
 }

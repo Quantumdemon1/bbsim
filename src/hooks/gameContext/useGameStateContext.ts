@@ -28,15 +28,15 @@ export function useGameStateContext() {
     clearPhaseProgress: gameState.clearPhaseProgress,
     
     // Notifications support
-    notifications: gameState.notifications,
-    clearNotifications: gameState.clearNotifications,
-    markNotificationAsRead: gameState.markNotificationAsRead,
+    notifications: gameState.notifications || [],
+    clearNotifications: gameState.clearNotifications || (() => {}),
+    markNotificationAsRead: gameState.markNotificationAsRead || (() => {}),
     
     // Additional Game State properties
     showChat: gameState.showChat,
     setShowChat: gameState.setShowChat,
     gameMode: gameState.gameMode,
-    humanPlayers: gameState.humanPlayers,
+    humanPlayers: gameState.humanPlayers || [],
     countdownTimer: gameState.countdownTimer,
     createSinglePlayerGame: gameState.createSinglePlayerGame,
     createMultiplayerGame: gameState.createMultiplayerGame,
@@ -50,8 +50,8 @@ export function useGameStateContext() {
     saveGame: gameState.saveCurrentGame, // Alias saveCurrentGame as saveGame
     saveCurrentGame: gameState.saveCurrentGame,
     loadGame: gameState.loadGame,
-    savedGames: gameState.savedGames,
+    savedGames: gameState.savedGames || [],
     deleteSavedGame: gameState.deleteSavedGame,
-    isLoadingSave: gameState.isLoadingSave
+    isLoadingSave: gameState.isLoadingSave || false
   };
 }

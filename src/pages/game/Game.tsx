@@ -19,7 +19,7 @@ import { Notification } from '@/hooks/auth/types';
 const Game = () => {
   const navigate = useNavigate();
   const { 
-    players, 
+    players = [],
     gameState, 
     isAuthenticated,
     currentPlayer,
@@ -27,9 +27,10 @@ const Game = () => {
     clearPhaseProgress,
     saveGame,
     showChat,
-    notifications,
+    notifications = [],
     clearNotifications,
-    markNotificationAsRead
+    markNotificationAsRead,
+    savedGames = []
   } = useGameContext();
   
   const [showNotifications, setShowNotifications] = useState(false);
@@ -39,7 +40,7 @@ const Game = () => {
   const [isLoading, setIsLoading] = useState(true);
   
   const adaptedNotifications: Notification[] = React.useMemo(() => {
-    if (!notifications) return [];
+    if (!notifications || notifications.length === 0) return [];
     
     if (isGameNotificationArray(notifications)) {
       return notifications.map(adaptGameNotificationToAuthNotification);
