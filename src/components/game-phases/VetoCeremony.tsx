@@ -1,56 +1,59 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
 import PlayerProfile, { PlayerData } from '@/components/PlayerProfile';
-import { Card, CardContent } from "@/components/ui/card";
 
 interface VetoCeremonyProps {
   players: PlayerData[];
-  veto: string | null;
   nominees: string[];
-  onAction: (action: string, data: string) => void;
+  veto: string | null;
+  onAction: (action: string, data?: any) => void;
 }
 
 const VetoCeremony: React.FC<VetoCeremonyProps> = ({
   players,
-  veto,
   nominees,
+  veto,
   onAction
 }) => {
-  const [selectedNominee, setSelectedNominee] = useState<string | null>(null);
+  const [selectedNominee, setSelectedNominee] = React.useState<string | null>(null);
+  
   const vetoHolder = players.find(p => p.id === veto);
   const nomineeProfiles = players.filter(p => nominees.includes(p.id));
+  
+  const handleUseVeto = () => {
+    if (selectedNominee) {
+      onAction('vetoAction', 'use');
+    }
+  };
+  
+  const handleDoNotUseVeto = () => {
+    onAction('vetoAction', 'noUse');
+  };
   
   return (
     <div className="glass-panel p-6 w-full max-w-4xl mx-auto animate-scale-in">
       <h2 className="text-2xl font-bold text-center mb-6">Veto Ceremony</h2>
       
-      {veto && (
+      {vetoHolder && (
         <div className="mb-8">
-          <p className="text-center text-gray-300 mb-4">Current Veto Holder:</p>
+          <p className="text-center text-gray-300 mb-4">Power of Veto Holder:</p>
           <div className="flex justify-center">
-            {vetoHolder && (
-              <PlayerProfile key={vetoHolder.id} player={vetoHolder} size="lg" showDetails={true} />
-            )}
+            <PlayerProfile key={vetoHolder.id} player={vetoHolder} size="lg" showDetails={true} />
           </div>
         </div>
       )}
       
-      <div className="flex flex-col items-center mb-8">
+      <div className="mb-8">
         <p className="text-center text-gray-300 mb-4">Current Nominees:</p>
-        <div className="flex gap-8">
+        <div className="flex justify-center gap-8">
           {nomineeProfiles.map(player => (
             <div 
               key={player.id} 
-              className={`cursor-pointer ${selectedNominee === player.id ? 'ring-2 ring-game-accent' : ''}`}
+              className={`cursor-pointer transition-transform transform ${selectedNominee === player.id ? 'scale-110 ring-4 ring-game-accent rounded-lg' : 'hover:scale-105'}`}
               onClick={() => setSelectedNominee(player.id)}
             >
               <PlayerProfile player={player} showDetails={true} />
-              {selectedNominee === player.id && (
-                <div className="text-center mt-2 text-game-accent font-semibold">
-                  Selected to save
-                </div>
-              )}
             </div>
           ))}
         </div>
@@ -58,11 +61,18 @@ const VetoCeremony: React.FC<VetoCeremonyProps> = ({
       
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <Button 
-          className="bg-game-accent hover:bg-game-highlight text-black px-8 py-6 text-lg rounded-md button-glow"
-          onClick={() => onAction('vetoAction', selectedNominee ? 'use' : 'dontUse')}
-          disabled={selectedNominee === null && vetoHolder}
+          className="bg-game-accent hover:bg-game-highlight text-black px-8 py-4 rounded-md button-glow"
+          onClick={handleUseVeto}
+          disabled={selectedNominee === null}
         >
-          {selectedNominee ? `Use Veto on ${players.find(p => p.id === selectedNominee)?.name}` : "Don't Use Veto"}
+          Use Veto
+        </Button>
+        
+        <Button 
+          className="bg-gray-700 hover:bg-gray-800 text-white px-8 py-4 rounded-md"
+          onClick={handleDoNotUseVeto}
+        >
+          Do Not Use Veto
         </Button>
       </div>
     </div>

@@ -31,7 +31,7 @@ const Eviction: React.FC<EvictionProps> = ({
       {evictedPlayer && (
         <div className="flex flex-col items-center mb-8">
           <div className="relative">
-            <PlayerProfile player={evictedPlayer} size="xl" />
+            <PlayerProfile player={evictedPlayer} size="lg" />
             <div className="absolute -top-4 -right-4 w-14 h-14 bg-red-600 rounded-full flex items-center justify-center text-white font-bold text-lg border-2 border-white">
               OUT
             </div>

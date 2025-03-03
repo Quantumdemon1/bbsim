@@ -1,3 +1,4 @@
+
 import { GameActionsProps } from './types';
 
 export function useGameActions({
@@ -52,13 +53,16 @@ export function useGameActions({
     
     // Update player stats
     const updatedPlayers = state.players.map(player => {
+      // Initialize stats object if it doesn't exist
+      const stats = player.stats || {};
+      
       // If they were HoH this week, increment their HoH wins
       if (player.id === state.hoh) {
         return {
           ...player,
           stats: {
-            ...player.stats,
-            hohWins: (player.stats?.hohWins || 0) + 1,
+            ...stats,
+            hohWins: (stats.hohWins || 0) + 1,
           }
         };
       }
@@ -68,8 +72,8 @@ export function useGameActions({
         return {
           ...player,
           stats: {
-            ...player.stats,
-            povWins: (player.stats?.povWins || 0) + 1,
+            ...stats,
+            povWins: (stats.povWins || 0) + 1,
           }
         };
       }
@@ -79,8 +83,8 @@ export function useGameActions({
         return {
           ...player,
           stats: {
-            ...player.stats,
-            timesNominated: (player.stats?.timesNominated || 0) + 1,
+            ...stats,
+            timesNominated: (stats.timesNominated || 0) + 1,
           }
         };
       }
