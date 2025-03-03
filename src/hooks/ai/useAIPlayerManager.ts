@@ -5,7 +5,8 @@ import { useToast } from '@/components/ui/use-toast';
 import { useAIMemoryManager } from './memory/aiMemoryManager';
 import { makeRuleBasedDecision } from './decision-making/ruleBasedDecisions';
 import { generateLLMDecision } from './decision-making/llmDecisions';
-import { generateTemplateDialogue, generatePersonalityDialogue } from './dialogue/aiDialogue';
+import { generateTemplateDialogue } from './dialogue/aiDialogue';
+import { generateLLMDialogue } from './dialogue/llmDialogue';
 
 /**
  * Hook to manage AI player behavior and decision-making
@@ -99,11 +100,17 @@ export function useAIPlayerManager(players: PlayerData[]) {
     const player = players.find(p => p.id === playerId);
     if (!player) return "I have nothing to say.";
     
-    // If LLM is enabled, generate more natural dialogue
+    // If LLM is enabled, generate more natural dialogue with OpenAI
     if (isUsingLLM) {
       const memory = memoryManager.getPlayerMemory(playerId);
       const recentMemory = memory.slice(-3).map(m => m.description).join("; ");
-      return await generatePersonalityDialogue(player, situation, context, recentMemory);
+      try {
+        return await generateLLMDialogue(player, situation, context, recentMemory);
+      } catch (error) {
+        console.error("Error using LLM dialogue:", error);
+        // Fall back to template-based responses if LLM fails
+        return generateTemplateDialogue(player, situation, context);
+      }
     }
     
     // Otherwise use template-based responses

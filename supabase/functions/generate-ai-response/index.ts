@@ -1,23 +1,13 @@
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
-import { Configuration, OpenAIApi } from 'https://esm.sh/openai@3.2.1'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
-// CORS headers
+const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-// Handle OpenAI API responses
-interface OpenAIResponse {
-  choices: {
-    text: string;
-    index: number;
-    logprobs: any;
-    finish_reason: string;
-  }[];
-}
+};
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -26,82 +16,100 @@ serve(async (req) => {
   }
 
   try {
-    // Get environment variables
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
-    const openaiKey = Deno.env.get('OPENAI_API_KEY') || '';
-
-    // Initialize OpenAI
-    const configuration = new Configuration({
-      apiKey: openaiKey,
-    });
-    const openai = new OpenAIApi(configuration);
-
-    // Initialize Supabase client
-    const supabase = createClient(supabaseUrl, supabaseKey);
-    
     // Parse request body
-    const { playerProfile, gamePhase, situation, recentMemory, context } = await req.json();
+    const { playerProfile, gamePhase, situation, context, recentMemory } = await req.json();
     
-    console.log(`Generating response for ${playerProfile.name} in ${gamePhase} situation`);
+    // Log request details (helpful for debugging)
+    console.log("Generating AI response for:", playerProfile.name);
+    console.log("Game phase:", gamePhase);
+    console.log("Situation:", situation);
     
-    // Construct the prompt for OpenAI
-    const prompt = `
-      You are ${playerProfile.name}, a Big Brother contestant with the following traits:
-      Archetype: ${playerProfile.archetype}
-      Key Traits: ${Array.isArray(playerProfile.traits) ? playerProfile.traits.join(", ") : playerProfile.traits}
-      Personality: ${playerProfile.personality}
-      Backstory: ${playerProfile.backstory || "No specific backstory available."}
-      
-      Recent game events: ${recentMemory || "No recent events to recall."}
-      
-      You are currently in the ${gamePhase} phase of the game.
-      
-      Based on your personality and the current situation (${situation}), respond in character to the following:
-      ${JSON.stringify(context)}
-      
-      Your response should be 1-3 sentences, in the first person, and reflect your personality and game strategy. Do not include quotation marks in your response.
-    `;
-
-    // If OpenAI key isn't set up, return a placeholder response
-    if (!openaiKey) {
-      console.warn("OpenAI API key not set, returning fallback response");
-      return new Response(
-        JSON.stringify({
-          generated_text: `As ${playerProfile.name}, I need to think strategically about this situation. This game is all about adapting and making the right moves at the right time.`
-        }),
-        { headers: { 'Content-Type': 'application/json', ...corsHeaders } }
-      );
+    // Format data for context relevance
+    let contextString = "";
+    if (context) {
+      if (situation === 'nomination' && context.nominees) {
+        contextString = `Nominated players: ${context.nominees.join(", ")}`;
+      } else if (situation === 'veto') {
+        contextString = context.used 
+          ? `Used veto on: ${context.savedPlayer}` 
+          : "Decided not to use the veto";
+      } else if (situation === 'eviction' && context.evictedPlayer) {
+        contextString = `Player being voted on: ${context.evictedPlayer}`;
+      } else if (situation === 'reaction') {
+        contextString = context.isNominated 
+          ? "You are currently nominated for eviction" 
+          : "You are safe from eviction this week";
+      }
     }
 
-    // Call OpenAI API
-    const completion = await openai.createCompletion({
-      model: "text-davinci-003",
-      prompt: prompt,
-      max_tokens: 100,
-      temperature: 0.7,
+    // Generate system prompt based on player profile
+    const systemPrompt = `
+You are roleplaying as ${playerProfile.name}, a contestant on the reality TV show Big Brother.
+
+Character traits:
+- Archetype: ${playerProfile.archetype}
+- Personality traits: ${Array.isArray(playerProfile.traits) ? playerProfile.traits.join(", ") : playerProfile.traits}
+- Personality: ${playerProfile.personality}
+- Backstory: ${playerProfile.backstory}
+
+Game context:
+- Current phase: ${gamePhase}
+- ${contextString}
+- Recent memory: ${recentMemory || "No recent noteworthy events"}
+
+Rules for your responses:
+1. Stay in character at all times, and speak in first person
+2. Keep responses brief (1-3 sentences)
+3. Don't mention that you are an AI
+4. Incorporate your personality traits and game strategy in your response
+5. Reference recent events from memory if relevant
+6. Respond with realistic emotion appropriate to the situation
+7. Your response should match how a real Big Brother contestant would react in this scenario
+`;
+
+    // Make request to OpenAI API
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `Generate a response as ${playerProfile.name} for the current ${gamePhase} situation.` }
+        ],
+        temperature: 0.7,
+        max_tokens: 150,
+      }),
     });
 
-    const response = completion.data as OpenAIResponse;
-    const generated_text = response.choices[0].text.trim();
+    // Handle OpenAI response
+    const data = await response.json();
     
-    console.log(`Generated response: ${generated_text}`);
-
+    if (data.error) {
+      console.error("OpenAI API error:", data.error);
+      throw new Error(`OpenAI API error: ${data.error.message}`);
+    }
+    
+    const generatedText = data.choices[0].message.content;
+    
+    // Return the generated text
     return new Response(
-      JSON.stringify({ generated_text }),
-      { headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      JSON.stringify({ generated_text: generatedText }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
     console.error("Error in generate-ai-response function:", error);
-    
     return new Response(
       JSON.stringify({ 
-        error: "Error generating AI response",
-        details: error.message
+        error: "Failed to generate AI response", 
+        details: error.message 
       }),
       { 
-        status: 500,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     );
   }
