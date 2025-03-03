@@ -21,7 +21,7 @@ const Game = () => {
     currentPlayer,
     gameMode,
     clearPhaseProgress,
-    saveGame
+    saveCurrentGame: saveGame
   } = useGameContext();
   
   const [showNotifications, setShowNotifications] = useState(false);
@@ -54,12 +54,14 @@ const Game = () => {
     }
     
     // Save game state after phase completion
-    saveGame();
+    if (saveGame) {
+      saveGame();
+    }
   };
   
   // Auto-save game state periodically
   useEffect(() => {
-    if (gameState === 'playing') {
+    if (gameState === 'playing' && saveGame) {
       const saveInterval = setInterval(() => {
         saveGame();
       }, 5 * 60 * 1000); // Auto-save every 5 minutes
@@ -86,10 +88,12 @@ const Game = () => {
       
       <GameControls players={players} />
       
-      {/* Save Game Manager (top right) */}
-      <div className="absolute top-16 right-4 z-10">
-        <SaveGameManager />
-      </div>
+      {/* Only show SaveGameManager if saveGame function exists */}
+      {saveGame && (
+        <div className="absolute top-16 right-4 z-10">
+          <SaveGameManager />
+        </div>
+      )}
       
       <GameRoom 
         players={players} 
@@ -98,10 +102,12 @@ const Game = () => {
       />
       
       {/* Phase Progress Tracker */}
-      <PhaseProgressTracker 
-        phase={currentPhase}
-        onPhaseComplete={handlePhaseComplete}
-      />
+      {clearPhaseProgress && (
+        <PhaseProgressTracker 
+          phase={currentPhase}
+          onPhaseComplete={handlePhaseComplete}
+        />
+      )}
       
       <GamePanels 
         showNotifications={showNotifications}
@@ -126,13 +132,15 @@ const GamePanels = ({
     <>
       {showChat && <ChatPanel minimizable />}
       
-      <NotificationPanel 
-        open={showNotifications}
-        onOpenChange={setShowNotifications}
-        notifications={notifications}
-        onClearAll={clearNotifications}
-        onMarkAsRead={markNotificationAsRead}
-      />
+      {notifications && (
+        <NotificationPanel 
+          open={showNotifications}
+          onOpenChange={setShowNotifications}
+          notifications={notifications}
+          onClearAll={clearNotifications}
+          onMarkAsRead={markNotificationAsRead}
+        />
+      )}
       
       {selectedPlayerData && (
         <PlayerProfileModal
