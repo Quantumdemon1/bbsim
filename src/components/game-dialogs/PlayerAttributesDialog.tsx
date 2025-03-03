@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -111,7 +112,7 @@ const PlayerAttributesDialog: React.FC<PlayerAttributesDialogProps> = ({ players
                         <div>
                           <div className="font-medium">{player.name}</div>
                           <div className="text-xs text-gray-400">
-                            {player.status === 'active' ? 'Active' : player.status}
+                            {player.status === 'evicted' ? 'Evicted' : player.status || 'Active'}
                           </div>
                         </div>
                       </div>
@@ -244,7 +245,7 @@ const AttributeEditor: React.FC<AttributeEditorProps> = ({ player, onUpdateAttri
     { id: 'temperament', name: 'Temperament', description: 'Emotional stability under pressure' },
   ];
 
-  const statusOptions = ['active', 'HoH', 'nominated', 'veto', 'evicted'];
+  const statusOptions = ['hoh', 'nominated', 'veto', 'safe', 'evicted'];
 
   return (
     <div className="space-y-6">
@@ -258,8 +259,8 @@ const AttributeEditor: React.FC<AttributeEditorProps> = ({ player, onUpdateAttri
           <h3 className="text-lg font-medium">{player.name}</h3>
           <div className="flex space-x-2 mt-1">
             <select
-              value={player.status || 'active'}
-              onChange={(e) => onUpdateAttribute(player.id, 'status', e.target.value)}
+              value={player.status || 'safe'}
+              onChange={(e) => onUpdateAttribute(player.id, 'status', e.target.value as PlayerData['status'])}
               className="bg-game-dark border border-gray-700 rounded text-sm p-1"
             >
               {statusOptions.map(status => (
@@ -280,25 +281,28 @@ const AttributeEditor: React.FC<AttributeEditorProps> = ({ player, onUpdateAttri
       </div>
       
       <div className="space-y-4">
-        {attributes.map(attr => (
-          <div key={attr.id} className="space-y-2">
-            <div className="flex justify-between">
-              <Label htmlFor={`${attr.id}-${player.id}`} className="text-sm">
-                {attr.name}
-              </Label>
-              <span className="text-sm font-medium">{player[attr.id as keyof PlayerData] || 5}</span>
+        {attributes.map(attr => {
+          const attrValue = (player[attr.id as keyof PlayerData] as number) || 5;
+          return (
+            <div key={attr.id} className="space-y-2">
+              <div className="flex justify-between">
+                <Label htmlFor={`${attr.id}-${player.id}`} className="text-sm">
+                  {attr.name}
+                </Label>
+                <span className="text-sm font-medium">{attrValue}</span>
+              </div>
+              <Slider 
+                id={`${attr.id}-${player.id}`}
+                min={1}
+                max={10}
+                step={1}
+                value={[attrValue]}
+                onValueChange={([value]) => onUpdateAttribute(player.id, attr.id, value)}
+              />
+              <p className="text-xs text-gray-400">{attr.description}</p>
             </div>
-            <Slider 
-              id={`${attr.id}-${player.id}`}
-              min={1}
-              max={10}
-              step={1}
-              value={[player[attr.id as keyof PlayerData] as number || 5]}
-              onValueChange={([value]) => onUpdateAttribute(player.id, attr.id, value)}
-            />
-            <p className="text-xs text-gray-400">{attr.description}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
       
       <div className="pt-2 border-t border-gray-700">
