@@ -3,7 +3,7 @@
 export * from './player';
 
 // Explicitly re-export the types from common to avoid ambiguity
-export { 
+export type { 
   WeekSummary,
   ToastProps
 } from './common';

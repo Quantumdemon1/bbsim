@@ -1,3 +1,4 @@
+
 import { JuryVotingProps } from './types';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 
@@ -29,7 +30,9 @@ export function useJuryVotingPhase({
     // Count votes for each finalist
     const voteCounts: Record<string, number> = {};
     Object.values(votes).forEach(finalistId => {
-      voteCounts[finalistId] = (voteCounts[finalistId] || 0) + 1;
+      if (typeof finalistId === 'string') {
+        voteCounts[finalistId] = (voteCounts[finalistId] || 0) + 1;
+      }
     });
     
     // Determine winner (finalist with most votes)

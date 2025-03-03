@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import PlayerProfile from '@/components/PlayerProfile';
 import { PlayerData } from '@/components/PlayerProfileTypes';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import FinalistsSection from './jury-voting/FinalistsSection';
+import JurorsSection from './jury-voting/JurorsSection';
+import ResultsButton from './jury-voting/ResultsButton';
 
 interface JuryVotingProps {
   players: PlayerData[];
@@ -33,11 +33,11 @@ const JuryVoting: React.FC<JuryVotingProps> = ({
     }
   };
   
-  const hasVoted = (jurorId: string) => {
-    return votes && votes[jurorId] !== undefined;
-  };
+  const allVotesCast = jurors.every(jurorId => 
+    votes && votes[jurorId] !== undefined
+  );
   
-  const allVotesCast = jurors.every(jurorId => hasVoted(jurorId));
+  const selectedJurorName = players.find(p => p.id === selectedJuror)?.name;
   
   return (
     <div className="glass-panel p-6 w-full max-w-4xl mx-auto animate-scale-in">
@@ -48,72 +48,25 @@ const JuryVoting: React.FC<JuryVotingProps> = ({
       </p>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        <Card className="bg-game-medium border-game-light/30">
-          <CardHeader>
-            <CardTitle className="text-center">Finalists</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center gap-4">
-            {finalistProfiles.map(player => (
-              <div key={player.id} className="flex flex-col items-center w-full">
-                <PlayerProfile player={player} size="lg" showDetails={true} />
-                {selectedJuror && (
-                  <Button 
-                    className="mt-4 bg-game-accent hover:bg-game-highlight text-black px-6 py-2"
-                    onClick={() => handleVote(player.id)}
-                  >
-                    Vote for {player.name}
-                  </Button>
-                )}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+        <FinalistsSection 
+          finalists={finalistProfiles}
+          selectedJuror={selectedJuror}
+          onVote={handleVote}
+        />
         
-        <Card className="bg-game-medium border-game-light/30">
-          <CardHeader>
-            <CardTitle className="text-center">Jury Members</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              {jurorProfiles.map(player => (
-                <div 
-                  key={player.id} 
-                  className={`relative cursor-pointer ${hasVoted(player.id) ? 'opacity-50' : ''}`}
-                  onClick={() => !hasVoted(player.id) ? setSelectedJuror(player.id) : null}
-                >
-                  <PlayerProfile 
-                    player={player} 
-                    size="md"
-                    selected={selectedJuror === player.id}
-                  />
-                  {hasVoted(player.id) && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-md">
-                      <span className="text-white font-bold">VOTED</span>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-            
-            <div className="text-center mt-4 text-sm text-gray-400">
-              {selectedJuror ? 
-                `Select a finalist for ${players.find(p => p.id === selectedJuror)?.name} to vote for` : 
-                "Select a jury member to cast their vote"}
-            </div>
-          </CardContent>
-        </Card>
+        <JurorsSection 
+          jurors={jurorProfiles}
+          selectedJuror={selectedJuror}
+          votes={votes}
+          onJurorSelect={setSelectedJuror}
+          selectedJurorName={selectedJurorName}
+        />
       </div>
       
-      {allVotesCast && (
-        <div className="flex justify-center mt-8">
-          <Button 
-            className="bg-game-accent hover:bg-game-highlight text-black px-8 py-6 text-lg rounded-md button-glow"
-            onClick={() => onAction('showResults')}
-          >
-            Show the Results
-          </Button>
-        </div>
-      )}
+      <ResultsButton 
+        allVotesCast={allVotesCast}
+        onShowResults={() => onAction('showResults')}
+      />
     </div>
   );
 };
