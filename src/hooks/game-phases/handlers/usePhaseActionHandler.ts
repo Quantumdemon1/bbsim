@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { GamePhaseState, GamePhaseSetters } from '../types';
+import { usePhaseActionRouter } from './usePhaseActionRouter';
 
 export function usePhaseActionHandler(
   state: GamePhaseState,
@@ -15,12 +16,31 @@ export function usePhaseActionHandler(
   handleNextWeek: () => void,
 ) {
   const { 
-    phase, hoh, nominees, players, selectedPlayers, 
+    phase, players
   } = state;
   
   const { 
-    setPhase, setNominees, setStatusMessage, setSelectedPlayers
+    setSelectedPlayers
   } = setters;
+
+  // Get all phase-specific action handlers
+  const { 
+    getNominationActions, 
+    getVetoActions, 
+    getEvictionActions,
+    getJuryActions,
+    getSummaryActions,
+    getCompetitionActions
+  } = usePhaseActionRouter(state, setters, {
+    handleNominate,
+    handleSelectHoH,
+    handleSelectVeto,
+    handleVetoAction,
+    handleEvict,
+    handleJuryQuestions,
+    handleProceedToVoting,
+    handleNextWeek
+  });
 
   const getPlayerName = (playerId: string | null) => {
     if (!playerId) return 'Unknown';
@@ -31,108 +51,39 @@ export function usePhaseActionHandler(
   function handlePhaseAction(action: string, data?: any) {
     console.log(`Handling action: ${action} in phase: ${phase}`);
     
+    // Route actions based on current phase
     switch (phase) {
       case 'Nomination Ceremony':
-        return {
-          nominate: (nominees: string[]) => {
-            setNominees(nominees);
-            setPhase('PoV Competition');
-            setStatusMessage(`${getPlayerName(hoh)} has nominated ${nominees.map(id => getPlayerName(id)).join(' and ')} for eviction.`);
-          },
-          handleNominate
-        };
+        return getNominationActions();
       case 'Veto Ceremony':
-        return {
-          handleUseVeto: (nomineeId: string) => {
-            handleVetoAction('use');
-          },
-          handleDoNotUseVeto: () => {
-            handleVetoAction('doNotUse');
-          },
-          handleVetoAction
-        };
+        return getVetoActions();
       case 'Eviction Voting':
-        return {
-          handleCastVote: (voterId: string, nomineeId: string) => {
-            console.log(`${voterId} votes to evict ${nomineeId}`);
-          },
-          handleEvict
-        };
+        return getEvictionActions();
       case 'Jury Questions':
-        return {
-          handleQuestion: (jurorId: string, finalistId: string, question: string) => {
-            console.log(`${jurorId} asks ${finalistId}: ${question}`);
-          },
-          handleJuryQuestions,
-          handleProceedToVoting
-        };
+        return getJuryActions();
       case 'Weekly Summary':
-        return {
-          advanceWeek: () => {
-            handleNextWeek();
-          },
-          finishGame: () => {
-            setPhase('Placements');
-          },
-          handleNextWeek,
-          handleShowPlacements: () => setPhase('Placements')
-        };
+        return getSummaryActions();
       default:
+        // Handle generic actions based on action type
         switch (action) {
           case 'startHoH':
-            handleSelectHoH();
-            break;
           case 'selectHoH':
-            if (selectedPlayers.length === 1) {
-              handleSelectHoH();
-              setSelectedPlayers([]);
-            }
-            break;
-          case 'startNominations':
-            handleNominate();
-            break;
-          case 'nominate':
-            if (selectedPlayers.length === 2) {
-              handleNominate();
-              setSelectedPlayers([]);
-            }
-            break;
           case 'startPoV':
-            handleSelectVeto();
-            break;
           case 'selectVeto':
-            if (selectedPlayers.length === 1) {
-              handleSelectVeto();
-              setSelectedPlayers([]);
-            }
-            break;
+            return getCompetitionActions()[action]();
+          case 'startNominations':
+          case 'nominate':
+            return getNominationActions()[action]();
           case 'startVetoCeremony':
-            handleVetoAction('start');
-            break;
           case 'useVeto':
-            if (selectedPlayers.length === 1) {
-              handleVetoAction('use');
-              setSelectedPlayers([]);
-            }
-            break;
           case 'replaceNominee':
-            if (selectedPlayers.length === 1) {
-              setSelectedPlayers([]);
-            }
-            break;
           case 'doNotUseVeto':
-            handleVetoAction('doNotUse');
-            break;
+            return getVetoActions()[action]();
           case 'startEvictionVoting':
-            break;
           case 'castVote':
-            if (data && data.nominee) {
-            }
-            break;
           case 'finalizeVotes':
-            break;
           case 'evict':
-            if (data && data.evictedId) {
+            if (action === 'evict' && data && data.evictedId) {
               handleEvict(data.evictedId);
             }
             break;
@@ -140,7 +91,7 @@ export function usePhaseActionHandler(
             handleNextWeek();
             break;
           case 'showPlacements':
-            setPhase('Placements');
+            setters.setPhase('Placements');
             break;
           default:
             console.log(`Unknown action: ${action}`);
