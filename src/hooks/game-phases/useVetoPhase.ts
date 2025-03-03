@@ -1,3 +1,4 @@
+
 import { PlayerData } from '@/components/PlayerProfile';
 
 interface VetoPhaseProps {
@@ -36,11 +37,12 @@ export function useVetoPhase({
       // Use the nullifier
       usePowerup(nullifier.id);
       
-      setStatusMessage(`${nullifier.name} used the Veto Nullifier! The Power of Veto has been nullified this week.`);
+      const statusMsg = `${nullifier.name} used the Veto Nullifier! The Power of Veto has been nullified this week.`;
+      setStatusMessage(statusMsg);
       
       toast({
         title: "Veto Nullified",
-        description: setStatusMessage,
+        description: statusMsg,
       });
       
       setTimeout(() => {
@@ -87,18 +89,21 @@ export function useVetoPhase({
         const savedName = players.find(p => p.id === savedNomineeId)?.name;
         const replacementName = players.find(p => p.id === replacementId)?.name;
         
-        setStatusMessage(`${players.find(p => p.id === veto)?.name} used the Power of Veto on ${savedName}! ${replacementName} has been named as the replacement nominee.`);
+        const statusMsg = `${players.find(p => p.id === veto)?.name} used the Power of Veto on ${savedName}! ${replacementName} has been named as the replacement nominee.`;
+        setStatusMessage(statusMsg);
       } else {
-        setStatusMessage(`${players.find(p => p.id === veto)?.name} decided not to use the Power of Veto.`);
+        const statusMsg = `${players.find(p => p.id === veto)?.name} decided not to use the Power of Veto.`;
+        setStatusMessage(statusMsg);
       }
     } else {
       // Not using veto
-      setStatusMessage(`${players.find(p => p.id === veto)?.name} decided not to use the Power of Veto.`);
+      const statusMsg = `${players.find(p => p.id === veto)?.name} decided not to use the Power of Veto.`;
+      setStatusMessage(statusMsg);
     }
     
     toast({
       title: "Veto Ceremony",
-      description: setStatusMessage,
+      description: statusMessage,
     });
     
     setTimeout(() => {

@@ -1,3 +1,4 @@
+
 import { PlayerData } from '@/components/PlayerProfile';
 
 interface NominationPhaseProps {
@@ -65,7 +66,13 @@ export function useNominationPhase({
           const nominee1 = players.find(p => p.id === updatedNominees[0])?.name;
           const nominee2 = players.find(p => p.id === updatedNominees[1])?.name;
           
-          setStatusMessage(`${immuneNominee.name} used immunity! ${nominee1} and ${nominee2} are now nominated for eviction!`);
+          const statusMsg = `${immuneNominee.name} used immunity! ${nominee1} and ${nominee2} are now nominated for eviction!`;
+          setStatusMessage(statusMsg);
+          
+          toast({
+            title: "Nomination Ceremony",
+            description: statusMsg,
+          });
         }
       } else {
         setNominees(selectedPlayers);
@@ -81,13 +88,14 @@ export function useNominationPhase({
         const nominee1 = players.find(p => p.id === selectedPlayers[0])?.name;
         const nominee2 = players.find(p => p.id === selectedPlayers[1])?.name;
         
-        setStatusMessage(`${nominee1} and ${nominee2} have been nominated for eviction!`);
+        const statusMsg = `${nominee1} and ${nominee2} have been nominated for eviction!`;
+        setStatusMessage(statusMsg);
+        
+        toast({
+          title: "Nomination Ceremony",
+          description: statusMsg,
+        });
       }
-      
-      toast({
-        title: "Nomination Ceremony",
-        description: setStatusMessage,
-      });
       
       setTimeout(() => {
         setPhase('PoV Competition');

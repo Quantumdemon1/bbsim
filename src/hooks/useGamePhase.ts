@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import { PlayerData } from '@/components/PlayerProfile';
 import { useToast } from "@/components/ui/use-toast";
 import { useGameContext } from '@/contexts/GameContext';
 import { useHoHPhase } from './game-phases/useHoHPhase';
@@ -9,12 +8,9 @@ import { usePoVPhase } from './game-phases/usePoVPhase';
 import { useVetoPhase } from './game-phases/useVetoPhase';
 import { useEvictionPhase } from './game-phases/useEvictionPhase';
 import { useSpecialCompetitionPhase } from './game-phases/useSpecialCompetitionPhase';
-
-interface GamePhaseProps {
-  players: PlayerData[];
-  week: number;
-  initialPhase?: string;
-}
+import { usePlayerSelection } from './game-phases/usePlayerSelection';
+import { useGameActions } from './game-phases/useGameActions';
+import { GamePhaseProps } from './game-phases/types';
 
 export function useGamePhaseManager({ 
   players: initialPlayers, 
@@ -30,26 +26,41 @@ export function useGamePhaseManager({
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [statusMessage, setStatusMessage] = useState('');
   const { toast } = useToast();
-  const { alliances, usePowerup } = useGameContext();
+  const { usePowerup } = useGameContext();
 
-  // Player selection handler (reused across phases)
-  const handlePlayerSelect = (playerId: string) => {
-    if (phase === 'Nomination Ceremony') {
-      // For nominations, allow selecting up to 2 players
-      if (selectedPlayers.includes(playerId)) {
-        setSelectedPlayers(selectedPlayers.filter(id => id !== playerId));
-      } else if (selectedPlayers.length < 2) {
-        setSelectedPlayers([...selectedPlayers, playerId]);
-      }
-    } else {
-      // For other phases, select only one player
-      if (selectedPlayers.includes(playerId)) {
-        setSelectedPlayers([]);
-      } else {
-        setSelectedPlayers([playerId]);
-      }
-    }
+  // Game state object - shared with all hooks
+  const gameState = {
+    week,
+    phase,
+    players,
+    nominees,
+    hoh,
+    veto,
+    statusMessage,
+    selectedPlayers
   };
+
+  // Import the player selection logic
+  const playerSelection = usePlayerSelection({
+    selectedPlayers,
+    setSelectedPlayers,
+    phase
+  });
+
+  // Import the game actions logic
+  const gameActions = useGameActions({
+    state: gameState,
+    setPlayers,
+    setWeek,
+    setPhase,
+    setHoH,
+    setVeto,
+    setNominees,
+    setSelectedPlayers,
+    setStatusMessage,
+    usePowerup,
+    toast
+  });
 
   // Import the phase-specific logic
   const hohPhase = useHoHPhase({
@@ -148,47 +159,7 @@ export function useGamePhaseManager({
         break;
         
       case 'nextWeek':
-        // Check if we should have a special competition
-        const hasSpecialComp = week % 3 === 0 || Math.random() < 0.2; // Every 3rd week or 20% chance
-        
-        if (hasSpecialComp) {
-          // Reset player statuses except for evicted players
-          setPlayers(players.map(player => ({
-            ...player,
-            status: player.status === 'evicted' ? 'evicted' : undefined
-          })));
-          
-          setHoH(null);
-          setVeto(null);
-          setNominees([]);
-          setSelectedPlayers([]);
-          setPhase('Special Competition');
-          
-          toast({
-            title: "Special Competition",
-            description: "A special competition is taking place!",
-          });
-        } else {
-          // Reset game state for next week
-          setWeek(week + 1);
-          setPhase('HoH Competition');
-          setHoH(null);
-          setVeto(null);
-          setNominees([]);
-          setSelectedPlayers([]);
-          setStatusMessage('');
-          
-          // Reset player statuses except for evicted players
-          setPlayers(players.map(player => ({
-            ...player,
-            status: player.status === 'evicted' ? 'evicted' : undefined
-          })));
-          
-          toast({
-            title: `Week ${week + 1}`,
-            description: `Starting week ${week + 1}`,
-          });
-        }
+        gameActions.handleNextWeek();
         break;
         
       case 'specialCompetition':
@@ -198,15 +169,8 @@ export function useGamePhaseManager({
   };
 
   return {
-    week,
-    phase,
-    players,
-    nominees,
-    hoh,
-    veto,
-    statusMessage,
-    selectedPlayers,
-    handlePlayerSelect,
+    ...gameState,
+    handlePlayerSelect: playerSelection.handlePlayerSelect,
     handleAction,
     setWeek,
     setPhase
