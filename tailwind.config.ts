@@ -64,11 +64,15 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				game: {
-					dark: '#2A2A2A',
-					medium: '#3A3A3A',
-					light: '#4A4A4A',
-					accent: '#F7A41D', // Big Brother gold
-					highlight: '#E95C0C', // Highlight orange
+					dark: '#1A1A2E',
+					darker: '#16213E',
+					medium: '#2A2A3A',
+					light: '#4A4A5A',
+					accent: '#E94560', // Modern accent color
+					highlight: '#F08A5D', // Secondary accent
+					success: '#6BCB77',
+					warning: '#FFD93D',
+					danger: '#FF6B6B'
 				}
 			},
 			borderRadius: {
@@ -126,6 +130,14 @@ export default {
 						opacity: '1',
 						transform: 'translateX(0)'
 					}
+				},
+				'pulse-subtle': {
+					'0%, 100%': {
+						opacity: '1'
+					},
+					'50%': {
+						opacity: '0.8'
+					}
 				}
 			},
 			animation: {
@@ -133,7 +145,8 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.4s ease-out',
 				'scale-in': 'scale-in 0.3s ease-out',
-				'slide-in': 'slide-in 0.3s ease-out'
+				'slide-in': 'slide-in 0.3s ease-out',
+				'pulse-subtle': 'pulse-subtle 2s infinite ease-in-out'
 			}
 		}
 	},
