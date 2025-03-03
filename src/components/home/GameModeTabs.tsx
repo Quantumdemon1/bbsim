@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { useGameContext } from '@/contexts/GameContext';
+import { useGameContext } from '@/contexts/useGameContext';
 
 interface GameModeTabsProps {
   isAuthenticated: boolean;
@@ -22,12 +22,14 @@ const GameModeTabs: React.FC<GameModeTabsProps> = ({
   isGuest, 
   onStartSinglePlayer 
 }) => {
+  const { isAdmin } = useGameContext();
+  
   return (
     <div className="flex space-x-4">
       <Button 
         variant="outline" 
         onClick={onStartSinglePlayer} 
-        disabled={isGuest}
+        disabled={isGuest && !isAdmin}
       >
         Start Single Player
       </Button>

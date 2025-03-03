@@ -1,14 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGameContext } from '@/contexts/useGameContext';
 import Logo from '@/components/Logo';
-import { Award } from 'lucide-react';
+import { Award, KeyRound, Wrench } from 'lucide-react';
 import PlayerAuth from '@/components/PlayerAuth';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import GameStatusBanner from '@/components/home/GameStatusBanner';
 import GameModeTabs from '@/components/home/GameModeTabs';
 import AuthButton from '@/components/home/AuthButton';
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const [hostName, setHostName] = useState('');
@@ -16,14 +18,17 @@ const Index = () => {
   const [playerName, setPlayerName] = useState('');
   const [activeTab, setActiveTab] = useState<'single' | 'multi-create' | 'multi-join'>('single');
   const [showAuth, setShowAuth] = useState(false);
+  const [showAdminControls, setShowAdminControls] = useState(false);
   
   const { 
     isAuthenticated, 
     isGuest, 
+    isAdmin,
     currentPlayer, 
     login, 
     register, 
     loginAsGuest,
+    loginAsAdmin,
     createSinglePlayerGame,
     createMultiplayerGame,
     joinMultiplayerGame,
@@ -40,12 +45,12 @@ const Index = () => {
   }, [isAuthenticated, currentPlayer]);
 
   const handleCreateSinglePlayer = () => {
-    if ((!isAuthenticated || isGuest)) {
+    if ((!isAuthenticated || isGuest) && !isAdmin) {
       setShowAuth(true);
       return;
     }
     
-    if (createSinglePlayerGame(false)) {
+    if (createSinglePlayerGame(isAdmin)) {
       navigate('/game');
     }
   };
@@ -84,6 +89,16 @@ const Index = () => {
     setHostName(player.name);
   };
 
+  const handleAdminModeToggle = () => {
+    setShowAdminControls(!showAdminControls);
+  };
+
+  const handleLoginAsAdmin = () => {
+    loginAsAdmin();
+    setPlayerName('Game Admin');
+    setHostName('Game Admin');
+  };
+
   return (
     <div className="game-container">
       <div className="flex flex-col items-center justify-center min-h-screen p-4 sm:p-8">
@@ -119,7 +134,61 @@ const Index = () => {
                   isAuthenticated={isAuthenticated}
                   onClick={() => setShowAuth(true)}
                 />
+                
+                <Button 
+                  variant="outline"
+                  size="icon"
+                  onClick={handleAdminModeToggle}
+                  className="ml-2"
+                >
+                  <Wrench className="h-4 w-4" />
+                </Button>
               </div>
+              
+              {showAdminControls && (
+                <div className="mt-4 p-3 border border-dashed border-amber-500 rounded-md bg-amber-950/30">
+                  <h3 className="text-amber-400 text-sm font-medium mb-2 flex items-center">
+                    <KeyRound className="mr-1 h-3.5 w-3.5" />
+                    Admin Testing Tools
+                  </h3>
+                  <div className="flex flex-col space-y-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleLoginAsAdmin}
+                      className="bg-amber-950/50 border-amber-700 hover:bg-amber-900 text-amber-300"
+                    >
+                      Login as Admin
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleCreateSinglePlayer}
+                      className="bg-amber-950/50 border-amber-700 hover:bg-amber-900 text-amber-300"
+                    >
+                      Test Single Player Game
+                    </Button>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleCreateMultiplayerGame}
+                        className="bg-amber-950/50 border-amber-700 hover:bg-amber-900 text-amber-300"
+                      >
+                        Test Create Multiplayer
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleJoinMultiplayerGame}
+                        className="bg-amber-950/50 border-amber-700 hover:bg-amber-900 text-amber-300"
+                      >
+                        Test Join Multiplayer
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
