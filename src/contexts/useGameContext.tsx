@@ -1,3 +1,4 @@
+
 import { usePlayerManagerContext } from './PlayerManagerContext';
 import { useGameStateContext } from './GameStateContext';
 import { useAllianceContext } from './AllianceContext';
@@ -93,6 +94,8 @@ export const useGameContext = () => {
     generateAIDialogue: aiPlayer.generateAIDialogue,
     addAIMemoryEntry: aiPlayer.addMemoryEntry,
     clearAIMemory: aiPlayer.clearAIMemory,
-    getPlayerMemory: aiPlayer.getPlayerMemory
+    getPlayerMemory: aiPlayer.getPlayerMemory,
+    isUsingLLM: aiPlayer.isUsingLLM,
+    toggleLLMDecisionMaking: aiPlayer.toggleLLMDecisionMaking
   };
 }

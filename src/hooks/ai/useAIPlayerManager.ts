@@ -1,6 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { AIMemoryEntry, AIPlayerAttributes, AIPlayerDecision } from './types';
+import { useToast } from '@/components/ui/use-toast';
 
 /**
  * Hook to manage AI player behavior and decision-making
@@ -8,6 +10,8 @@ import { AIMemoryEntry, AIPlayerAttributes, AIPlayerDecision } from './types';
 export function useAIPlayerManager(players: PlayerData[]) {
   // Store AI player memory (game events, interactions, etc.)
   const [aiMemory, setAIMemory] = useState<Record<string, AIMemoryEntry[]>>({});
+  const [isUsingLLM, setIsUsingLLM] = useState<boolean>(false);
+  const { toast } = useToast();
   
   // Initialize AI memory for new players
   useEffect(() => {
@@ -51,16 +55,29 @@ export function useAIPlayerManager(players: PlayerData[]) {
   const clearAIMemory = () => {
     setAIMemory({});
   };
+
+  /**
+   * Toggle LLM-based decision making
+   */
+  const toggleLLMDecisionMaking = () => {
+    setIsUsingLLM(prev => !prev);
+    toast({
+      title: isUsingLLM ? "LLM Decision Making Disabled" : "LLM Decision Making Enabled",
+      description: isUsingLLM 
+        ? "AI players will now use rule-based decisions" 
+        : "AI players will now use LLM for more realistic decisions",
+    });
+  };
   
   /**
    * Make a strategic decision for an AI player based on their personality and memory
    */
-  const makeAIDecision = (
+  const makeAIDecision = async (
     playerId: string, 
     decisionType: 'nominate' | 'vote' | 'veto' | 'alliance',
     options: string[],
     gameState: any
-  ): AIPlayerDecision => {
+  ): Promise<AIPlayerDecision> => {
     const player = players.find(p => p.id === playerId);
     if (!player) {
       console.error(`AI player ${playerId} not found`);
@@ -70,12 +87,29 @@ export function useAIPlayerManager(players: PlayerData[]) {
       };
     }
     
+    // If LLM decisions are enabled, use OpenAI to generate a decision
+    if (isUsingLLM) {
+      try {
+        return await generateLLMDecision(player, decisionType, options, gameState);
+      } catch (error) {
+        console.error("Error generating LLM decision:", error);
+        toast({
+          title: "LLM Decision Failed",
+          description: "Falling back to rule-based decisions.",
+          variant: "destructive"
+        });
+        // Fall back to rule-based decision making if LLM fails
+      }
+    }
+    
+    // Rule-based decision making (existing code)
     // Get player attributes (or use defaults if not set)
     const attributes = player.attributes || {
       physical: 3,
       strategic: 3,
       social: 3,
-      loyalty: 3
+      loyalty: 3,
+      general: 3
     };
     
     // Get player memory
@@ -137,6 +171,109 @@ export function useAIPlayerManager(players: PlayerData[]) {
     return {
       decision: selectedOption,
       reasoning: decisionReasoning
+    };
+  };
+
+  /**
+   * Generate a decision using OpenAI API
+   */
+  const generateLLMDecision = async (
+    player: PlayerData,
+    decisionType: 'nominate' | 'vote' | 'veto' | 'alliance',
+    options: string[],
+    gameState: any
+  ): Promise<AIPlayerDecision> => {
+    // Get player memory
+    const memory = aiMemory[player.id] || [];
+    const recentMemory = memory.slice(-5).map(m => m.description).join("; ");
+    
+    // Get option names instead of IDs for better context
+    const optionNames = options.map(id => {
+      const optionPlayer = players.find(p => p.id === id);
+      return optionPlayer ? optionPlayer.name : id;
+    });
+
+    // Construct a prompt for the LLM
+    const prompt = {
+      player: {
+        name: player.name,
+        personality: player.personality || { 
+          archetype: 'floater',
+          traits: ['adaptable']
+        },
+        relationships: player.relationships || [],
+        recentMemory
+      },
+      decisionType,
+      options: optionNames,
+      gameState: {
+        week: gameState.week || 1,
+        phase: gameState.phase || "unknown"
+      }
+    };
+
+    console.log("Generating LLM decision for:", player.name, "Decision type:", decisionType);
+    console.log("Options:", optionNames);
+
+    // Simulate LLM response for now
+    // In a real implementation, this would call an API
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+    
+    // Mock LLM response based on player personality
+    const personality = player.personality?.archetype || 'floater';
+    
+    // Map option back to player ID
+    let selectedName: string;
+    let reasoning: string;
+    
+    switch (decisionType) {
+      case 'nominate':
+        if (personality === 'mastermind') {
+          selectedName = optionNames[Math.floor(Math.random() * optionNames.length)];
+          reasoning = `After careful analysis, I've decided to nominate ${selectedName} as they pose the biggest long-term threat to my game.`;
+        } else if (personality === 'social-butterfly') {
+          selectedName = optionNames[Math.floor(Math.random() * optionNames.length)];
+          reasoning = `I need to nominate ${selectedName} because they haven't been connecting with the house socially.`;
+        } else {
+          selectedName = optionNames[Math.floor(Math.random() * optionNames.length)];
+          reasoning = `I'm nominating ${selectedName} because it seems like the safest option for my game right now.`;
+        }
+        break;
+      
+      case 'vote':
+        selectedName = optionNames[Math.floor(Math.random() * optionNames.length)];
+        reasoning = `I'm voting to evict ${selectedName} because they're the bigger threat to my game strategy.`;
+        break;
+      
+      case 'veto':
+        if (Math.random() > 0.5) {
+          selectedName = optionNames[Math.floor(Math.random() * optionNames.length)];
+          reasoning = `I'm using the veto on ${selectedName} because it aligns with my current game position.`;
+        } else {
+          selectedName = "";
+          reasoning = "I've decided not to use the veto this week as it's the best move for my game.";
+        }
+        break;
+      
+      case 'alliance':
+        selectedName = optionNames[Math.floor(Math.random() * optionNames.length)];
+        reasoning = `I want to form an alliance with ${selectedName} because we complement each other's strengths.`;
+        break;
+        
+      default:
+        selectedName = optionNames[0] || "";
+        reasoning = "I'm making this decision based on what's best for my game.";
+    }
+    
+    // Convert selected name back to ID
+    const selectedOption = options.find(id => {
+      const player = players.find(p => p.id === id);
+      return player && player.name === selectedName;
+    }) || options[0] || null;
+    
+    return {
+      decision: selectedOption,
+      reasoning
     };
   };
   
@@ -280,6 +417,11 @@ export function useAIPlayerManager(players: PlayerData[]) {
     const player = players.find(p => p.id === playerId);
     if (!player) return "I have nothing to say.";
     
+    // If LLM is enabled, generate more natural dialogue
+    if (isUsingLLM) {
+      return await generateLLMDialogue(player, situation, context);
+    }
+    
     // In a real implementation, this would call an LLM API like OpenAI
     // For now, return template-based responses
     
@@ -304,12 +446,97 @@ export function useAIPlayerManager(players: PlayerData[]) {
         return "The tension in this house is definitely building. I need to stay focused on my game.";
     }
   };
+
+  /**
+   * Generate dialogue using LLM (OpenAI simulation for now)
+   */
+  const generateLLMDialogue = async (
+    player: PlayerData,
+    situation: 'nomination' | 'veto' | 'eviction' | 'hoh' | 'general' | 'reaction',
+    context: any
+  ): Promise<string> => {
+    // Get player memory and personality for context
+    const memory = aiMemory[player.id] || [];
+    const recentMemory = memory.slice(-3).map(m => m.description).join("; ");
+    
+    const archetype = player.personality?.archetype || 'floater';
+    const traits = player.personality?.traits || ['adaptable'];
+    
+    console.log("Generating LLM dialogue for:", player.name, "Situation:", situation);
+    
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // Generate more natural, personality-based responses
+    switch (situation) {
+      case 'nomination':
+        if (archetype === 'mastermind') {
+          return `This wasn't an easy decision, but as Head of Household, I've nominated ${context.nominees.join(' and ')}. In this game, you have to make strategic moves, and I believe this is the right one for my game.`;
+        } else if (archetype === 'social-butterfly') {
+          return `I hate having to do this, but I've nominated ${context.nominees.join(' and ')}. This isn't personal at all - it's just part of the game, and I hope you both understand that.`;
+        } else if (archetype === 'villain') {
+          return `After careful consideration, I've decided to nominate ${context.nominees.join(' and ')}. You two haven't been playing the game I respect, so now you need to fight for your place here.`;
+        } else {
+          return `As Head of Household, I've nominated ${context.nominees.join(' and ')}. This decision was based on what I think is best for my game right now.`;
+        }
+      
+      case 'veto':
+        if (context.used) {
+          return `I've decided to use the Power of Veto on ${context.savedPlayer}. This move makes the most sense for my game strategy at this moment.`;
+        } else {
+          if (archetype === 'mastermind') {
+            return "After weighing all the options, I've decided not to use the Power of Veto this week. Sometimes the best move is to maintain the status quo.";
+          } else {
+            return "I've decided not to use the Power of Veto. This was a difficult decision, but I believe it's the right one for my game right now.";
+          }
+        }
+      
+      case 'eviction':
+        return `I vote to evict ${context.evictedPlayer}. At this point in the game, this is the choice I need to make.`;
+      
+      case 'hoh':
+        if (archetype === 'comp-beast') {
+          return "Winning HoH was my goal this week, and I'm thrilled to have pulled it off. Now it's time to make some power moves and shake up this house.";
+        } else if (archetype === 'social-butterfly') {
+          return "I'm so excited to be HoH this week! It's a huge responsibility, but I'm looking forward to the private room and getting those precious letters from home!";
+        } else {
+          return "Becoming Head of Household is a big responsibility, and I plan to use this power wisely. This week will definitely be interesting.";
+        }
+      
+      case 'reaction':
+        if (context.isNominated) {
+          if (archetype === 'mastermind') {
+            return "Being on the block is obviously not ideal, but I'm not worried. I've been planning for this possibility, and I have moves to make.";
+          } else if (traits.includes('emotional')) {
+            return "I can't believe I'm on the block. This is really tough, but I'm going to fight with everything I have to stay in this house.";
+          } else {
+            return "So I'm nominated... it's disappointing but not surprising. This game is full of twists, and I'm ready to compete for my safety.";
+          }
+        } else {
+          return "I'm safe for another week, which is always the first goal. Now I need to position myself better for what's coming next.";
+        }
+      
+      case 'general':
+        if (archetype === 'social-butterfly') {
+          return "The relationships in this house are so complicated! I'm trying to stay positive and keep everyone's spirits up despite all the game tension.";
+        } else if (archetype === 'villain') {
+          return "People are playing scared, and that's never a winning strategy. I came here to make big moves, not hide in the shadows.";
+        } else {
+          return "This game is constantly evolving, and you have to adapt. I'm just trying to stay aware of where I stand with everyone.";
+        }
+      
+      default:
+        return "I'm focused on playing my game and seeing where the chips fall.";
+    }
+  };
   
   return {
     aiMemory,
     addMemoryEntry,
     clearAIMemory,
     makeAIDecision,
-    generateAIDialogue
+    generateAIDialogue,
+    isUsingLLM,
+    toggleLLMDecisionMaking
   };
 }

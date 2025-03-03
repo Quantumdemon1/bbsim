@@ -1,9 +1,10 @@
 
 import React from 'react';
-import { Bell, MessageSquare, X, Shield } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { useGameContext } from '@/contexts/GameContext';
+import { Bell, Users, Settings, Info, Crown, Bot } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import AISettingsToggle from '@/components/game-ui/AISettingsToggle';
 
 interface GameHeaderProps {
   showAdminPanel: boolean;
@@ -12,83 +13,69 @@ interface GameHeaderProps {
   setShowNotifications: (show: boolean) => void;
 }
 
-const GameHeader: React.FC<GameHeaderProps> = ({
-  showAdminPanel,
+const GameHeader = ({ 
+  showAdminPanel, 
   setShowAdminPanel,
   showNotifications,
   setShowNotifications
-}) => {
-  const { 
-    isAdmin, 
-    showChat, 
-    setShowChat, 
-    notifications,
-    gameMode,
-    humanPlayers
-  } = useGameContext();
+}: GameHeaderProps) => {
+  const { isAdmin, gameState, currentWeek, notifications } = useGameContext();
   
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadNotifications = notifications?.filter(n => !n.read).length || 0;
   
   return (
-    <>
-      <div className="absolute right-4 top-4 z-10 flex space-x-2">
+    <header className="bg-game-dark border-b border-game-light/20 h-16 p-3 flex items-center justify-between">
+      <div className="flex items-center">
+        <div className="text-lg font-bold text-white mr-4">
+          Big Brother
+        </div>
+        
+        <Separator orientation="vertical" className="h-8 bg-game-light/20 mx-2" />
+        
+        <div className="flex items-center">
+          <div className="text-red-500 font-semibold">Week {currentWeek}</div>
+          <Separator orientation="vertical" className="h-5 bg-game-light/20 mx-2" />
+          <div className="text-gray-300 text-sm">{gameState === 'playing' ? 'In Progress' : 'Setup'}</div>
+        </div>
+      </div>
+      
+      <div className="flex items-center space-x-2">
+        <AISettingsToggle className="mr-2" />
+        
         {isAdmin && (
-          <Button
-            variant="outline"
-            size="sm"
+          <Button 
+            variant="ghost" 
+            size="icon"
+            className={`relative ${showAdminPanel ? 'bg-red-950/40' : ''}`}
             onClick={() => setShowAdminPanel(!showAdminPanel)}
-            className="bg-game-dark/80 border-red-500 text-red-500 h-8"
           >
-            <Shield className="h-4 w-4 mr-1" />
-            Admin
+            <Crown className="h-5 w-5" />
           </Button>
         )}
         
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowNotifications(true)}
-          className="relative bg-game-dark/80 border-game-accent text-game-accent h-8"
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="relative"
+          onClick={() => setShowNotifications(!showNotifications)}
         >
-          <Bell className="h-4 w-4 mr-1" />
-          Notifications
-          {unreadCount > 0 && (
-            <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0">
-              {unreadCount}
-            </Badge>
+          <Bell className="h-5 w-5" />
+          {unreadNotifications > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">
+              {unreadNotifications}
+            </span>
           )}
         </Button>
         
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowChat(!showChat)}
-          className="bg-game-dark/80 border-game-accent text-game-accent h-8"
-        >
-          {showChat ? (
-            <>
-              <X className="h-4 w-4 mr-1" />
-              Close Chat
-            </>
-          ) : (
-            <>
-              <MessageSquare className="h-4 w-4 mr-1" />
-              Open Chat
-            </>
-          )}
+        <Button variant="ghost" size="icon">
+          <Users className="h-5 w-5" />
+        </Button>
+        
+        <Button variant="ghost" size="icon">
+          <Info className="h-5 w-5" />
         </Button>
       </div>
-      
-      {/* Game mode indicator */}
-      <div className="absolute left-4 top-4 z-10">
-        <Badge variant="outline" className="bg-game-dark/80 border-game-accent text-white px-3 py-1">
-          {gameMode === 'singleplayer' ? 'Single Player' : 'Multiplayer'}
-          {gameMode === 'multiplayer' && humanPlayers.length > 0 && (
-            <span className="ml-2">({humanPlayers.length} human players)</span>
-          )}
-        </Badge>
-      </div>
-    </>
+    </header>
   );
 };
 

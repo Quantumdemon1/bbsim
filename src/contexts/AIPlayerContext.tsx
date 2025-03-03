@@ -10,7 +10,7 @@ interface AIPlayerContextType {
     decisionType: 'nominate' | 'vote' | 'veto' | 'alliance',
     options: string[],
     gameState: any
-  ) => AIPlayerDecision;
+  ) => Promise<AIPlayerDecision>;
   generateAIDialogue: (
     playerId: string,
     situation: 'nomination' | 'veto' | 'eviction' | 'hoh' | 'general' | 'reaction',
@@ -19,6 +19,8 @@ interface AIPlayerContextType {
   addMemoryEntry: (playerId: string, entry: AIMemoryEntry) => void;
   clearAIMemory: () => void;
   getPlayerMemory: (playerId: string) => AIMemoryEntry[];
+  isUsingLLM: boolean;
+  toggleLLMDecisionMaking: () => void;
 }
 
 const AIPlayerContext = createContext<AIPlayerContextType>({} as AIPlayerContextType);
@@ -34,7 +36,9 @@ export const AIPlayerProvider = ({ children }: { children: ReactNode }) => {
         generateAIDialogue: aiManager.generateAIDialogue,
         addMemoryEntry: aiManager.addMemoryEntry,
         clearAIMemory: aiManager.clearAIMemory,
-        getPlayerMemory: (playerId: string) => aiManager.aiMemory[playerId] || []
+        getPlayerMemory: (playerId: string) => aiManager.aiMemory[playerId] || [],
+        isUsingLLM: aiManager.isUsingLLM,
+        toggleLLMDecisionMaking: aiManager.toggleLLMDecisionMaking
       }}
     >
       {children}
