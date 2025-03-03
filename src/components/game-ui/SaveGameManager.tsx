@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useGameContext } from '@/contexts/GameContext';
+import { useGameContext } from '@/hooks/useGameContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -9,17 +9,21 @@ import { Loader2, Save, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 export const SaveGameManager = ({ onClose }: { onClose?: () => void }) => {
-  const { saveGame, loadGame, savedGames, deleteSavedGame, isLoadingSave, gameId, gameState } = useGameContext();
+  const { saveGame, loadGame, savedGames = [], deleteSavedGame, isLoadingSave, gameId, gameState } = useGameContext();
   const [isOpen, setIsOpen] = useState(false);
   const [loadingGameId, setLoadingGameId] = useState<string | null>(null);
   const [deletingGameId, setDeletingGameId] = useState<string | null>(null);
 
   const handleSaveGame = async () => {
-    await saveGame();
-    if (onClose) onClose();
+    if (saveGame) {
+      await saveGame();
+      if (onClose) onClose();
+    }
   };
 
   const handleLoadGame = async (gameId: string) => {
+    if (!loadGame) return;
+    
     setLoadingGameId(gameId);
     const success = await loadGame(gameId);
     setLoadingGameId(null);
@@ -31,6 +35,8 @@ export const SaveGameManager = ({ onClose }: { onClose?: () => void }) => {
   };
 
   const handleDeleteGame = async (gameId: string, e: React.MouseEvent) => {
+    if (!deleteSavedGame) return;
+    
     e.stopPropagation();
     setDeletingGameId(gameId);
     await deleteSavedGame(gameId);
