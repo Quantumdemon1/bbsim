@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GameRoom from '@/components/GameRoom';
@@ -30,7 +29,6 @@ const Game = () => {
   const [currentPhase, setCurrentPhase] = useState<string>('HoH Competition');
   
   useEffect(() => {
-    // Redirect if no game mode is set
     if (!gameMode) {
       navigate('/');
     }
@@ -44,27 +42,23 @@ const Game = () => {
     }
   }, [gameState, isAuthenticated, navigate, gameMode]);
   
-  // Auto-save game state on phase completion
   const handlePhaseComplete = () => {
     console.log("Phase completed:", currentPhase);
     
-    // Clear the progress for the current phase
     if (clearPhaseProgress) {
       clearPhaseProgress(currentPhase);
     }
     
-    // Save game state after phase completion
     if (saveGame) {
       saveGame();
     }
   };
   
-  // Auto-save game state periodically
   useEffect(() => {
     if (gameState === 'playing' && saveGame) {
       const saveInterval = setInterval(() => {
         saveGame();
-      }, 5 * 60 * 1000); // Auto-save every 5 minutes
+      }, 5 * 60 * 1000);
       
       return () => clearInterval(saveInterval);
     }
@@ -83,12 +77,10 @@ const Game = () => {
         setShowNotifications={setShowNotifications}
       />
       
-      {/* Show admin panel if toggled */}
       {showAdminPanel && <AdminPanel onClose={() => setShowAdminPanel(false)} />}
       
       <GameControls players={players} />
       
-      {/* Only show SaveGameManager if saveGame function exists */}
       {saveGame && (
         <div className="absolute top-16 right-4 z-10">
           <SaveGameManager />
@@ -101,7 +93,6 @@ const Game = () => {
         onPhaseChange={(phase) => setCurrentPhase(phase)} 
       />
       
-      {/* Phase Progress Tracker */}
       {clearPhaseProgress && (
         <PhaseProgressTracker 
           phase={currentPhase}
@@ -119,7 +110,6 @@ const Game = () => {
   );
 };
 
-// Small inline component for the panels
 const GamePanels = ({ 
   showNotifications, 
   setShowNotifications, 

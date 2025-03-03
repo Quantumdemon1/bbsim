@@ -32,5 +32,8 @@ export const useGameContext = () => {
     
     // AI Player
     ...aiPlayer,
+    
+    // Make sure saveGame is consistently available
+    saveGame: gameState.saveGame
   };
 }

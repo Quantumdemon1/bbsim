@@ -39,8 +39,7 @@ export function useGameContext() {
     // AI Player Management
     ...aiPlayer,
     
-    // Alias saveGame to ensure consistency across the app
-    // Checking if saveGame exists before aliasing to avoid errors
+    // Make sure saveGame is consistently available
     saveGame: gameState.saveGame
   };
 }

@@ -41,8 +41,8 @@ export function useGameStateContext() {
     adminTakeControl: gameState.adminTakeControl,
     isAdminControl: gameState.isAdminControl,
     
-    // Game state persistence
-    saveGame: gameState.saveCurrentGame,
+    // Game state persistence - ensure consistent naming
+    saveGame: gameState.saveCurrentGame, // Alias saveCurrentGame as saveGame
     loadGame: gameState.loadGame,
     savedGames: gameState.savedGames,
     deleteSavedGame: gameState.deleteSavedGame,
