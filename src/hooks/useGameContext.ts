@@ -1,10 +1,10 @@
 
-import { useGameStateContext } from './gameContext/useGameStateContext';
-import { usePlayerManagementContext } from './gameContext/usePlayerManagementContext';
-import { useAllianceContext } from './gameContext/useAllianceContext';
-import { usePowerupContext } from './gameContext/usePowerupContext';
-import { usePlayerAuthContext } from './gameContext/usePlayerAuthContext';
-import { useAIPlayerContext } from './gameContext/useAIPlayerContext';
+import { usePlayerManagementContext } from '../hooks/gameContext/usePlayerManagementContext';
+import { useGameStateContext } from '../hooks/gameContext/useGameStateContext';
+import { useAllianceContext } from '../hooks/gameContext/useAllianceContext';
+import { usePowerupContext } from '../hooks/gameContext/usePowerupContext';
+import { usePlayerAuthContext } from '../hooks/gameContext/usePlayerAuthContext';
+import { useAIPlayerContext } from '../hooks/gameContext/useAIPlayerContext';
 
 /**
  * Central hook to access all game-related context
@@ -12,8 +12,8 @@ import { useAIPlayerContext } from './gameContext/useAIPlayerContext';
  */
 export function useGameContext() {
   // Get access to all specialized contexts
-  const gameState = useGameStateContext();
   const playerManager = usePlayerManagementContext();
+  const gameState = useGameStateContext();
   const alliance = useAllianceContext();
   const powerup = usePowerupContext();
   const playerAuth = usePlayerAuthContext();
@@ -39,7 +39,8 @@ export function useGameContext() {
     // AI Player Management
     ...aiPlayer,
     
-    // Alias saveCurrentGame to saveGame for consistency
-    saveGame: gameState.saveCurrentGame
+    // Alias saveGame to ensure consistency across the app
+    // Checking if saveGame exists before aliasing to avoid errors
+    saveGame: gameState.saveGame
   };
 }
