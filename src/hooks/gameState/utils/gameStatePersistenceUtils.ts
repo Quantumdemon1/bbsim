@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { DatabaseGameState, SavedGameState } from '../types/gameStatePersistenceTypes';
 import { PlayerData } from '@/components/PlayerProfileTypes';
@@ -29,7 +28,9 @@ export const fetchSavedGames = async () => {
 
   if (error) throw error;
   
-  return transformDatabaseToGameState(data as DatabaseGameState[] || []);
+  const savedGames = (data as unknown) as DatabaseGameState[];
+
+  return transformDatabaseToGameState(savedGames);
 };
 
 // Save or update game state
@@ -90,16 +91,16 @@ export const fetchGameState = async (gameId: string) => {
   
   if (!data) return null;
 
-  const dbState = data as DatabaseGameState;
+  const gameState = (data as unknown) as DatabaseGameState;
   
   return {
-    gameId: dbState.game_id,
-    week: dbState.week,
-    phase: dbState.phase,
-    players: dbState.players as unknown as PlayerData[] || [],
-    hoh: dbState.hoh_id,
-    veto: dbState.veto_holder_id,
-    nominees: dbState.nominees ? (dbState.nominees as unknown as string[]) : []
+    gameId: gameState.game_id,
+    week: gameState.week,
+    phase: gameState.phase,
+    players: gameState.players as unknown as PlayerData[] || [],
+    hoh: gameState.hoh_id,
+    veto: gameState.veto_holder_id,
+    nominees: gameState.nominees ? (gameState.nominees as unknown as string[]) : []
   };
 };
 

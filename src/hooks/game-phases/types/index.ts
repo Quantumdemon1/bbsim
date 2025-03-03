@@ -1,15 +1,14 @@
 
-
 // Re-export all types from the different files
 export * from './player';
 
-// Explicitly re-export the types from common to avoid ambiguity
+// Explicitly re-export the types from the main types file
 export type { 
-  WeekSummary,
-  ToastProps,
   GamePhaseProps,
   GamePhaseState, 
   GamePhaseSetters, 
+  WeekSummary,
+  ToastProps,
   GameActionsProps,
   HoHPhaseProps,
   NominationPhaseProps,
@@ -19,24 +18,9 @@ export type {
   SpecialCompetitionPhaseProps,
   PlayerSelectionProps,
   JuryQuestionsProps,
-  JuryVotingProps
-} from './common';
-
-// Re-export component props types
-export type { 
-  HoHCompetitionProps,
-  NominationCeremonyProps,
-  PoVCompetitionProps,
-  VetoCeremonyProps,
-  EvictionVotingProps,
-  EvictionProps,
-  WeeklySummaryProps,
-  PlacementsChartProps,
-  SpecialCompetitionProps,
-  JuryQuestionsProps as ComponentJuryQuestionsProps,
-  JuryVotingProps as ComponentJuryVotingProps,
-  WinnerRevealProps,
-  FinaleStatsProps,
-  DefaultPhaseProps
-} from './componentProps';
-
+  JuryVotingProps,
+  UseNominationPhaseResult,
+  UseVetoPhaseResult,
+  AIMemoryEntry,
+  BotEmotions
+} from '../types';
