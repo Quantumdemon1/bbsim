@@ -5,6 +5,8 @@ import { useAllianceManager } from './allianceManager';
 import { usePowerupManager } from './powerupManager';
 import { usePlayerManager } from '@/hooks/usePlayerManager';
 import { useGameStateManager } from '@/hooks/useGameStateManager';
+import { PlayerData, PlayerStatus } from '@/components/PlayerProfile';
+import { PlayerAttributes, PlayerRelationship } from '@/hooks/game-phases/types';
 
 // Create the context with a default empty object
 const GameContext = createContext<GameContextType>({} as GameContextType);
@@ -37,7 +39,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     allianceManager.setAlliances(newAlliances);
     
     // Initialize default attributes for all players
-    const defaultAttributes = {
+    const defaultAttributes: PlayerAttributes = {
       general: 3,
       physical: 3,
       endurance: 3,
@@ -59,7 +61,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       
       // Random powerup for 2 players to start (10% chance for each remaining player)
       const hasPowerup = Math.random() < 0.1;
-      const powerupTypes = ['immunity', 'coup', 'replay', 'nullify'];
+      const powerupTypes: PlayerData['powerup'][] = ['immunity', 'coup', 'replay', 'nullify'];
       const randomPowerup = hasPowerup ? powerupTypes[Math.floor(Math.random() * powerupTypes.length)] : undefined;
       
       // Create default relationships

@@ -25,10 +25,10 @@ export function useJuryVotingPhase({
 }: JuryVotingProps) {
   
   const handleJuryVote = (jurorId: string, finalistId: string) => {
-    setVotes(prev => ({
-      ...prev,
+    setVotes({
+      ...votes,
       [jurorId]: finalistId
-    }));
+    });
     
     toast({
       title: "Vote Cast",
