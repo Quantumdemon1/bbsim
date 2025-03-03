@@ -1,4 +1,3 @@
-
 import { usePlayerManagerContext } from './PlayerManagerContext';
 import { useGameStateContext } from './GameStateContext';
 import { useAllianceContext } from './AllianceContext';
@@ -99,6 +98,13 @@ export const useGameContext = () => {
     toggleLLMDecisionMaking: aiPlayer.toggleLLMDecisionMaking,
     isThinking: aiPlayer.isThinking,
     botEmotions: aiPlayer.botEmotions,
-    updateBotEmotion: aiPlayer.updateBotEmotion
+    updateBotEmotion: aiPlayer.updateBotEmotion,
+    
+    // Game state persistence
+    saveGame: gameState.saveCurrentGame,
+    loadGame: gameState.loadGame,
+    savedGames: gameState.savedGames,
+    deleteSavedGame: gameState.deleteSavedGame,
+    isLoadingSave: gameState.isLoadingSave
   };
 }

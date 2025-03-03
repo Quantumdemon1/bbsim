@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, ReactNode } from 'react';
 import { usePlayerManagerContext } from './PlayerManagerContext';
 import { PlayerData } from '@/components/PlayerProfileTypes';
@@ -7,6 +6,7 @@ import { useGameModes } from '@/hooks/gameState/useGameModes';
 import { useAdminControl } from '@/hooks/gameState/useAdminControl';
 import { useChatState } from '@/hooks/gameState/useChatState';
 import { usePhaseProgress } from '@/hooks/gameState/usePhaseProgress';
+import { useGameStatePersistence } from '@/hooks/gameState/useGameStatePersistence';
 
 interface GameStateContextType {
   gameId: string | null;
@@ -46,6 +46,12 @@ interface GameStateContextType {
   } | null;
   startPhaseCountdown: (seconds: number) => void;
   clearPhaseProgress: (phase: string) => void;
+  
+  saveCurrentGame: () => Promise<void>;
+  loadGame: (gameId: string) => Promise<boolean>;
+  savedGames: any[];
+  deleteSavedGame: (gameId: string) => Promise<boolean>;
+  isLoadingSave: boolean;
 }
 
 const GameStateContext = createContext<GameStateContextType>({} as GameStateContextType);
@@ -70,6 +76,8 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
     gameState: gameCore.gameState,
     clearPhaseProgress: phaseProgressTracker.clearPhaseProgress
   });
+  
+  const gamePersistence = useGameStatePersistence();
 
   const handleGameStart = () => {
     const newAlliances = [
@@ -130,6 +138,8 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
     
     setPlayers(updatedPlayers);
     chatState.setShowChat(true);
+    
+    saveCurrentGame();
   };
 
   const handleGameReset = () => {
@@ -152,11 +162,49 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
   const resetGame = () => {
     gameCore.resetGame(handleGameReset);
   };
+  
+  const saveCurrentGame = async () => {
+    if (!gameCore.gameId || gameCore.gameState !== 'playing') {
+      return;
+    }
+    
+    await gamePersistence.saveGameState({
+      game_id: gameCore.gameId,
+      week: gameCore.currentWeek,
+      phase: phaseProgressTracker.phaseProgress ? Object.keys(phaseProgressTracker.phaseProgress)[0] : 'HoH Competition',
+      players: players,
+      hoh: players.find(p => p.status === 'hoh')?.id || null,
+      veto: players.find(p => p.status === 'veto')?.id || null,
+      nominees: players.filter(p => p.status === 'nominated').map(p => p.id)
+    });
+  };
+  
+  const loadGame = async (gameId: string) => {
+    const gameState = await gamePersistence.loadGameState(gameId);
+    
+    if (gameState) {
+      gameCore.joinGame(gameState.gameId, gameCore.playerName || 'Player');
+      gameCore.setCurrentWeek(gameState.week);
+      gameCore.startGame(() => {
+        setPlayers(gameState.players);
+        chatState.setShowChat(true);
+        
+        phaseProgressTracker.clearPhaseProgress('*');
+      });
+      
+      return true;
+    }
+    
+    return false;
+  };
+  
+  const deleteSavedGame = async (gameId: string) => {
+    return await gamePersistence.deleteGameState(gameId);
+  };
 
   return (
     <GameStateContext.Provider
       value={{
-        // Game core state
         gameId: gameCore.gameId,
         isHost: gameCore.isHost,
         playerName: gameCore.playerName,
@@ -170,11 +218,9 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
         endGame: gameCore.endGame,
         resetGame,
         
-        // Chat state
         showChat: chatState.showChat,
         setShowChat: chatState.setShowChat,
         
-        // Game modes
         gameMode: gameModes.gameMode,
         humanPlayers: gameModes.humanPlayers,
         countdownTimer: gameModes.countdownTimer,
@@ -182,18 +228,22 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
         createMultiplayerGame: gameModes.createMultiplayerGame,
         joinMultiplayerGame: gameModes.joinMultiplayerGame,
         
-        // Admin control
         adminTakeControl: adminControl.adminTakeControl,
         isAdminControl: adminControl.isAdminControl,
         loginAsAdmin: adminControl.loginAsAdmin,
         
-        // Phase progress tracking
         phaseProgress: phaseProgressTracker.phaseProgress,
         phaseCountdown: phaseProgressTracker.phaseCountdown,
         markPhaseProgress: phaseProgressTracker.markPhaseProgress,
         getPhaseProgress: phaseProgressTracker.getPhaseProgress,
         startPhaseCountdown: phaseProgressTracker.startPhaseCountdown,
-        clearPhaseProgress: phaseProgressTracker.clearPhaseProgress
+        clearPhaseProgress: phaseProgressTracker.clearPhaseProgress,
+        
+        saveCurrentGame,
+        loadGame,
+        savedGames: gamePersistence.savedGames,
+        deleteSavedGame,
+        isLoadingSave: gamePersistence.isLoading
       }}
     >
       {children}

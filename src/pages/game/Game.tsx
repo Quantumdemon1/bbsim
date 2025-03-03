@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GameRoom from '@/components/GameRoom';
@@ -6,6 +7,7 @@ import GameHeader from './components/GameHeader';
 import GameControls from './components/GameControls';
 import AdminPanel from './components/AdminPanel';
 import { PhaseProgressTracker } from '@/components/game-ui/PhaseProgressTracker';
+import { SaveGameManager } from '@/components/game-ui/SaveGameManager';
 import ChatPanel from '@/components/chat/ChatPanel';
 import NotificationPanel from '@/components/notifications/NotificationPanel';
 import PlayerProfileModal from '@/components/profile/PlayerProfileModal';
@@ -18,7 +20,8 @@ const Game = () => {
     isAuthenticated,
     currentPlayer,
     gameMode,
-    clearPhaseProgress
+    clearPhaseProgress,
+    saveGame
   } = useGameContext();
   
   const [showNotifications, setShowNotifications] = useState(false);
@@ -41,11 +44,7 @@ const Game = () => {
     }
   }, [gameState, isAuthenticated, navigate, gameMode]);
   
-  const selectedPlayerData = selectedPlayer ? 
-    players.find(p => p.id === selectedPlayer) || null : 
-    null;
-
-  // Handle phase completion
+  // Auto-save game state on phase completion
   const handlePhaseComplete = () => {
     console.log("Phase completed:", currentPhase);
     
@@ -53,8 +52,26 @@ const Game = () => {
     if (clearPhaseProgress) {
       clearPhaseProgress(currentPhase);
     }
+    
+    // Save game state after phase completion
+    saveGame();
   };
   
+  // Auto-save game state periodically
+  useEffect(() => {
+    if (gameState === 'playing') {
+      const saveInterval = setInterval(() => {
+        saveGame();
+      }, 5 * 60 * 1000); // Auto-save every 5 minutes
+      
+      return () => clearInterval(saveInterval);
+    }
+  }, [gameState, saveGame]);
+  
+  const selectedPlayerData = selectedPlayer ? 
+    players.find(p => p.id === selectedPlayer) || null : 
+    null;
+
   return (
     <div className="h-full relative overflow-hidden">
       <GameHeader 
@@ -68,6 +85,12 @@ const Game = () => {
       {showAdminPanel && <AdminPanel onClose={() => setShowAdminPanel(false)} />}
       
       <GameControls players={players} />
+      
+      {/* Save Game Manager (top right) */}
+      <div className="absolute top-16 right-4 z-10">
+        <SaveGameManager />
+      </div>
+      
       <GameRoom 
         players={players} 
         initialWeek={1} 
