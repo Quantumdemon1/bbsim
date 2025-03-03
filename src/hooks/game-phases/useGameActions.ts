@@ -1,5 +1,5 @@
 
-import { GamePhaseSetters, GamePhaseState } from '../types';
+import { GamePhaseSetters, GamePhaseState } from '../game-phases/types';
 
 export function useGameActions(
   state: GamePhaseState,
