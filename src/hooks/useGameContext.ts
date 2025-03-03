@@ -6,6 +6,7 @@ import { usePowerupContext } from '../hooks/gameContext/usePowerupContext';
 import { usePlayerAuthContext } from '../hooks/gameContext/usePlayerAuthContext';
 import { useAIPlayerContext } from '../hooks/gameContext/useAIPlayerContext';
 import { GameNotification } from '@/types/gameTypes';
+import { adaptGameNotificationToAuthNotification, isGameNotificationArray } from '@/types/notificationTypes';
 
 /**
  * Central hook to access all game-related context
@@ -44,6 +45,6 @@ export function useGameContext() {
     notifications: (gameState.notifications || []) as GameNotification[],
     clearNotifications: gameState.clearNotifications || (() => {}),
     markNotificationAsRead: gameState.markNotificationAsRead || (() => {}),
-    saveGame: gameState.saveGame || gameState.saveCurrentGame || (() => Promise.resolve())
+    saveGame: gameState.saveCurrentGame || (() => Promise.resolve())
   };
 }

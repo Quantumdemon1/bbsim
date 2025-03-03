@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GameRoom from '@/components/GameRoom';
@@ -14,6 +13,8 @@ import PlayerProfileModal from '@/components/profile/PlayerProfileModal';
 import { ErrorBoundary } from '@/components/error/ErrorBoundary';
 import { LoadingState } from '@/components/ui/loading-state';
 import { GamePhase } from '@/types/gameTypes';
+import { adaptGameNotificationToAuthNotification, isGameNotificationArray } from '@/types/notificationTypes';
+import { Notification } from '@/hooks/auth/types';
 
 const Game = () => {
   const navigate = useNavigate();
@@ -37,7 +38,16 @@ const Game = () => {
   const [currentPhase, setCurrentPhase] = useState<GamePhase>('HoH Competition');
   const [isLoading, setIsLoading] = useState(true);
   
-  // Check for required game conditions and navigate if not met
+  const adaptedNotifications: Notification[] = React.useMemo(() => {
+    if (!notifications) return [];
+    
+    if (isGameNotificationArray(notifications)) {
+      return notifications.map(adaptGameNotificationToAuthNotification);
+    }
+    
+    return notifications as unknown as Notification[];
+  }, [notifications]);
+  
   useEffect(() => {
     const checkRequirements = () => {
       if (!gameMode) {
@@ -60,9 +70,7 @@ const Game = () => {
     
     const requirementsMet = checkRequirements();
     
-    // Only set loading to false if all requirements are met
     if (requirementsMet) {
-      // Small delay to allow components to load
       const timer = setTimeout(() => {
         setIsLoading(false);
       }, 500);
@@ -85,7 +93,6 @@ const Game = () => {
     }
   };
   
-  // Auto-save game state every 5 minutes
   useEffect(() => {
     if (gameState === 'playing' && saveGame) {
       const saveInterval = setInterval(() => {
@@ -102,7 +109,6 @@ const Game = () => {
     players?.find(p => p.id === selectedPlayer) || null : 
     null;
 
-  // Show loading state while checking requirements or if players data is missing
   if (isLoading || !players || players.length === 0) {
     return <LoadingState fullScreen text="Loading game..." />;
   }
@@ -157,14 +163,13 @@ const Game = () => {
           />
         )}
         
-        {/* Game panels for chat, notifications, and player profiles */}
         {showChat && <ChatPanel minimizable />}
         
-        {notifications && (
+        {adaptedNotifications.length > 0 && (
           <NotificationPanel 
             open={showNotifications}
             onOpenChange={setShowNotifications}
-            notifications={notifications}
+            notifications={adaptedNotifications}
             onClearAll={clearNotifications}
             onMarkAsRead={markNotificationAsRead}
           />

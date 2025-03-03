@@ -1,5 +1,6 @@
 
 import { PlayerData } from '@/components/PlayerProfileTypes';
+import { GameNotification } from '@/types/gameTypes';
 
 export interface GameStateContextType {
   gameId: string | null;
@@ -39,6 +40,11 @@ export interface GameStateContextType {
   } | null;
   startPhaseCountdown: (seconds: number) => void;
   clearPhaseProgress: (phase: string) => void;
+  
+  // Add notification properties
+  notifications?: GameNotification[];
+  clearNotifications?: () => void;
+  markNotificationAsRead?: (notificationId: string) => void;
   
   saveCurrentGame: () => Promise<void>;
   loadGame: (gameId: string) => Promise<boolean>;

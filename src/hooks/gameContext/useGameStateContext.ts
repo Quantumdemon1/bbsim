@@ -27,6 +27,11 @@ export function useGameStateContext() {
     startPhaseCountdown: gameState.startPhaseCountdown,
     clearPhaseProgress: gameState.clearPhaseProgress,
     
+    // Notifications support
+    notifications: gameState.notifications,
+    clearNotifications: gameState.clearNotifications,
+    markNotificationAsRead: gameState.markNotificationAsRead,
+    
     // Additional Game State properties
     showChat: gameState.showChat,
     setShowChat: gameState.setShowChat,
@@ -43,6 +48,7 @@ export function useGameStateContext() {
     
     // Game state persistence - ensure consistent naming
     saveGame: gameState.saveCurrentGame, // Alias saveCurrentGame as saveGame
+    saveCurrentGame: gameState.saveCurrentGame,
     loadGame: gameState.loadGame,
     savedGames: gameState.savedGames,
     deleteSavedGame: gameState.deleteSavedGame,
