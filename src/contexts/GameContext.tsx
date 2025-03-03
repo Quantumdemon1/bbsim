@@ -32,6 +32,9 @@ interface Alliance {
   members: string[];
 }
 
+// Create the context with a default empty object
+const GameContext = createContext<GameContextType>({} as GameContextType);
+
 // Mock player data
 const mockPlayers: PlayerData[] = [
   { id: '1', name: 'Alison Irwin', image: '/lovable-uploads/cec1a3bf-b0b6-4618-9c68-1585b9e53db4.png' },
