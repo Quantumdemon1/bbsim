@@ -142,18 +142,19 @@ export function createAIPlayers(count: number): PlayerData[] {
 function generateAttributesForArchetype(archetype: string) {
   // Base attributes start at 2
   const attributes = {
-    physical: 2 + Math.floor(Math.random() * 2),   // 2-3 base
-    endurance: 2 + Math.floor(Math.random() * 2),  // 2-3 base
-    mentalQuiz: 2 + Math.floor(Math.random() * 2), // 2-3 base
-    strategic: 2 + Math.floor(Math.random() * 2),  // 2-3 base
-    adaptability: 2 + Math.floor(Math.random() * 2), // 2-3 base
-    risk: 2 + Math.floor(Math.random() * 2),       // 2-3 base
-    social: 2 + Math.floor(Math.random() * 2),     // 2-3 base
-    leadership: 2 + Math.floor(Math.random() * 2), // 2-3 base
-    temperament: 2 + Math.floor(Math.random() * 2), // 2-3 base
-    loyalty: 2 + Math.floor(Math.random() * 2),    // 2-3 base
-    deception: 2 + Math.floor(Math.random() * 2),  // 2-3 base
-    independence: 2 + Math.floor(Math.random() * 2) // 2-3 base
+    general: 2 + Math.floor(Math.random() * 2),   // Add the missing general attribute
+    physical: 2 + Math.floor(Math.random() * 2),
+    endurance: 2 + Math.floor(Math.random() * 2),
+    mentalQuiz: 2 + Math.floor(Math.random() * 2),
+    strategic: 2 + Math.floor(Math.random() * 2),
+    adaptability: 2 + Math.floor(Math.random() * 2),
+    risk: 2 + Math.floor(Math.random() * 2),
+    social: 2 + Math.floor(Math.random() * 2),
+    leadership: 2 + Math.floor(Math.random() * 2),
+    temperament: 2 + Math.floor(Math.random() * 2),
+    loyalty: 2 + Math.floor(Math.random() * 2),
+    deception: 2 + Math.floor(Math.random() * 2),
+    independence: 2 + Math.floor(Math.random() * 2)
   };
   
   // Add bonus points based on archetype (total +6 points)
@@ -163,6 +164,8 @@ function generateAttributesForArchetype(archetype: string) {
       attributes.mentalQuiz += 2;
       attributes.deception += 1;
       attributes.adaptability += 1;
+      // Update general attribute to reflect overall ability
+      attributes.general += 1;
       break;
       
     case 'social-butterfly':
@@ -177,6 +180,8 @@ function generateAttributesForArchetype(archetype: string) {
       attributes.endurance += 2;
       attributes.mentalQuiz += 1;
       attributes.leadership += 1;
+      // Update general attribute to reflect overall ability
+      attributes.general += 1;
       break;
       
     case 'floater':
@@ -191,6 +196,8 @@ function generateAttributesForArchetype(archetype: string) {
       attributes.strategic += 2;
       attributes.risk += 1;
       attributes.independence += 1;
+      // Update general attribute for villain archetype
+      attributes.general += 1;
       break;
   }
   
