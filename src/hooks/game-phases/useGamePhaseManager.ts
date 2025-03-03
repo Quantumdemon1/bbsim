@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
-import { useToast, Toast } from "@/components/ui/use-toast";
-import { PlayerData } from '@/components/PlayerProfileTypes';
+import { useToast } from "@/components/ui/use-toast";
+import type { ToastProps } from "./types";
 import { useGameState } from './useGameState';
 import { GamePhaseProps } from './types';
 import { useHoHPhase } from './useHoHPhase';

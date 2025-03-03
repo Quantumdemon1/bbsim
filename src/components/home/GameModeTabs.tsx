@@ -9,7 +9,11 @@ interface GameModeTabsProps {
   onStartSinglePlayer: () => void;
 }
 
-const GameModeTabs: React.FC<GameModeTabsProps> = ({ isAuthenticated, isGuest, onStartSinglePlayer }) => {
+const GameModeTabs: React.FC<GameModeTabsProps> = ({ 
+  isAuthenticated, 
+  isGuest, 
+  onStartSinglePlayer 
+}) => {
   return (
     <div className="flex space-x-4">
       <Button 

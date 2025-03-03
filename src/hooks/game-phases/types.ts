@@ -1,7 +1,6 @@
 
 import { PlayerData } from '@/components/PlayerProfileTypes';
-import { useState } from 'react';
-import { Toast } from '@/components/ui/use-toast';
+import { Toast } from '@/hooks/use-toast';
 
 export interface GamePhaseProps {
   players: PlayerData[];
@@ -101,7 +100,12 @@ export interface WeekSummary {
   }[];
 }
 
-export interface ToastProps extends Toast {}
+export interface ToastProps {
+  title?: string;
+  description?: string;
+  variant?: 'default' | 'destructive' | 'success';
+  duration?: number;
+}
 
 export interface GameActionsProps {
   state: GamePhaseState;
@@ -237,5 +241,12 @@ export interface JuryVotingProps {
   setSelectedPlayers: (players: string[]) => void;
 }
 
-// Export player types to allow direct import from game-phases/types
-export type { PlayerAttributes, PlayerRelationship, relationshipTypes, RelationshipType, attributeLevels, attributeDescriptions } from './types/player';
+// Export player types directly
+export { 
+  PlayerAttributes, 
+  PlayerRelationship, 
+  RelationshipType,
+  attributeLevels,
+  relationshipTypes,
+  attributeDescriptions
+} from './types/player';

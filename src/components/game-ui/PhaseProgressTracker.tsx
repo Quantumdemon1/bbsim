@@ -4,6 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { useGameContext } from '@/contexts/GameContext';
 import { CheckCircle, Clock, User } from 'lucide-react';
+import { SinglePhaseProgressInfo } from '@/hooks/gameState/types/phaseProgressTypes';
 
 interface PhaseProgressTrackerProps {
   phase: string;
@@ -31,7 +32,7 @@ export const PhaseProgressTracker: React.FC<PhaseProgressTrackerProps> = ({
     players.filter(p => p.isHuman || p.isAdmin).map(p => p.id);
   
   // Get the current phase progress
-  const progress = getPhaseProgress(phase);
+  const progress: SinglePhaseProgressInfo | null = getPhaseProgress(phase);
   
   // Handle clicking ready
   const handleMarkReady = () => {

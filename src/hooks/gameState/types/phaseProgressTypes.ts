@@ -5,14 +5,7 @@ export interface PhaseProgressProps {
 }
 
 export interface PhaseProgressInfo {
-  [phase: string]: {
-    playersReady: string[];
-    completed: boolean;
-    completedCount: number;
-    totalCount: number;
-    percentage: number;
-    hasStartedCountdown: boolean;
-  }
+  [phase: string]: SinglePhaseProgressInfo;
 }
 
 export interface SinglePhaseProgressInfo {

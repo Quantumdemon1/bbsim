@@ -1,7 +1,7 @@
 
 import { usePhaseTracker } from './phase-progress/usePhaseTracker';
 import { usePhaseCountdown } from './phase-progress/usePhaseCountdown';
-import { PhaseProgressProps, PhaseProgressInfo } from './types/phaseProgressTypes';
+import { PhaseProgressProps, SinglePhaseProgressInfo } from './types/phaseProgressTypes';
 
 export function usePhaseProgress({ gameMode, humanPlayerCount }: PhaseProgressProps) {
   const { 
@@ -27,7 +27,7 @@ export function usePhaseProgress({ gameMode, humanPlayerCount }: PhaseProgressPr
     }
   };
   
-  const getPhaseProgress = (phase: string): PhaseProgressInfo => {
+  const getPhaseProgress = (phase: string): SinglePhaseProgressInfo => {
     const progressData = getTrackProgress(phase, humanPlayerCount);
     
     return {

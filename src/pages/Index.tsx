@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -110,19 +109,9 @@ const Index = () => {
               />
               
               <GameModeTabs 
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-                hostName={hostName}
-                gameId={gameId}
-                playerName={playerName}
-                onHostNameChange={(e) => setHostName(e.target.value)}
-                onGameIdChange={(e) => setGameId(e.target.value.toUpperCase())}
-                onPlayerNameChange={(e) => setPlayerName(e.target.value)}
-                isAuthenticated={isAuthenticated}
+                isAuthenticated={isAuthenticated} 
                 isGuest={isGuest}
-                onStartSinglePlayer={handleCreateSinglePlayer}
-                onCreateMultiplayerGame={handleCreateMultiplayerGame}
-                onJoinMultiplayerGame={handleJoinMultiplayerGame}
+                onStartSinglePlayer={handleCreateSinglePlayer} 
               />
 
               <div className="mt-4 flex space-x-2">

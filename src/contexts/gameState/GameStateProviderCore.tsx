@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, ReactNode } from 'react';
 import { usePlayerManagerContext } from '../PlayerManagerContext';
 import { useGameStateHooks } from './useGameStateHooks';
@@ -87,7 +86,14 @@ export const GameStateProviderCore = ({ children }: { children: ReactNode }) => 
         phaseProgress: phaseProgressTracker.phaseProgress,
         phaseCountdown: phaseProgressTracker.phaseCountdown,
         markPhaseProgress: phaseProgressTracker.markPhaseProgress,
-        getPhaseProgress: phaseProgressTracker.getPhaseProgress,
+        getPhaseProgress: phaseProgressTracker.getPhaseProgress as (phase: string) => { 
+          playersReady: string[]; 
+          completed: boolean;
+          completedCount: number;
+          totalCount: number;
+          percentage: number;
+          hasStartedCountdown: boolean;
+        } | null,
         startPhaseCountdown: phaseProgressTracker.startPhaseCountdown,
         clearPhaseProgress: phaseProgressTracker.clearPhaseProgress,
         
