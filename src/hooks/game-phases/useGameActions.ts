@@ -1,21 +1,23 @@
+import { GamePhaseSetters, GamePhaseState } from './types';
 
-import { GameActionsProps } from './types';
+export function useGameActions(
+  state: GamePhaseState,
+  setters: GamePhaseSetters
+) {
+  const { 
+    setPlayers,
+    setWeek,
+    setPhase,
+    setHoH,
+    setVeto,
+    setNominees,
+    setSelectedPlayers,
+    setStatusMessage,
+    setWeekSummaries,
+    usePowerup,
+    toast
+  } = setters;
 
-export function useGameActions({
-  state,
-  setPlayers,
-  setWeek,
-  setPhase,
-  setHoH,
-  setVeto,
-  setNominees,
-  setSelectedPlayers,
-  setStatusMessage,
-  setWeekSummaries,
-  usePowerup,
-  toast
-}: GameActionsProps) {
-  
   const handleNextWeek = () => {
     // Reset phase-specific selections
     setSelectedPlayers([]);

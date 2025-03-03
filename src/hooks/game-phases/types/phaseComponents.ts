@@ -1,104 +1,7 @@
 
 import { PlayerData } from '@/components/PlayerProfileTypes';
+import { WeekSummary } from './weekSummary';
 import { toast } from '@/hooks/use-toast';
-
-export interface GamePhaseProps {
-  players: PlayerData[];
-  week: number;
-  initialPhase?: string;
-}
-
-// Add AIMemoryEntry type
-export interface AIMemoryEntry {
-  type: string;
-  week: number;
-  description: string;
-  impact: 'positive' | 'negative' | 'neutral';
-  importance: number;
-  timestamp: number;
-}
-
-// Add BotEmotions type
-export type BotEmotions = Record<string, string>;
-
-export interface UseNominationPhaseResult {
-  nominate: (nominees: string[]) => void;
-  handleNominate: () => void;
-  startNominations: () => void;
-}
-
-export interface UseVetoPhaseResult {
-  handleUseVeto: (nomineeId: string) => void;
-  handleDoNotUseVeto: () => void;
-  handleVetoAction: (action: string) => void;
-  useVeto: (nomineeId: string) => void;
-  replaceNominee: (nomineeId: string) => void;
-  doNotUseVeto: () => void;
-  startVetoCeremony: () => void;
-}
-
-export interface GamePhaseState {
-  week: number;
-  phase: string;
-  players: PlayerData[];
-  nominees: string[];
-  hoh: string | null;
-  veto: string | null;
-  vetoUsed: boolean;
-  lastHoH: string | null;
-  statusMessage: string;
-  selectedPlayers: string[];
-  finalists?: string[];
-  jurors?: string[];
-  votes?: Record<string, string>;
-  weekSummaries?: WeekSummary[];
-}
-
-export interface GamePhaseSetters {
-  setWeek: (week: number) => void;
-  setPlayers: (players: PlayerData[]) => void;
-  setPhase: (phase: string) => void;
-  setHoH: (hoh: string | null) => void;
-  setVeto: (veto: string | null) => void;
-  setVetoUsed: (used: boolean) => void;
-  setLastHoH: (lastHoH: string | null) => void;
-  setNominees: (nominees: string[]) => void;
-  setSelectedPlayers: (selectedPlayers: string[]) => void;
-  setStatusMessage: (message: string) => void;
-  setFinalists: (finalists: string[]) => void;
-  setJurors: (jurors: string[]) => void;
-  setVotes: (votes: Record<string, string>) => void;
-  setWeekSummaries: (summaries: WeekSummary[]) => void;
-}
-
-export interface WeekSummary {
-  week: number;
-  hoh: string | null;
-  nominees: string[];
-  vetoWinner: string | null;
-  vetoUsed: boolean;
-  finalNominees?: string[];
-  evicted: string | null;
-  evictionVotes?: string;
-  jurors?: string[];
-  competitions?: {
-    hoh?: {
-      type: string;
-      winner: string;
-      results?: any;
-    };
-    veto?: {
-      type: string;
-      winner: string;
-      results?: any;
-    };
-  };
-  keyEvents?: {
-    type: string;
-    description: string;
-    players: string[];
-  }[];
-}
 
 export interface ToastProps {
   description?: string;
@@ -124,6 +27,9 @@ export interface GameActionsProps {
   selectedPlayers: string[];
   handlePlayerSelect: (playerId: string) => void;
 }
+
+// Import required types
+import { GamePhaseState } from './gamePhaseState';
 
 // Phase Props types
 export interface HoHPhaseProps {
@@ -240,16 +146,18 @@ export interface JuryVotingProps {
   setSelectedPlayers: (players: string[]) => void;
 }
 
-// Export player types directly
-export type { 
-  PlayerAttributes, 
-  PlayerRelationship, 
-  RelationshipType
-} from './types/player';
+export interface UseNominationPhaseResult {
+  nominate: (nominees: string[]) => void;
+  handleNominate: () => void;
+  startNominations: () => void;
+}
 
-// Value exports (not types)
-export { 
-  attributeLevels,
-  relationshipTypes,
-  attributeDescriptions
-} from './types/player';
+export interface UseVetoPhaseResult {
+  handleUseVeto: (nomineeId: string) => void;
+  handleDoNotUseVeto: () => void;
+  handleVetoAction: (action: string) => void;
+  useVeto: (nomineeId: string) => void;
+  replaceNominee: (nomineeId: string) => void;
+  doNotUseVeto: () => void;
+  startVetoCeremony: () => void;
+}

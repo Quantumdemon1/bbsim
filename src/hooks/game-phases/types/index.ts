@@ -1,26 +1,15 @@
 
-// Re-export all types from the different files
+// Re-export all types from their specific files
+export * from './gamePhaseState';
+export * from './gamePhaseProps';
+export * from './phaseSetters';
+export * from './weekSummary';
+export * from './phaseComponents';
 export * from './player';
 
-// Explicitly re-export the types from the main types file
-export type { 
-  GamePhaseProps,
-  GamePhaseState, 
-  GamePhaseSetters, 
-  WeekSummary,
-  ToastProps,
-  GameActionsProps,
-  HoHPhaseProps,
-  NominationPhaseProps,
-  PoVPhaseProps,
-  VetoPhaseProps,
-  EvictionPhaseProps,
-  SpecialCompetitionPhaseProps,
-  PlayerSelectionProps,
-  JuryQuestionsProps,
-  JuryVotingProps,
-  UseNominationPhaseResult,
-  UseVetoPhaseResult,
-  AIMemoryEntry,
-  BotEmotions
-} from '../types';
+// Re-export constants from player types
+export { 
+  attributeLevels,
+  relationshipTypes,
+  attributeDescriptions
+} from './player';
