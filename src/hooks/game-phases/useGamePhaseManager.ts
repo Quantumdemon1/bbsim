@@ -1,19 +1,15 @@
-import { useState, useEffect } from 'react';
-import { useToast } from "@/components/ui/use-toast";
-import type { ToastProps } from "./types";
+import { useState, useCallback, useEffect } from 'react';
 import { useGameState } from './useGameState';
-import { GamePhaseProps } from './types';
+import { toast } from '@/hooks/use-toast';
 import { useHoHPhase } from './useHoHPhase';
 import { useNominationPhase } from './useNominationPhase';
 import { usePoVPhase } from './usePoVPhase';
 import { useVetoPhase } from './useVetoPhase';
 import { useEvictionPhase } from './useEvictionPhase';
-import { useSpecialCompetitionPhase } from './useSpecialCompetitionPhase';
 import { useJuryQuestionsPhase } from './useJuryQuestionsPhase';
 import { useJuryVotingPhase } from './useJuryVotingPhase';
-import { useFinaleManager } from './useFinaleManager';
-import { usePlayerSelection } from './usePlayerSelection';
-import { useGameActions } from './useGameActions';
+import { useSpecialCompetitionPhase } from './useSpecialCompetitionPhase';
+import { GamePhaseProps } from './types';
 
 export function useGamePhaseManager({ 
   players: initialPlayers, 
@@ -37,7 +33,6 @@ export function useGamePhaseManager({
     setVotes, setWeekSummaries
   } = setters;
 
-  // Mock usePowerup function until integrated
   const usePowerup = (playerId: string) => {
     console.log(`Using powerup for player: ${playerId}`);
     setPlayers(players.map(p => 
@@ -45,7 +40,6 @@ export function useGamePhaseManager({
     ));
   };
 
-  // Initialize phase-specific hooks
   const hohPhase = useHoHPhase({
     players,
     week,
@@ -183,18 +177,15 @@ export function useGamePhaseManager({
     handlePlayerSelect: playerSelection.handlePlayerSelect
   });
 
-  // Helper function to get player name by ID
   const getPlayerName = (playerId: string | null) => {
     if (!playerId) return 'Unknown';
     const player = players.find(p => p.id === playerId);
     return player ? player.name : 'Unknown';
   };
 
-  // Handle actions based on the current phase
   function handlePhaseAction(action: string, data?: any) {
     console.log(`Handling action: ${action} in phase: ${phase}`);
     
-    // Return appropriate hooks based on the current phase
     switch (phase) {
       case 'Nomination Ceremony':
         return {
@@ -244,7 +235,6 @@ export function useGamePhaseManager({
           handleShowPlacements: () => setPhase('Placements')
         };
       default:
-        // Handle other actions
         switch (action) {
           case 'startHoH':
             hohPhase.handleSelectHoH();
@@ -284,7 +274,6 @@ export function useGamePhaseManager({
             break;
           case 'replaceNominee':
             if (selectedPlayers.length === 1) {
-              // Implement this
               setSelectedPlayers([]);
             }
             break;
@@ -292,15 +281,12 @@ export function useGamePhaseManager({
             vetoPhase.handleVetoAction('doNotUse');
             break;
           case 'startEvictionVoting':
-            // Implement this
             break;
           case 'castVote':
             if (data && data.nominee) {
-              // Implement this
             }
             break;
           case 'finalizeVotes':
-            // Implement this
             break;
           case 'evict':
             if (data && data.evictedId) {
@@ -327,7 +313,6 @@ export function useGamePhaseManager({
   }
 
   return {
-    // Game state
     week,
     phase,
     players,
@@ -343,7 +328,6 @@ export function useGamePhaseManager({
     votes,
     weekSummaries,
     
-    // Setters
     setWeek,
     setPhase,
     setHoH,
@@ -359,7 +343,6 @@ export function useGamePhaseManager({
     setVotes,
     setWeekSummaries,
     
-    // Actions
     handleAction: handlePhaseAction,
     handlePlayerSelect: playerSelection.handlePlayerSelect
   };

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { PhaseProgressInfo, SinglePhaseProgressInfo } from '../types/phaseProgressTypes';
 
 export function usePhaseTracker() {
-  const [phaseProgress, setPhaseProgress] = useState<Record<string, { playersReady: string[], completed: boolean }>>({});
+  const [phaseProgress, setPhaseProgress] = useState<PhaseProgressInfo>({});
 
   const markPhaseProgress = (phase: string, playerId: string, gameMode: 'singleplayer' | 'multiplayer' | null, humanPlayerCount: number) => {
     setPhaseProgress(prev => {

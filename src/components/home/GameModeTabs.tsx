@@ -7,6 +7,14 @@ interface GameModeTabsProps {
   isAuthenticated: boolean;
   isGuest: boolean;
   onStartSinglePlayer: () => void;
+  activeTab?: "single" | "multi-create" | "multi-join";
+  setActiveTab?: React.Dispatch<React.SetStateAction<"single" | "multi-create" | "multi-join">>;
+  hostName?: string;
+  gameId?: string;
+  setHostName?: React.Dispatch<React.SetStateAction<string>>;
+  setGameId?: React.Dispatch<React.SetStateAction<string>>;
+  onCreateMultiplayerGame?: () => void;
+  onJoinMultiplayerGame?: () => void;
 }
 
 const GameModeTabs: React.FC<GameModeTabsProps> = ({ 

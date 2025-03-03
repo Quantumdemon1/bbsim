@@ -1,6 +1,6 @@
 
 import { PlayerData } from '@/components/PlayerProfileTypes';
-import { Toast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 export interface GamePhaseProps {
   players: PlayerData[];
@@ -101,7 +101,6 @@ export interface WeekSummary {
 }
 
 export interface ToastProps {
-  title?: string;
   description?: string;
   variant?: 'default' | 'destructive' | 'success';
   duration?: number;
@@ -242,10 +241,14 @@ export interface JuryVotingProps {
 }
 
 // Export player types directly
-export { 
+export type { 
   PlayerAttributes, 
   PlayerRelationship, 
-  RelationshipType,
+  RelationshipType
+} from './types/player';
+
+// Value exports (not types)
+export { 
   attributeLevels,
   relationshipTypes,
   attributeDescriptions

@@ -5,7 +5,10 @@ export interface PhaseProgressProps {
 }
 
 export interface PhaseProgressInfo {
-  [phase: string]: SinglePhaseProgressInfo;
+  [phase: string]: {
+    playersReady: string[];
+    completed: boolean;
+  };
 }
 
 export interface SinglePhaseProgressInfo {
