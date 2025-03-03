@@ -1,3 +1,4 @@
+
 import { GameActionsProps } from '../types';
 
 /**
@@ -113,7 +114,18 @@ export function useActionManager({
     }
   };
   
+  const handleShowPlacements = () => {
+    setters.setPhase('Placements');
+    setters.setStatusMessage('Final placements for all houseguests');
+    
+    toast({
+      title: "Final Placements",
+      description: "View the final standings of all houseguests",
+    });
+  };
+  
   return {
-    handleNextWeek
+    handleNextWeek,
+    handleShowPlacements
   };
 }

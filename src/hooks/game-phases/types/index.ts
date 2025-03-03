@@ -5,11 +5,7 @@ export * from './player';
 // Explicitly re-export the types from common to avoid ambiguity
 export type { 
   WeekSummary,
-  ToastProps
-} from './common';
-
-// Re-export types properly with 'export type'
-export type { 
+  ToastProps,
   GamePhaseProps,
   GamePhaseState, 
   GamePhaseSetters, 
