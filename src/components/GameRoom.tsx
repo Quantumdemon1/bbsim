@@ -5,7 +5,6 @@ import GamePhaseDisplay from './GamePhaseDisplay';
 import { PlayerData } from './PlayerProfileTypes';
 import { useGameContext } from '@/contexts/GameContext';
 import { useGamePhaseManager } from '@/hooks/game-phases/useGamePhaseManager';
-import GameActionsToolbar from './game-ui/GameActionsToolbar';
 
 interface GameRoomProps {
   players: PlayerData[];
@@ -54,7 +53,8 @@ const GameRoom: React.FC<GameRoomProps> = ({
         onPhaseChange={handlePhaseChange}
       />
       
-      <GameActionsToolbar players={gamePhase.players} />
+      {/* Removed the duplicate GameActionsToolbar from here
+          since it's already in the Game component */}
       
       <GamePhaseDisplay 
         phase={gamePhase.phase}
