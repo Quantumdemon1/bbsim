@@ -1,6 +1,7 @@
 
 import { useGameContext } from '@/contexts/GameContext';
 import { HoHPhaseProps } from './types';
+import { PlayerData } from '@/components/PlayerProfileTypes';
 
 /**
  * Hook to manage the Head of Household competition phase
@@ -42,9 +43,9 @@ export function useHoHPhase({
     // Update player statuses
     const updatedPlayers = players.map(player => {
       if (player.id === newHoH) {
-        return { ...player, status: 'hoh' };
+        return { ...player, status: 'hoh' as const };
       } else if (player.status === 'hoh') {
-        return { ...player, status: 'safe' };
+        return { ...player, status: 'safe' as const };
       }
       return player;
     });
