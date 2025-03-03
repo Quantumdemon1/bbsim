@@ -97,6 +97,8 @@ export const useGameContext = () => {
     getPlayerMemory: aiPlayer.getPlayerMemory,
     isUsingLLM: aiPlayer.isUsingLLM,
     toggleLLMDecisionMaking: aiPlayer.toggleLLMDecisionMaking,
-    isThinking: aiPlayer.isThinking
+    isThinking: aiPlayer.isThinking,
+    botEmotions: aiPlayer.botEmotions,
+    updateBotEmotion: aiPlayer.updateBotEmotion
   };
 }

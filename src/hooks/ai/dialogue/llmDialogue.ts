@@ -12,7 +12,7 @@ export const generateLLMDialogue = async (
   situation: 'nomination' | 'veto' | 'eviction' | 'hoh' | 'general' | 'reaction',
   context: any,
   recentMemory: string = ""
-): Promise<string> => {
+): Promise<{ text: string; emotion: string }> => {
   try {
     console.log("Generating LLM dialogue for:", player.name, "Situation:", situation);
     
@@ -46,21 +46,27 @@ export const generateLLMDialogue = async (
         situation,
         recentMemory,
         context,
-        responseType: 'dialogue'
+        responseType: 'dialogue',
+        includeEmotion: true
       }
     });
     
     if (error) {
       console.error("Error calling generate-ai-response:", error);
       // Fall back to template dialogue if the API call fails
-      return fallbackDialogue(player, situation, context);
+      const fallbackText = fallbackDialogue(player, situation, context);
+      return { text: fallbackText, emotion: 'neutral' };
     }
     
-    return data.generated_text;
+    return {
+      text: data.generated_text,
+      emotion: data.emotion || 'neutral'
+    };
   } catch (error) {
     console.error("Error in generateLLMDialogue:", error);
     // Fall back to template dialogue
-    return fallbackDialogue(player, situation, context);
+    const fallbackText = fallbackDialogue(player, situation, context);
+    return { text: fallbackText, emotion: 'neutral' };
   }
 };
 

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { AIMemoryEntry, AIPlayerDecision } from './types';
@@ -13,7 +14,7 @@ import { generateLLMDialogue } from './dialogue/llmDialogue';
  */
 export function useAIPlayerManager(players: PlayerData[]) {
   const memoryManager = useAIMemoryManager();
-  const [isUsingLLM, setIsUsingLLM] = useState<boolean>(false);
+  const [isUsingLLM, setIsUsingLLM] = useState<boolean>(true); // Default to true for better experience
   const [isThinking, setIsThinking] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
   
@@ -150,9 +151,15 @@ export function useAIPlayerManager(players: PlayerData[]) {
         const recentMemory = memory.slice(-3).map(m => m.description).join("; ");
         
         try {
-          const dialogue = await generateLLMDialogue(player, situation, context, recentMemory);
+          const result = await generateLLMDialogue(player, situation, context, recentMemory);
           setIsThinking(prev => ({ ...prev, [playerId]: false }));
-          return dialogue;
+          
+          // If we have access to the updateBotEmotion function, update the bot's emotion
+          if (typeof window !== 'undefined' && window.updateBotEmotion) {
+            window.updateBotEmotion(playerId, result.emotion);
+          }
+          
+          return result.text;
         } catch (error) {
           console.error("Error using LLM dialogue:", error);
           // Fall back to template-based responses if LLM fails

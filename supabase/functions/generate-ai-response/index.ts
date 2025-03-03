@@ -1,8 +1,6 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,185 +13,152 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const openAIKey = Deno.env.get('OPENAI_API_KEY');
+  if (!openAIKey) {
+    return new Response(
+      JSON.stringify({ error: 'OpenAI API key not configured' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
   try {
+    const requestData = await req.json();
     const { 
       playerProfile, 
       gamePhase, 
       situation, 
       context, 
-      recentMemory,
-      gameContext,
-      responseType = 'dialogue' 
-    } = await req.json();
-    
-    console.log(`Generating ${responseType} for player: ${playerProfile.name}`);
+      recentMemory, 
+      responseType, 
+      includeEmotion 
+    } = requestData;
 
-    let prompt = '';
-    let systemMessage = '';
-    
+    console.log(`Processing ${responseType} request for player ${playerProfile.name} in ${gamePhase}`);
+
+    let systemPrompt = '';
+    let userPrompt = '';
+
     if (responseType === 'dialogue') {
-      // Format system message for dialogue generation
-      systemMessage = `You are ${playerProfile.name}, a contestant on a reality TV show similar to Big Brother. 
-You are a ${playerProfile.archetype} player. Your personality traits include: ${playerProfile.traits.join(', ')}.
+      systemPrompt = `You are ${playerProfile.name}, a contestant on the reality TV show Big Brother. 
+Your personality is defined as a "${playerProfile.archetype}" archetype with traits including ${playerProfile.traits.join(', ')}.
 Background: ${playerProfile.personality}
 Motivation: ${playerProfile.backstory}
 
-Respond in-character as ${playerProfile.name} with a short, dramatic, and TV-worthy statement about the current situation.
-Keep your response to 1-3 sentences maximum. Use realistic, casual speech patterns.`;
+Respond in-character as ${playerProfile.name} would speak during a confessional or in the Big Brother house.
+Keep responses concise (30-60 words), authentic to your character, and reflective of your game strategy.
+${includeEmotion ? "At the end of your response, on a new line, indicate the emotion you are feeling (happy, sad, angry, excited, nervous, strategic, neutral)." : ""}`;
 
-      // Format prompt based on the current game phase
-      prompt = `Current situation: ${gamePhase}
-${recentMemory ? `Recent events in the game: ${recentMemory}` : ''}`;
+      userPrompt = `Current situation: ${gamePhase}
+${recentMemory ? `Recent events: ${recentMemory}` : ''}
+Context: ${JSON.stringify(context)}
 
-      // Add context-specific details to the prompt
-      switch (situation) {
-        case 'nomination':
-          prompt += `\nYou are the Head of Household and have nominated ${context.nominees?.join(' and ')} for eviction. Explain your nominations.`;
-          break;
-        case 'veto':
-          if (context.used) {
-            prompt += `\nYou have the Power of Veto and you've decided to use it to save ${context.savedPlayer}. Explain your decision.`;
-          } else {
-            prompt += `\nYou have the Power of Veto but have decided not to use it. Explain why you're keeping nominations the same.`;
-          }
-          break;
-        case 'eviction':
-          prompt += `\nIt's eviction night and you've voted to evict ${context.evictedPlayer}. Explain your vote.`;
-          break;
-        case 'hoh':
-          prompt += `\nYou've just won Head of Household! Discuss how this power will impact your game.`;
-          break;
-        case 'reaction':
-          if (context.isNominated) {
-            prompt += `\nYou've been nominated for eviction. React to being put on the block.`;
-          } else {
-            prompt += `\nYou're safe from eviction this week. React to your current position in the game.`;
-          }
-          break;
-        case 'general':
-          prompt += `\nShare your current thoughts on the game, your strategy, or other houseguests.`;
-          break;
-      }
-    } else if (responseType === 'decision') {
-      // Format system message for decision generation
-      systemMessage = `You are an AI assistant helping to model the decision-making process of ${playerProfile.name}, 
-a contestant on a reality TV show similar to Big Brother. 
-${playerProfile.name} is a ${playerProfile.archetype} player with the following traits: ${playerProfile.traits.join(', ')}.
+What would you say in this ${situation} situation?`;
+    } 
+    else if (responseType === 'decision') {
+      systemPrompt = `You are ${playerProfile.name}, a contestant on the reality TV show Big Brother.
+Your personality is defined as a "${playerProfile.archetype}" archetype with traits including ${playerProfile.traits.join(', ')}.
 Background: ${playerProfile.personality}
 Motivation: ${playerProfile.backstory}
-Attributes - Physical: ${playerProfile.attributes.physical}/5, Strategic: ${playerProfile.attributes.strategic}/5, 
-Social: ${playerProfile.attributes.social}/5, Loyalty: ${playerProfile.attributes.loyalty}/5
 
-Your task is to determine what decision ${playerProfile.name} would make in the current game situation, 
-based on their personality, traits, and game position.`;
+You need to make a strategic game decision that aligns with your character's personality, traits, and game position.
+Respond with a decision and a brief explanation of your reasoning.`;
 
-      // Format prompt based on decision type
-      prompt = `Decision type: ${gameContext.decisionType}
-${recentMemory ? `Recent game events: ${recentMemory}` : ''}
-Current game week: ${gameContext.week}
-Current game phase: ${gameContext.phase}`;
+      const { decisionType, options } = requestData.gameContext;
+      userPrompt = `You need to make a ${decisionType} decision.
+Your options are: ${JSON.stringify(options)}
+${recentMemory ? `Recent events to consider: ${recentMemory}` : ''}
 
-      switch (gameContext.decisionType) {
-        case 'nominate':
-          prompt += `\n${playerProfile.name} is Head of Household and needs to nominate two players for eviction.
-Available options: ${gameContext.options.map(o => o.name).join(', ')}
-For each option, consider their archetype, traits, and relationship with ${playerProfile.name}.
-Who would ${playerProfile.name} nominate as a ${playerProfile.archetype} player, and why?`;
-          break;
-        case 'vote':
-          prompt += `\n${playerProfile.name} needs to vote for eviction.
-Available options (nominees): ${gameContext.options.map(o => o.name).join(', ')}
-For each nominee, consider their archetype, traits, and relationship with ${playerProfile.name}.
-Who would ${playerProfile.name} vote to evict as a ${playerProfile.archetype} player, and why?`;
-          break;
-        case 'veto':
-          prompt += `\n${playerProfile.name} has won the Power of Veto and needs to decide whether to use it and on whom.
-Available options (nominees): ${gameContext.options.map(o => o.name).join(', ')}
-For each nominee, consider their archetype, traits, and relationship with ${playerProfile.name}.
-Would ${playerProfile.name} use the veto as a ${playerProfile.archetype} player? If so, on whom? Why?`;
-          break;
-        case 'alliance':
-          prompt += `\n${playerProfile.name} is considering forming an alliance.
-Available options (players): ${gameContext.options.map(o => o.name).join(', ')}
-For each player, consider their archetype, traits, and relationship with ${playerProfile.name}.
-With whom would ${playerProfile.name} want to form an alliance as a ${playerProfile.archetype} player, and why?`;
-          break;
-      }
-
-      prompt += `\n\nRespond with a JSON object containing:
-1. "selectedOption": The name of the selected player (or null if not using veto)
-2. "reasoning": A brief explanation (1-2 sentences) of why this decision was made
-
-Example:
+Respond in the following JSON format:
 {
-  "selectedOption": "Alex",
-  "reasoning": "As a strategic player, I'm targeting Alex because they're a competition threat."
+  "selectedOption": "[name of your choice]",
+  "reasoning": "[1-2 sentence explanation of why you made this choice]"
 }`;
     }
 
-    // Call OpenAI API
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
+        'Authorization': `Bearer ${openAIKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: systemMessage },
-          { role: 'user', content: prompt }
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
         ],
-        temperature: 0.8,
-        max_tokens: responseType === 'dialogue' ? 150 : 300,
+        temperature: 0.7,
+        max_tokens: 200,
       }),
     });
 
     const data = await response.json();
     
-    if (!data.choices || data.choices.length === 0) {
-      console.error('Invalid response from OpenAI:', data);
-      throw new Error('Invalid response from OpenAI');
+    if (!response.ok) {
+      console.error('OpenAI API error:', data);
+      throw new Error(`OpenAI API error: ${data.error?.message || 'Unknown error'}`);
     }
 
     const content = data.choices[0].message.content;
-    
+
     // Process the response based on type
-    let result;
-    if (responseType === 'dialogue') {
-      result = { generated_text: content.trim() };
-    } else {
-      try {
-        // Extract JSON from the response - handle cases where the model might
-        // include explanatory text before or after the JSON
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
-        const jsonString = jsonMatch ? jsonMatch[0] : content;
-        const parsed = JSON.parse(jsonString);
-        
-        result = {
-          selectedOption: parsed.selectedOption,
-          reasoning: parsed.reasoning
-        };
-      } catch (e) {
-        console.error('Error parsing decision JSON:', e, 'Content:', content);
-        result = {
-          selectedOption: null,
-          reasoning: "Decision could not be determined."
-        };
+    if (responseType === 'dialogue' && includeEmotion) {
+      const lines = content.split('\n').filter(line => line.trim());
+      let generatedText = lines[0];
+      let emotion = 'neutral';
+      
+      // Check if there's an emotion indicator in the last line
+      if (lines.length > 1) {
+        const lastLine = lines[lines.length - 1].toLowerCase();
+        const emotions = ['happy', 'sad', 'angry', 'excited', 'nervous', 'strategic', 'neutral'];
+        for (const e of emotions) {
+          if (lastLine.includes(e)) {
+            emotion = e;
+            break;
+          }
+        }
+        // Keep all but the last line if we found an emotion
+        generatedText = lines.slice(0, -1).join('\n');
       }
+      
+      return new Response(
+        JSON.stringify({ generated_text: generatedText, emotion }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    } 
+    else if (responseType === 'decision') {
+      try {
+        // Try to parse JSON from the response
+        const decisionData = JSON.parse(content);
+        return new Response(
+          JSON.stringify(decisionData),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      } catch (e) {
+        // If parsing fails, return a structured response with the full text
+        console.error('Failed to parse decision JSON:', e);
+        return new Response(
+          JSON.stringify({ 
+            selectedOption: null, 
+            reasoning: content 
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    } 
+    else {
+      // Default case - just return the generated text
+      return new Response(
+        JSON.stringify({ generated_text: content }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    return new Response(JSON.stringify(result), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
   } catch (error) {
-    console.error('Error in generate-ai-response function:', error);
-    return new Response(JSON.stringify({ 
-      error: error.message,
-      generated_text: "I'm facing some challenges right now. Let me collect my thoughts."
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    console.error('Error in generate-ai-response:', error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
 });

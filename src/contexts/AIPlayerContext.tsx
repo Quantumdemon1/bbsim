@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useState } from 'react';
 import { useAIPlayerManager } from '@/hooks/ai/useAIPlayerManager';
 import { usePlayerManagerContext } from './PlayerManagerContext';
 import { AIMemoryEntry, AIPlayerDecision } from '@/hooks/ai/types';
@@ -22,13 +22,24 @@ interface AIPlayerContextType {
   isUsingLLM: boolean;
   toggleLLMDecisionMaking: () => void;
   isThinking: Record<string, boolean>;
+  botEmotions: Record<string, string>;
+  updateBotEmotion: (playerId: string, emotion: string) => void;
 }
 
 const AIPlayerContext = createContext<AIPlayerContextType>({} as AIPlayerContextType);
 
 export const AIPlayerProvider = ({ children }: { children: ReactNode }) => {
   const { players } = usePlayerManagerContext();
+  const [botEmotions, setBotEmotions] = useState<Record<string, string>>({});
+  
   const aiManager = useAIPlayerManager(players);
+  
+  const updateBotEmotion = (playerId: string, emotion: string) => {
+    setBotEmotions(prev => ({
+      ...prev,
+      [playerId]: emotion
+    }));
+  };
   
   return (
     <AIPlayerContext.Provider
@@ -40,7 +51,9 @@ export const AIPlayerProvider = ({ children }: { children: ReactNode }) => {
         getPlayerMemory: (playerId: string) => aiManager.getPlayerMemory(playerId),
         isUsingLLM: aiManager.isUsingLLM,
         toggleLLMDecisionMaking: aiManager.toggleLLMDecisionMaking,
-        isThinking: aiManager.isThinking
+        isThinking: aiManager.isThinking,
+        botEmotions,
+        updateBotEmotion
       }}
     >
       {children}

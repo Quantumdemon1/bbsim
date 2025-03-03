@@ -2,7 +2,7 @@
 import React from 'react';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { useGameContext } from '@/contexts/GameContext';
-import { Bot, Brain, Database, MessageSquare, Star, Users, Shield, Activity } from 'lucide-react';
+import { Bot, Brain, Database, MessageSquare, Star, Users, Shield, Activity, Heart } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -12,7 +12,7 @@ interface AIPlayerProfileProps {
 }
 
 const AIPlayerProfile: React.FC<AIPlayerProfileProps> = ({ player }) => {
-  const { getPlayerMemory } = useGameContext();
+  const { getPlayerMemory, botEmotions } = useGameContext();
   
   const playerMemory = getPlayerMemory(player.id);
   const personality = player.personality || {
@@ -20,6 +20,8 @@ const AIPlayerProfile: React.FC<AIPlayerProfileProps> = ({ player }) => {
     traits: ['adaptable', 'quiet', 'observant'],
     background: 'No detailed background provided.'
   };
+  
+  const currentEmotion = botEmotions[player.id] || 'neutral';
   
   // Helper to get icon based on memory type
   const getMemoryIcon = (type: string) => {
@@ -36,6 +38,28 @@ const AIPlayerProfile: React.FC<AIPlayerProfileProps> = ({ player }) => {
         return <MessageSquare className="h-3 w-3 text-gray-500" />;
     }
   };
+  
+  // Get emotional state display
+  const getEmotionDisplay = (emotion: string) => {
+    switch (emotion) {
+      case 'happy':
+        return { color: 'text-green-500', label: 'Happy' };
+      case 'angry':
+        return { color: 'text-red-500', label: 'Angry' };
+      case 'sad':
+        return { color: 'text-blue-500', label: 'Sad' };
+      case 'excited':
+        return { color: 'text-yellow-500', label: 'Excited' };
+      case 'nervous':
+        return { color: 'text-purple-500', label: 'Nervous' };
+      case 'strategic':
+        return { color: 'text-indigo-500', label: 'Strategic' };
+      default:
+        return { color: 'text-gray-500', label: 'Neutral' };
+    }
+  };
+  
+  const emotionDisplay = getEmotionDisplay(currentEmotion);
   
   // Get archetype description
   const getArchetypeDescription = (archetype: string) => {
@@ -95,6 +119,16 @@ const AIPlayerProfile: React.FC<AIPlayerProfileProps> = ({ player }) => {
                       {trait}
                     </Badge>
                   ))}
+                </div>
+              </div>
+              
+              <div>
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Current Emotional State:</span>
+                <div className="flex items-center gap-1 mt-1">
+                  <Heart className={`h-4 w-4 ${emotionDisplay.color}`} />
+                  <span className={`text-sm ${emotionDisplay.color} font-medium`}>
+                    {emotionDisplay.label}
+                  </span>
                 </div>
               </div>
               
