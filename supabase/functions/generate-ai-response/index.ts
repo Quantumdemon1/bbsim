@@ -1,164 +1,185 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
+
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+interface PlayerProfile {
+  id: string;
+  name: string;
+  archetype: string;
+  traits: string[];
+  personality: string;
+  backstory: string;
+}
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 serve(async (req) => {
   // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const openAIKey = Deno.env.get('OPENAI_API_KEY');
-  if (!openAIKey) {
+  // Get supabase client
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+  const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  // Get OpenAI key
+  const openaiKey = Deno.env.get("OPENAI_API_KEY");
+  if (!openaiKey) {
     return new Response(
-      JSON.stringify({ error: 'OpenAI API key not configured' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: "OpenAI API key is not configured" }),
+      { 
+        status: 500, 
+        headers: { 
+          "Content-Type": "application/json",
+          ...corsHeaders
+        }
+      }
     );
   }
 
   try {
-    const requestData = await req.json();
-    const { 
-      playerProfile, 
-      gamePhase, 
-      situation, 
-      context, 
-      recentMemory, 
-      responseType, 
-      includeEmotion 
-    } = requestData;
+    // Parse request body
+    const { playerProfile, gamePhase, situation, recentMemory, context, responseType, includeEmotion } = await req.json();
 
-    console.log(`Processing ${responseType} request for player ${playerProfile.name} in ${gamePhase}`);
+    // Build the prompt based on responseType
+    let systemPrompt = "";
+    let userPrompt = "";
 
-    let systemPrompt = '';
-    let userPrompt = '';
-
-    if (responseType === 'dialogue') {
+    if (responseType === "dialogue") {
       systemPrompt = `You are ${playerProfile.name}, a contestant on the reality TV show Big Brother. 
-Your personality is defined as a "${playerProfile.archetype}" archetype with traits including ${playerProfile.traits.join(', ')}.
-Background: ${playerProfile.personality}
-Motivation: ${playerProfile.backstory}
+You are a ${playerProfile.archetype} player with these traits: ${playerProfile.traits.join(", ")}.
+Personality: ${playerProfile.personality}
+Backstory: ${playerProfile.backstory}
 
-Respond in-character as ${playerProfile.name} would speak during a confessional or in the Big Brother house.
-Keep responses concise (30-60 words), authentic to your character, and reflective of your game strategy.
-${includeEmotion ? "At the end of your response, on a new line, indicate the emotion you are feeling (happy, sad, angry, excited, nervous, strategic, neutral)." : ""}`;
+You will respond in character, speaking as this player would, reflecting your unique personality and gameplay style.
+Your response should be ONE short paragraph (2-3 sentences maximum).
+Include subtle hints about your strategy and feelings toward others when appropriate.`;
 
-      userPrompt = `Current situation: ${gamePhase}
-${recentMemory ? `Recent events: ${recentMemory}` : ''}
-Context: ${JSON.stringify(context)}
+      userPrompt = `Current Game Phase: ${gamePhase}
+Recent Memory: ${recentMemory || "No recent significant events."}
+Current Situation: ${situation}
+${JSON.stringify(context, null, 2)}
 
-What would you say in this ${situation} situation?`;
+How do you respond to this situation? Express your authentic reaction as ${playerProfile.name}.`;
     } 
-    else if (responseType === 'decision') {
-      systemPrompt = `You are ${playerProfile.name}, a contestant on the reality TV show Big Brother.
-Your personality is defined as a "${playerProfile.archetype}" archetype with traits including ${playerProfile.traits.join(', ')}.
-Background: ${playerProfile.personality}
-Motivation: ${playerProfile.backstory}
+    else if (responseType === "decision") {
+      systemPrompt = `You are ${playerProfile.name}, a strategic player on Big Brother. 
+You are a ${playerProfile.archetype} player with these traits: ${playerProfile.traits.join(", ")}.
+Your goal is to make game decisions that align with your personality and gameplay style.
+You will provide a clear decision and a brief explanation of your reasoning.`;
 
-You need to make a strategic game decision that aligns with your character's personality, traits, and game position.
-Respond with a decision and a brief explanation of your reasoning.`;
+      userPrompt = `Current Game Phase: ${gamePhase}
+Recent Memory: ${recentMemory || "No recent significant events."}
+Decision Required: ${situation}
+Options: ${JSON.stringify(context.options)}
+Players: ${JSON.stringify(context.players, null, 2)}
 
-      const { decisionType, options } = requestData.gameContext;
-      userPrompt = `You need to make a ${decisionType} decision.
-Your options are: ${JSON.stringify(options)}
-${recentMemory ? `Recent events to consider: ${recentMemory}` : ''}
-
-Respond in the following JSON format:
-{
-  "selectedOption": "[name of your choice]",
-  "reasoning": "[1-2 sentence explanation of why you made this choice]"
-}`;
+What is your decision as ${playerProfile.name}? Provide your choice and a brief reasoning.`;
     }
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
+    // Call OpenAI API
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${openAIKey}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${openaiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: "gpt-4",
         messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
         ],
         temperature: 0.7,
-        max_tokens: 200,
-      }),
+        max_tokens: 150
+      })
     });
 
     const data = await response.json();
     
-    if (!response.ok) {
-      console.error('OpenAI API error:', data);
-      throw new Error(`OpenAI API error: ${data.error?.message || 'Unknown error'}`);
+    if (!data.choices || data.choices.length === 0) {
+      throw new Error("No response from OpenAI API");
     }
 
-    const content = data.choices[0].message.content;
+    let emotion = "neutral";
+    let generated_text = data.choices[0].message.content.trim();
 
-    // Process the response based on type
-    if (responseType === 'dialogue' && includeEmotion) {
-      const lines = content.split('\n').filter(line => line.trim());
-      let generatedText = lines[0];
-      let emotion = 'neutral';
-      
-      // Check if there's an emotion indicator in the last line
-      if (lines.length > 1) {
-        const lastLine = lines[lines.length - 1].toLowerCase();
-        const emotions = ['happy', 'sad', 'angry', 'excited', 'nervous', 'strategic', 'neutral'];
-        for (const e of emotions) {
-          if (lastLine.includes(e)) {
-            emotion = e;
-            break;
-          }
-        }
-        // Keep all but the last line if we found an emotion
-        generatedText = lines.slice(0, -1).join('\n');
+    // Determine emotion if requested
+    if (includeEmotion) {
+      // Simplified emotion detection based on text content
+      const emotionResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${openaiKey}`
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
+            { 
+              role: "system", 
+              content: "You are an emotion analyzer. Identify the primary emotion in this text and return ONLY one of these emotions: happy, sad, angry, surprised, scared, disgusted, neutral, excited, anxious, confident, suspicious" 
+            },
+            { role: "user", content: generated_text }
+          ],
+          temperature: 0.3,
+          max_tokens: 10
+        })
+      });
+
+      const emotionData = await emotionResponse.json();
+      if (emotionData.choices && emotionData.choices.length > 0) {
+        emotion = emotionData.choices[0].message.content.trim().toLowerCase();
       }
-      
-      return new Response(
-        JSON.stringify({ generated_text: generatedText, emotion }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    } 
-    else if (responseType === 'decision') {
+    }
+
+    // Store the response in memory if applicable
+    if (playerProfile.id && responseType === "dialogue") {
       try {
-        // Try to parse JSON from the response
-        const decisionData = JSON.parse(content);
-        return new Response(
-          JSON.stringify(decisionData),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      } catch (e) {
-        // If parsing fails, return a structured response with the full text
-        console.error('Failed to parse decision JSON:', e);
-        return new Response(
-          JSON.stringify({ 
-            selectedOption: null, 
-            reasoning: content 
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        await supabase.from('ai_memory_entries').insert({
+          player_id: playerProfile.id,
+          type: 'dialogue',
+          description: `Said: "${generated_text}" (${emotion}) during ${gamePhase}`,
+          impact: 'neutral',
+          importance: 2,
+          week: context.week || 1,
+          timestamp: new Date().toISOString()
+        });
+      } catch (memoryError) {
+        console.error("Error storing memory:", memoryError);
+        // Continue even if memory storage fails
       }
-    } 
-    else {
-      // Default case - just return the generated text
-      return new Response(
-        JSON.stringify({ generated_text: content }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
     }
 
+    return new Response(
+      JSON.stringify({ 
+        generated_text, 
+        emotion, 
+        type: responseType 
+      }),
+      { 
+        headers: { 
+          "Content-Type": "application/json",
+          ...corsHeaders
+        } 
+      }
+    );
   } catch (error) {
-    console.error('Error in generate-ai-response:', error);
+    console.error("Error in generate-ai-response function:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        status: 500, 
+        headers: { 
+          "Content-Type": "application/json",
+          ...corsHeaders
+        } 
+      }
     );
   }
 });

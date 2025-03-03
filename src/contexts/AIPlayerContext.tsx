@@ -30,16 +30,7 @@ const AIPlayerContext = createContext<AIPlayerContextType>({} as AIPlayerContext
 
 export const AIPlayerProvider = ({ children }: { children: ReactNode }) => {
   const { players } = usePlayerManagerContext();
-  const [botEmotions, setBotEmotions] = useState<Record<string, string>>({});
-  
   const aiManager = useAIPlayerManager(players);
-  
-  const updateBotEmotion = (playerId: string, emotion: string) => {
-    setBotEmotions(prev => ({
-      ...prev,
-      [playerId]: emotion
-    }));
-  };
   
   return (
     <AIPlayerContext.Provider
@@ -52,8 +43,8 @@ export const AIPlayerProvider = ({ children }: { children: ReactNode }) => {
         isUsingLLM: aiManager.isUsingLLM,
         toggleLLMDecisionMaking: aiManager.toggleLLMDecisionMaking,
         isThinking: aiManager.isThinking,
-        botEmotions,
-        updateBotEmotion
+        botEmotions: aiManager.botEmotions,
+        updateBotEmotion: aiManager.updateBotEmotion
       }}
     >
       {children}

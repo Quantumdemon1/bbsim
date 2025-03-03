@@ -16,6 +16,7 @@ export function useAIPlayerManager(players: PlayerData[]) {
   const memoryManager = useAIMemoryManager();
   const [isUsingLLM, setIsUsingLLM] = useState<boolean>(true); // Default to true for better experience
   const [isThinking, setIsThinking] = useState<Record<string, boolean>>({});
+  const [botEmotions, setBotEmotions] = useState<Record<string, string>>({});
   const { toast } = useToast();
   
   // Initialize AI memory for new players
@@ -37,6 +38,16 @@ export function useAIPlayerManager(players: PlayerData[]) {
       // Handle memory initialization if needed
     }
   }, [players]);
+  
+  /**
+   * Update bot's emotional state
+   */
+  const updateBotEmotion = (playerId: string, emotion: string) => {
+    setBotEmotions(prev => ({
+      ...prev,
+      [playerId]: emotion
+    }));
+  };
   
   /**
    * Toggle LLM-based decision making
@@ -154,10 +165,8 @@ export function useAIPlayerManager(players: PlayerData[]) {
           const result = await generateLLMDialogue(player, situation, context, recentMemory);
           setIsThinking(prev => ({ ...prev, [playerId]: false }));
           
-          // If we have access to the updateBotEmotion function, update the bot's emotion
-          if (typeof window !== 'undefined' && window.updateBotEmotion) {
-            window.updateBotEmotion(playerId, result.emotion);
-          }
+          // Update the bot's emotion based on the result
+          updateBotEmotion(playerId, result.emotion || 'neutral');
           
           return result.text;
         } catch (error) {
@@ -187,6 +196,8 @@ export function useAIPlayerManager(players: PlayerData[]) {
     generateAIDialogue,
     isUsingLLM,
     toggleLLMDecisionMaking,
-    isThinking
+    isThinking,
+    botEmotions,
+    updateBotEmotion
   };
 }
