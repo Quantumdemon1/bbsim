@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { GameStateService, SavedGameState } from './types/gameStatePersistenceTypes';
@@ -154,4 +153,4 @@ export function useGameStatePersistence(): GameStateService {
 }
 
 // Re-export types for easier imports elsewhere
-export { SavedGameState } from './types/gameStatePersistenceTypes';
+export type { SavedGameState } from './types/gameStatePersistenceTypes';
