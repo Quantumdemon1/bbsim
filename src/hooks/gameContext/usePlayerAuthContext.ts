@@ -1,29 +1,40 @@
 
-import { usePlayerAuthContext as usePlayerAuth } from '../../contexts/PlayerAuthContext';
+import { useContext } from 'react';
+import { PlayerAuthContext } from '../../contexts/PlayerAuthContext';
 
 export function usePlayerAuthContext() {
-  const playerAuth = usePlayerAuth();
+  const authContext = useContext(PlayerAuthContext);
+  
+  if (!authContext) {
+    throw new Error('usePlayerAuthContext must be used within a PlayerAuthProvider');
+  }
   
   return {
-    // Auth
-    isAuthenticated: playerAuth.isAuthenticated,
-    currentPlayer: playerAuth.currentPlayer,
-    isGuest: playerAuth.isGuest,
-    isAdmin: playerAuth.isAdmin,
-    login: playerAuth.login,
-    register: playerAuth.register,
-    loginAsGuest: playerAuth.loginAsGuest,
-    loginAsAdmin: playerAuth.loginAsAdmin,
-    logout: playerAuth.logout,
-    updateProfile: playerAuth.updateProfile,
-    updateSettings: playerAuth.updateSettings,
-    addFriend: playerAuth.addFriend,
-    removeFriend: playerAuth.removeFriend,
-    addNotification: playerAuth.addNotification,
-    markNotificationAsRead: playerAuth.markNotificationAsRead,
-    clearNotifications: playerAuth.clearNotifications,
-    friends: playerAuth.friends,
-    notifications: playerAuth.notifications,
-    settings: playerAuth.settings,
+    // Authentication
+    isAuthenticated: authContext.isAuthenticated,
+    currentPlayer: authContext.currentPlayer,
+    isGuest: authContext.isGuest,
+    login: authContext.login,
+    register: authContext.register,
+    loginAsGuest: authContext.loginAsGuest,
+    logout: authContext.logout,
+    
+    // Profile
+    updateProfile: authContext.updateProfile,
+    updateSettings: authContext.updateSettings,
+    
+    // Friends
+    friends: authContext.friends,
+    addFriend: authContext.addFriend,
+    removeFriend: authContext.removeFriend,
+    
+    // Notifications
+    notifications: authContext.notifications,
+    addNotification: authContext.addNotification,
+    markNotificationAsRead: authContext.markNotificationAsRead,
+    clearNotifications: authContext.clearNotifications,
+    
+    // Settings
+    settings: authContext.settings
   };
 }

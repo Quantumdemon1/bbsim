@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GameRoom from '@/components/GameRoom';
-import { useGameContext } from '@/contexts/GameContext';
+import { useGameContext } from '@/hooks/useGameContext';
 import GameHeader from './components/GameHeader';
 import GameControls from './components/GameControls';
 import AdminPanel from './components/AdminPanel';

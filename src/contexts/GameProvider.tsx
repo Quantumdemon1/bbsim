@@ -12,6 +12,10 @@ interface GameProviderProps {
   children: ReactNode;
 }
 
+/**
+ * Main provider component that wraps all game-related context providers
+ * Establishes the proper dependency order for nested contexts
+ */
 export const GameProvider = ({ children }: GameProviderProps) => {
   return (
     <PlayerAuthProvider>
