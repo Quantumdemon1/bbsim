@@ -13,7 +13,8 @@ export interface PlayerData {
   age?: number;
   hometown?: string;
   occupation?: string;
-  isAdmin?: boolean; // Add this new property
+  isAdmin?: boolean;
+  isHuman?: boolean; // Add this property for human players in multiplayer
   stats?: {
     hohWins?: number;
     povWins?: number;

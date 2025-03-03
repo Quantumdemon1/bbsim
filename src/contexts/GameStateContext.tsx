@@ -62,6 +62,12 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
     clearPhaseProgress: (phase: string) => clearPhaseProgress(phase)
   });
   
+  const gameModes = useGameModes({
+    createGame: gameCore.createGame,
+    joinGame: gameCore.joinGame,
+    startGame: gameCore.startGame
+  });
+  
   const markPhaseProgress = (phase: string, playerId: string) => {
     setPhaseProgress(prev => {
       const phaseObj = prev[phase] || { playersReady: [], completed: false };
@@ -69,10 +75,11 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
       if (!phaseObj.playersReady.includes(playerId)) {
         const updatedPlayersReady = [...phaseObj.playersReady, playerId];
         
-        const isCompleted = gameCore.gameMode === 'singleplayer' || 
-                           (updatedPlayersReady.length >= Math.ceil(players.filter(p => p.isHuman).length / 2));
+        const humanPlayerCount = players.filter(p => p.isAdmin || p.isHuman).length;
+        const isCompleted = gameModes.gameMode === 'singleplayer' || 
+                           (updatedPlayersReady.length >= Math.ceil(humanPlayerCount / 2));
         
-        if (isCompleted && gameCore.gameMode === 'multiplayer' && !phaseObj.completed) {
+        if (isCompleted && gameModes.gameMode === 'multiplayer' && !phaseObj.completed) {
           startPhaseCountdown(30);
         }
         
@@ -206,12 +213,6 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
     chatState.setShowChat(false);
     clearPhaseProgress('*');
   };
-
-  const gameModes = useGameModes({
-    createGame: gameCore.createGame,
-    joinGame: gameCore.joinGame,
-    startGame: gameCore.startGame
-  });
 
   const startGame = () => {
     gameCore.startGame(handleGameStart);

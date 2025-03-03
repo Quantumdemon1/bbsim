@@ -32,22 +32,47 @@ const PhaseProgressTracker: React.FC<PhaseProgressTrackerProps> = ({
     .map(p => p.id);
   
   // Get progress for the current phase
-  const progress = getPhaseProgress(currentPhase, activePlayerIds);
+  const progress = getPhaseProgress(currentPhase);
+  
+  // Process the progress data for display
+  const processedProgress = React.useMemo(() => {
+    if (!progress) {
+      return { 
+        playersReady: [], 
+        completed: false,
+        completedCount: 0,
+        totalCount: activePlayerIds.length,
+        percentage: 0
+      };
+    }
+    
+    const completedCount = progress.playersReady.length;
+    const totalCount = activePlayerIds.length;
+    const percentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+    
+    return {
+      ...progress,
+      completedCount,
+      totalCount,
+      percentage,
+      hasStartedCountdown: progress.completed && !progress.playersReady.includes('*')
+    };
+  }, [progress, activePlayerIds]);
   
   // Check if current player has completed this phase
   const isCurrentPlayerComplete = currentPlayer ? 
-    getPhaseProgress(currentPhase, [currentPlayer.id]).completedCount > 0 : 
+    processedProgress.playersReady.includes(currentPlayer.id) : 
     false;
   
   // Start countdown if majority has voted but not all
   useEffect(() => {
     if (gameMode === 'multiplayer' && 
-        progress.hasStartedCountdown && 
-        !progress.isComplete &&
+        processedProgress.hasStartedCountdown && 
+        !processedProgress.completed &&
         phaseCountdown === null) {
       startPhaseCountdown(30);
     }
-  }, [progress.hasStartedCountdown, progress.isComplete, phaseCountdown]);
+  }, [processedProgress.hasStartedCountdown, processedProgress.completed, phaseCountdown, gameMode, startPhaseCountdown]);
   
   // If single player or countdown reaches 0, complete the phase
   useEffect(() => {
@@ -55,7 +80,7 @@ const PhaseProgressTracker: React.FC<PhaseProgressTrackerProps> = ({
         (phaseCountdown === 0)) {
       onPhaseComplete();
     }
-  }, [isCurrentPlayerComplete, phaseCountdown, gameMode]);
+  }, [isCurrentPlayerComplete, phaseCountdown, gameMode, onPhaseComplete]);
   
   const handleProceed = () => {
     if (currentPlayer) {
@@ -77,13 +102,13 @@ const PhaseProgressTracker: React.FC<PhaseProgressTrackerProps> = ({
               {currentPhase}
             </span>
             <span className="text-game-accent text-xs">
-              {progress.completedCount} / {progress.totalCount} ready
+              {processedProgress.completedCount} / {processedProgress.totalCount} ready
             </span>
           </div>
-          <Progress value={progress.percentage} className="h-2 bg-gray-700">
+          <Progress value={processedProgress.percentage} className="h-2 bg-gray-700">
             <div 
               className="h-full bg-game-accent transition-all duration-500"
-              style={{ width: `${progress.percentage}%` }}
+              style={{ width: `${processedProgress.percentage}%` }}
             />
           </Progress>
         </div>

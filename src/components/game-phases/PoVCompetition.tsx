@@ -9,8 +9,8 @@ interface PoVCompetitionProps {
   selectedPlayers: string[];
   onPlayerSelect: (playerId: string) => void;
   onAction: (action: string) => void;
-  hoh: string | null;
-  nominees: string[];
+  hoh?: string | null;
+  nominees?: string[];
 }
 
 const PoVCompetition: React.FC<PoVCompetitionProps> = ({
@@ -18,8 +18,8 @@ const PoVCompetition: React.FC<PoVCompetitionProps> = ({
   selectedPlayers,
   onPlayerSelect,
   onAction,
-  hoh,
-  nominees
+  hoh = null,
+  nominees = []
 }) => {
   // Get eligible players for POV competition (HoH, nominees, and randomly selected others)
   const getEligiblePlayers = () => {
