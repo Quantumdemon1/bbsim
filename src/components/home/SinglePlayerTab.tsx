@@ -2,6 +2,8 @@
 import React from 'react';
 import { User, Bot, Settings } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { useGameContext } from '@/contexts/GameContext';
+import { useNavigate } from 'react-router-dom';
 
 interface SinglePlayerTabProps {
   isAuthenticated: boolean;
@@ -14,11 +16,14 @@ const SinglePlayerTab: React.FC<SinglePlayerTabProps> = ({
   isGuest, 
   onStartSinglePlayer 
 }) => {
+  const navigate = useNavigate();
+  const { createSinglePlayerGame } = useGameContext();
+
   // Special admin bypass function to test single player without registration
   const handleAdminBypass = () => {
-    // This will directly call the onStartSinglePlayer function
-    // bypassing the authentication check
-    onStartSinglePlayer();
+    if (createSinglePlayerGame(true)) { // Pass true to bypass auth check
+      navigate('/game');
+    }
   };
 
   return (
