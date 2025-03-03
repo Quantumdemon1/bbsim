@@ -1,83 +1,108 @@
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
+import { Configuration, OpenAIApi } from 'https://esm.sh/openai@3.2.1'
 
+// CORS headers
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+}
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+// Handle OpenAI API responses
+interface OpenAIResponse {
+  choices: {
+    text: string;
+    index: number;
+    logprobs: any;
+    finish_reason: string;
+  }[];
+}
 
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
-  
+
   try {
-    if (!openAIApiKey) {
-      throw new Error("OpenAI API key is not configured");
-    }
+    // Get environment variables
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+    const openaiKey = Deno.env.get('OPENAI_API_KEY') || '';
+
+    // Initialize OpenAI
+    const configuration = new Configuration({
+      apiKey: openaiKey,
+    });
+    const openai = new OpenAIApi(configuration);
+
+    // Initialize Supabase client
+    const supabase = createClient(supabaseUrl, supabaseKey);
     
+    // Parse request body
     const { playerProfile, gamePhase, situation, recentMemory, context } = await req.json();
     
-    // Create a system prompt that defines the character's personality
-    const systemPrompt = `
-You are ${playerProfile.name}, a contestant on Big Brother.
-Personality: ${playerProfile.personality || 'No specific personality defined'}
-Archetype: ${playerProfile.archetype}
-Traits: ${Array.isArray(playerProfile.traits) ? playerProfile.traits.join(', ') : playerProfile.traits}
-Backstory: ${playerProfile.backstory || 'No specific backstory defined'}
-
-You are currently in the ${gamePhase} phase of the game.
-Recent events: ${recentMemory || 'No recent events to recall'}
-
-Respond as this character would, in just 1-2 sentences, maintaining their personality and keeping in mind their game strategy.
-`;
-
-    console.log("Sending request to OpenAI...");
+    console.log(`Generating response for ${playerProfile.name} in ${gamePhase} situation`);
     
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `How do you respond to this situation: ${situation}?${context ? ` Context: ${JSON.stringify(context)}` : ''}` }
-        ],
-        max_tokens: 120,
-        temperature: 0.8,
-      }),
-    });
+    // Construct the prompt for OpenAI
+    const prompt = `
+      You are ${playerProfile.name}, a Big Brother contestant with the following traits:
+      Archetype: ${playerProfile.archetype}
+      Key Traits: ${Array.isArray(playerProfile.traits) ? playerProfile.traits.join(", ") : playerProfile.traits}
+      Personality: ${playerProfile.personality}
+      Backstory: ${playerProfile.backstory || "No specific backstory available."}
+      
+      Recent game events: ${recentMemory || "No recent events to recall."}
+      
+      You are currently in the ${gamePhase} phase of the game.
+      
+      Based on your personality and the current situation (${situation}), respond in character to the following:
+      ${JSON.stringify(context)}
+      
+      Your response should be 1-3 sentences, in the first person, and reflect your personality and game strategy. Do not include quotation marks in your response.
+    `;
 
-    const data = await response.json();
-    console.log("Received response from OpenAI");
-    
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${data.error?.message || 'Unknown error'}`);
+    // If OpenAI key isn't set up, return a placeholder response
+    if (!openaiKey) {
+      console.warn("OpenAI API key not set, returning fallback response");
+      return new Response(
+        JSON.stringify({
+          generated_text: `As ${playerProfile.name}, I need to think strategically about this situation. This game is all about adapting and making the right moves at the right time.`
+        }),
+        { headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
     }
-    
-    const generatedText = data.choices[0].message.content;
 
-    return new Response(JSON.stringify({ 
-      generated_text: generatedText,
-      character: playerProfile.name
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    // Call OpenAI API
+    const completion = await openai.createCompletion({
+      model: "text-davinci-003",
+      prompt: prompt,
+      max_tokens: 100,
+      temperature: 0.7,
     });
+
+    const response = completion.data as OpenAIResponse;
+    const generated_text = response.choices[0].text.trim();
+    
+    console.log(`Generated response: ${generated_text}`);
+
+    return new Response(
+      JSON.stringify({ generated_text }),
+      { headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+    );
   } catch (error) {
-    console.error('Error in generate-ai-response function:', error);
-    return new Response(JSON.stringify({ 
-      error: error.message || 'An unknown error occurred',
-      detail: error.toString()
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    console.error("Error in generate-ai-response function:", error);
+    
+    return new Response(
+      JSON.stringify({ 
+        error: "Error generating AI response",
+        details: error.message
+      }),
+      { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+      }
+    );
   }
 });

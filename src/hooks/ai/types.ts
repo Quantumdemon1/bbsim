@@ -28,6 +28,8 @@ export interface AIPlayerAttributes {
  * Memory entry for storing game events and interactions
  */
 export interface AIMemoryEntry {
+  id?: string;
+  player_id?: string;    // Added for database integration
   type: 'nomination' | 'veto' | 'eviction' | 'hoh' | 'alliance' | 'betrayal' | 'conversation' | 
         'competition_win' | 'competition_loss' | 'argument' | 'celebration' | 'strategy_discussion' | 'private_conversation';
   week: number;
@@ -61,5 +63,6 @@ export type PlayerArchetype = 'mastermind' | 'social-butterfly' | 'comp-beast' |
  */
 export type PersonalityTrait = 'adaptable' | 'loyal' | 'strategic' | 'emotional' | 'calculated' | 
                                'trustworthy' | 'paranoid' | 'confident' | 'grateful' | 'observant' | 
-                               'humorous' | 'passionate' | 'resilient' | 'humble' | 'quiet';
-
+                               'humorous' | 'passionate' | 'resilient' | 'humble' | 'quiet' |
+                               'manipulative' | 'charming' | 'persuasive' | 'competitive' | 'outspoken' |
+                               'analytical';

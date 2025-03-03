@@ -9,7 +9,128 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      ai_memory_entries: {
+        Row: {
+          description: string
+          id: string
+          impact: string | null
+          importance: number | null
+          player_id: string | null
+          related_player_id: string | null
+          timestamp: string | null
+          type: string
+          week: number
+        }
+        Insert: {
+          description: string
+          id?: string
+          impact?: string | null
+          importance?: number | null
+          player_id?: string | null
+          related_player_id?: string | null
+          timestamp?: string | null
+          type: string
+          week: number
+        }
+        Update: {
+          description?: string
+          id?: string
+          impact?: string | null
+          importance?: number | null
+          player_id?: string | null
+          related_player_id?: string | null
+          timestamp?: string | null
+          type?: string
+          week?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_memory_entries_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "ai_player_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_player_profiles: {
+        Row: {
+          archetype: string
+          backstory: string | null
+          competition_skill: number | null
+          created_at: string | null
+          id: string
+          loyalty: number | null
+          name: string
+          personality: string | null
+          social_skill: number | null
+          strategic_skill: number | null
+          traits: Json
+        }
+        Insert: {
+          archetype: string
+          backstory?: string | null
+          competition_skill?: number | null
+          created_at?: string | null
+          id?: string
+          loyalty?: number | null
+          name: string
+          personality?: string | null
+          social_skill?: number | null
+          strategic_skill?: number | null
+          traits: Json
+        }
+        Update: {
+          archetype?: string
+          backstory?: string | null
+          competition_skill?: number | null
+          created_at?: string | null
+          id?: string
+          loyalty?: number | null
+          name?: string
+          personality?: string | null
+          social_skill?: number | null
+          strategic_skill?: number | null
+          traits?: Json
+        }
+        Relationships: []
+      }
+      game_states: {
+        Row: {
+          evicted_id: string | null
+          game_id: string
+          hoh_id: string | null
+          id: string
+          nominees: Json | null
+          phase: string
+          updated_at: string | null
+          veto_holder_id: string | null
+          week: number
+        }
+        Insert: {
+          evicted_id?: string | null
+          game_id: string
+          hoh_id?: string | null
+          id?: string
+          nominees?: Json | null
+          phase: string
+          updated_at?: string | null
+          veto_holder_id?: string | null
+          week: number
+        }
+        Update: {
+          evicted_id?: string | null
+          game_id?: string
+          hoh_id?: string | null
+          id?: string
+          nominees?: Json | null
+          phase?: string
+          updated_at?: string | null
+          veto_holder_id?: string | null
+          week?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

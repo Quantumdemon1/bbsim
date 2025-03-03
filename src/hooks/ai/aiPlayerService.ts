@@ -1,7 +1,8 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { AIMemoryEntry, AIPlayerDecision, AIPlayerAttributes } from './types';
+import { AIMemoryEntry, AIPlayerDecision, AIPlayerAttributes, PlayerArchetype, PersonalityTrait } from './types';
 import { PlayerData } from '@/components/PlayerProfileTypes';
+import { PlayerAttributes } from '@/hooks/game-phases/types/player';
 
 /**
  * Service for interacting with AI player data in Supabase
@@ -26,13 +27,15 @@ export const AIPlayerService = {
       name: profile.name,
       isAI: true,
       personality: {
-        archetype: profile.archetype,
-        traits: Array.isArray(profile.traits) ? profile.traits : [],
+        archetype: profile.archetype as PlayerArchetype,
+        traits: Array.isArray(profile.traits) ? profile.traits as PersonalityTrait[] : [],
         background: profile.personality,
         motivation: profile.backstory
       },
       attributes: {
+        general: 3, // Default value
         physical: profile.competition_skill || 3,
+        mental: 3, // Default value
         mentalQuiz: profile.strategic_skill || 3,
         social: profile.social_skill || 3,
         loyalty: profile.loyalty || 3,

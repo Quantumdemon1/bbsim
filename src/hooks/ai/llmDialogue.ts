@@ -74,13 +74,13 @@ const fallbackDialogue = (
   
   switch (situation) {
     case 'nomination':
-      return `As Head of Household, I've nominated ${context.nominees.join(' and ')} for eviction. This is a strategic move for my game.`;
+      return `As Head of Household, I've nominated ${context.nominees?.join(' and ') || 'the nominees'} for eviction. This is a strategic move for my game.`;
     case 'veto':
       return context.used 
-        ? `I've decided to use the Power of Veto on ${context.savedPlayer}. This is the right move for my game.` 
+        ? `I've decided to use the Power of Veto on ${context.savedPlayer || 'someone'}. This is the right move for my game.` 
         : "I've decided not to use the Power of Veto this week. My decision is final.";
     case 'eviction':
-      return `I vote to evict ${context.evictedPlayer}. This is my strategic choice.`;
+      return `I vote to evict ${context.evictedPlayer || 'the nominee'}. This is my strategic choice.`;
     case 'hoh':
       return "I'm the new Head of Household, and I'm ready to make some big moves this week.";
     case 'reaction':
