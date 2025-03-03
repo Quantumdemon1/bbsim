@@ -1,5 +1,6 @@
 
 import { PlayerData } from '@/components/PlayerProfileTypes';
+import { PlayerArchetype, PersonalityTrait } from '@/hooks/ai/types';
 
 /**
  * Generate template-based dialogue for an AI player
@@ -42,8 +43,8 @@ export const generatePersonalityDialogue = async (
   context: any,
   recentMemory: string = ""
 ): Promise<string> => {
-  const archetype = player.personality?.archetype || 'floater';
-  const traits = player.personality?.traits || ['adaptable'];
+  const archetype = player.personality?.archetype as PlayerArchetype || 'floater';
+  const traits = player.personality?.traits as PersonalityTrait[] || ['adaptable'];
   
   console.log("Generating LLM dialogue for:", player.name, "Situation:", situation);
   

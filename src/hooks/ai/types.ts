@@ -51,3 +51,15 @@ export interface AIPlayerDecision {
  */
 export type RelationshipType = 'Enemy' | 'Rival' | 'Neutral' | 'Friend' | 'Ally';
 
+/**
+ * Player archetype types
+ */
+export type PlayerArchetype = 'mastermind' | 'social-butterfly' | 'comp-beast' | 'floater' | 'villain' | 'underdog';
+
+/**
+ * Player personality traits
+ */
+export type PersonalityTrait = 'adaptable' | 'loyal' | 'strategic' | 'emotional' | 'calculated' | 
+                               'trustworthy' | 'paranoid' | 'confident' | 'grateful' | 'observant' | 
+                               'humorous' | 'passionate' | 'resilient' | 'humble' | 'quiet';
+
