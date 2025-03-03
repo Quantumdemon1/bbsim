@@ -1,14 +1,14 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Shield, Star, UserRound } from 'lucide-react';
+import { Shield, Star, UserRound, Trophy } from 'lucide-react';
 import { PlayerAttributes, PlayerRelationship } from '@/hooks/game-phases/types';
 
 export interface PlayerData {
   id: string;
   name: string;
   image: string;
-  status?: 'hoh' | 'nominated' | 'veto' | 'safe' | 'evicted';
+  status?: 'hoh' | 'nominated' | 'veto' | 'safe' | 'evicted' | 'winner';
   alliances?: string[];
   powerup?: 'immunity' | 'coup' | 'replay' | 'nullify';
   attributes?: PlayerAttributes;
@@ -66,7 +66,8 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
     nominated: 'bg-red-500',
     veto: 'bg-purple-500',
     safe: 'bg-green-500',
-    evicted: 'bg-gray-500'
+    evicted: 'bg-gray-500',
+    winner: 'bg-yellow-400'
   };
 
   const powerupIcons = {
@@ -91,7 +92,8 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       <div className={cn(
         'relative rounded-md overflow-hidden border-2 transition-all duration-300',
         sizeClasses[size],
-        selected ? 'border-game-accent' : 'border-transparent group-hover:border-white/30'
+        selected ? 'border-game-accent' : 'border-transparent group-hover:border-white/30',
+        player.status === 'winner' ? 'border-yellow-400 ring-2 ring-yellow-400/50' : ''
       )}>
         {hasValidImage ? (
           <img 
@@ -120,7 +122,13 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
             'absolute bottom-0 left-0 right-0 py-1 text-center text-white font-medium text-xs',
             statusColors[player.status]
           )}>
-            {player.status.toUpperCase()}
+            {player.status === 'winner' ? 'WINNER' : player.status.toUpperCase()}
+          </div>
+        )}
+
+        {player.status === 'winner' && (
+          <div className="absolute top-1 right-1 bg-yellow-500 rounded-full p-1">
+            <Trophy size={16} className="text-black" />
           </div>
         )}
 

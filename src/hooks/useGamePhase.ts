@@ -8,6 +8,8 @@ import { usePoVPhase } from './game-phases/usePoVPhase';
 import { useVetoPhase } from './game-phases/useVetoPhase';
 import { useEvictionPhase } from './game-phases/useEvictionPhase';
 import { useSpecialCompetitionPhase } from './game-phases/useSpecialCompetitionPhase';
+import { useJuryQuestionsPhase } from './game-phases/useJuryQuestionsPhase';
+import { useJuryVotingPhase } from './game-phases/useJuryVotingPhase';
 import { usePlayerSelection } from './game-phases/usePlayerSelection';
 import { useGameActions } from './game-phases/useGameActions';
 import { GamePhaseProps } from './game-phases/types';
@@ -25,6 +27,9 @@ export function useGamePhaseManager({
   const [nominees, setNominees] = useState<string[]>([]);
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [statusMessage, setStatusMessage] = useState('');
+  const [finalists, setFinalists] = useState<string[]>([]);
+  const [jurors, setJurors] = useState<string[]>([]);
+  const [votes, setVotes] = useState<Record<string, string>>({});
   const { toast } = useToast();
   const { usePowerup } = useGameContext();
 
@@ -37,7 +42,10 @@ export function useGamePhaseManager({
     hoh,
     veto,
     statusMessage,
-    selectedPlayers
+    selectedPlayers,
+    finalists,
+    jurors,
+    votes
   };
 
   // Import the player selection logic
@@ -134,6 +142,58 @@ export function useGamePhaseManager({
     setStatusMessage,
     toast
   });
+  
+  const juryQuestionsPhase = useJuryQuestionsPhase({
+    players,
+    setPlayers,
+    finalists,
+    setFinalists,
+    jurors,
+    setJurors,
+    setStatusMessage,
+    setPhase,
+    setSelectedPlayers
+  });
+
+  const juryVotingPhase = useJuryVotingPhase({
+    players,
+    setPlayers,
+    finalists,
+    votes,
+    setVotes,
+    setStatusMessage,
+    setPhase,
+    setSelectedPlayers
+  });
+
+  // Set up finalists and jury for finale
+  const setupFinale = () => {
+    // For demo purposes, let's just select the first 2 players as finalists and the next 7 as jury
+    const activePlayers = players.filter(p => p.status !== 'evicted');
+    const finalist1 = activePlayers[0]?.id;
+    const finalist2 = activePlayers[1]?.id;
+    
+    if (finalist1 && finalist2) {
+      setFinalists([finalist1, finalist2]);
+      
+      // Set jury members as evicted players, or random active players if not enough evicted
+      const evictedPlayers = players.filter(p => p.status === 'evicted');
+      let juryMembers = evictedPlayers.slice(0, 7).map(p => p.id);
+      
+      // If we don't have enough evicted players, add some active players
+      if (juryMembers.length < 3) {
+        const remainingPlayers = activePlayers.slice(2).map(p => p.id);
+        juryMembers = [...juryMembers, ...remainingPlayers.slice(0, 7 - juryMembers.length)];
+      }
+      
+      setJurors(juryMembers);
+    }
+    
+    toast({
+      title: "Finale Setup",
+      description: "Finalists and jury members have been selected"
+    });
+  };
 
   // Main action handler that routes to the appropriate phase handler
   const handleAction = (action: string, data?: any) => {
@@ -164,6 +224,36 @@ export function useGamePhaseManager({
         
       case 'specialCompetition':
         specialCompPhase.handleSpecialCompetition();
+        break;
+        
+      case 'setupFinale':
+        setupFinale();
+        break;
+        
+      case 'juryQuestions':
+        juryQuestionsPhase.handleJuryQuestions();
+        break;
+        
+      case 'proceedToVoting':
+        juryQuestionsPhase.handleProceedToVoting();
+        break;
+        
+      case 'juryVote':
+        if (data && data.jurorId && data.finalistId) {
+          juryVotingPhase.handleJuryVote(data.jurorId, data.finalistId);
+        }
+        break;
+        
+      case 'showResults':
+        juryVotingPhase.handleShowResults();
+        break;
+        
+      case 'showFinaleStats':
+        setPhase('Statistics');
+        break;
+        
+      case 'reSimulate':
+        window.location.reload();
         break;
     }
   };

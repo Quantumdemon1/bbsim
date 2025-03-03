@@ -9,6 +9,10 @@ import VetoCeremony from './game-phases/VetoCeremony';
 import EvictionVoting from './game-phases/EvictionVoting';
 import Eviction from './game-phases/Eviction';
 import SpecialCompetition from './game-phases/SpecialCompetition';
+import JuryQuestions from './game-phases/JuryQuestions';
+import JuryVoting from './game-phases/JuryVoting';
+import WinnerReveal from './game-phases/WinnerReveal';
+import FinaleStats from './game-phases/FinaleStats';
 import DefaultPhase from './game-phases/DefaultPhase';
 
 interface GamePhaseDisplayProps {
@@ -23,6 +27,9 @@ interface GamePhaseDisplayProps {
   selectedPlayers: string[];
   onPlayerSelect: (playerId: string) => void;
   alliances?: Alliance[];
+  finalists?: string[];
+  jurors?: string[];
+  votes?: Record<string, string>;
 }
 
 const GamePhaseDisplay: React.FC<GamePhaseDisplayProps> = ({
@@ -36,7 +43,10 @@ const GamePhaseDisplay: React.FC<GamePhaseDisplayProps> = ({
   statusMessage,
   selectedPlayers,
   onPlayerSelect,
-  alliances = []
+  alliances = [],
+  finalists = [],
+  jurors = [],
+  votes = {}
 }) => {
   const renderPhaseContent = () => {
     switch (phase) {
@@ -108,6 +118,48 @@ const GamePhaseDisplay: React.FC<GamePhaseDisplayProps> = ({
             players={players}
             selectedPlayers={selectedPlayers}
             onPlayerSelect={onPlayerSelect}
+            onAction={onAction}
+          />
+        );
+        
+      case 'Jury Questions':
+        return (
+          <JuryQuestions
+            players={players}
+            finalists={finalists}
+            jurors={jurors}
+            statusMessage={statusMessage}
+            onAction={onAction}
+          />
+        );
+        
+      case 'Jury Voting':
+        return (
+          <JuryVoting
+            players={players}
+            finalists={finalists}
+            jurors={jurors}
+            votes={votes}
+            statusMessage={statusMessage}
+            onAction={onAction}
+          />
+        );
+        
+      case 'The Winner':
+        return (
+          <WinnerReveal
+            players={players}
+            votes={votes}
+            finalists={finalists}
+            onAction={onAction}
+          />
+        );
+        
+      case 'Statistics':
+      case 'Finale':
+        return (
+          <FinaleStats
+            players={players}
             onAction={onAction}
           />
         );
