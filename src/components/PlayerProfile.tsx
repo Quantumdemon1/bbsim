@@ -1,7 +1,4 @@
-
 import React from 'react';
-import { cn } from '@/lib/utils';
-import { Shield, Star, UserRound, Trophy } from 'lucide-react';
 import { PlayerAttributes, PlayerRelationship } from '@/hooks/game-phases/types/player';
 
 export interface PlayerData {
@@ -25,137 +22,103 @@ export interface PlayerData {
 
 interface PlayerProfileProps {
   player: PlayerData;
-  size?: 'sm' | 'md' | 'lg';
   onClick?: () => void;
   selected?: boolean;
-  className?: string;
   showDetails?: boolean;
+  size?: 'sm' | 'md' | 'lg';
 }
-
-const DefaultAvatar = ({ size }: { size: 'sm' | 'md' | 'lg' }) => {
-  const sizeMap = {
-    sm: 16,
-    md: 24,
-    lg: 32
-  };
-  
-  return (
-    <div className={cn(
-      'flex items-center justify-center w-full h-full bg-game-medium',
-      'text-gray-400'
-    )}>
-      <UserRound size={sizeMap[size]} strokeWidth={1.5} />
-    </div>
-  );
-};
 
 const PlayerProfile: React.FC<PlayerProfileProps> = ({ 
   player, 
-  size = 'md', 
-  onClick,
-  selected,
-  className,
-  showDetails = false
+  onClick, 
+  selected = false, 
+  showDetails = false,
+  size = 'md'
 }) => {
+  // Determine size classes
   const sizeClasses = {
     sm: 'w-16 h-16',
-    md: 'w-24 h-24', 
+    md: 'w-24 h-24',
     lg: 'w-32 h-32'
   };
   
-  const fontSizeClasses = {
-    sm: 'text-xs',
-    md: 'text-sm',
-    lg: 'text-base'
+  // Determine status indicator
+  const getStatusIndicator = () => {
+    switch (player.status) {
+      case 'hoh':
+        return <div className="absolute -top-2 -right-2 bg-yellow-500 text-black text-xs font-bold px-1 rounded">HoH</div>;
+      case 'veto':
+        return <div className="absolute -top-2 -right-2 bg-purple-500 text-white text-xs font-bold px-1 rounded">VETO</div>;
+      case 'nominated':
+        return <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-1 rounded">NOM</div>;
+      case 'evicted':
+        return <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-md">
+          <span className="text-white font-bold text-sm">EVICTED</span>
+        </div>;
+      case 'winner':
+        return <div className="absolute -top-2 -right-2 bg-yellow-400 text-black text-xs font-bold px-1 rounded">WINNER</div>;
+      case 'juror':
+        return <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs font-bold px-1 rounded">JURY</div>;
+      case 'runner-up':
+        return <div className="absolute -top-2 -right-2 bg-gray-400 text-white text-xs font-bold px-1 rounded">RUNNER-UP</div>;
+      default:
+        return null;
+    }
   };
   
-  const statusColors = {
-    hoh: 'bg-yellow-500',
-    nominated: 'bg-red-500',
-    veto: 'bg-purple-500',
-    safe: 'bg-green-500',
-    evicted: 'bg-gray-500',
-    winner: 'bg-yellow-400',
-    juror: 'bg-purple-400',
-    'runner-up': 'bg-silver-400'
+  // Determine powerup indicator
+  const getPowerupIndicator = () => {
+    if (!player.powerup) return null;
+    
+    const powerupColors = {
+      immunity: 'bg-green-500',
+      nullify: 'bg-red-500',
+      coup: 'bg-purple-500',
+      replay: 'bg-blue-500'
+    };
+    
+    return (
+      <div className={`absolute -bottom-2 -left-2 ${powerupColors[player.powerup]} text-white text-xs font-bold px-1 rounded-full`}>
+        {player.powerup.charAt(0).toUpperCase() + player.powerup.slice(1)}
+      </div>
+    );
   };
-
-  const powerupIcons = {
-    immunity: <Shield className="text-green-400" />,
-    coup: <Star className="text-yellow-400" />,
-    replay: <Star className="text-blue-400" />,
-    nullify: <Shield className="text-red-400" />
+  
+  // Generate a placeholder image if none provided
+  const getPlayerImage = () => {
+    if (player.image) {
+      return player.image;
+    }
+    
+    // Generate a placeholder with initials
+    const initials = player.name.split(' ').map(n => n[0]).join('');
+    const colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500'];
+    const colorIndex = player.id.charCodeAt(0) % colors.length;
+    
+    return `https://ui-avatars.com/api/?name=${initials}&background=${colors[colorIndex].replace('bg-', '')}&color=fff`;
   };
-
-  // Check if image exists or is placeholder
-  const hasValidImage = player.image && player.image !== '/placeholder.svg';
-
+  
   return (
     <div 
-      className={cn(
-        'flex flex-col items-center gap-2 group transition-all duration-300', 
-        onClick ? 'cursor-pointer hover-lift' : '',
-        className
-      )}
+      className={`relative cursor-pointer transition-all duration-200 ${selected ? 'scale-110 ring-2 ring-game-accent' : 'hover:scale-105'}`}
       onClick={onClick}
     >
-      <div className={cn(
-        'relative rounded-md overflow-hidden border-2 transition-all duration-300',
-        sizeClasses[size],
-        selected ? 'border-game-accent' : 'border-transparent group-hover:border-white/30',
-        player.status === 'winner' ? 'border-yellow-400 ring-2 ring-yellow-400/50' : ''
-      )}>
-        {hasValidImage ? (
-          <img 
-            src={player.image} 
-            alt={player.name}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-              const parent = target.parentElement;
-              if (parent) {
-                parent.querySelector('.fallback-avatar')?.classList.remove('hidden');
-              }
-            }}
-          />
-        ) : (
-          <DefaultAvatar size={size} />
-        )}
-        
-        <div className={cn('fallback-avatar hidden', hasValidImage ? 'hidden' : '')}>
-          <DefaultAvatar size={size} />
-        </div>
-        
-        {player.status && statusColors[player.status] && (
-          <div className={cn(
-            'absolute bottom-0 left-0 right-0 py-1 text-center text-white font-medium text-xs',
-            statusColors[player.status]
-          )}>
-            {player.status === 'winner' ? 'WINNER' : player.status.toUpperCase()}
-          </div>
-        )}
-
-        {player.status === 'winner' && (
-          <div className="absolute top-1 right-1 bg-yellow-500 rounded-full p-1">
-            <Trophy size={16} className="text-black" />
-          </div>
-        )}
-
-        {player.powerup && (
-          <div className="absolute top-1 right-1 bg-black/50 rounded-full p-1">
-            {powerupIcons[player.powerup]}
-          </div>
-        )}
+      <div className={`relative rounded-md overflow-hidden ${sizeClasses[size]}`}>
+        <img 
+          src={getPlayerImage()} 
+          alt={player.name} 
+          className={`w-full h-full object-cover ${player.status === 'evicted' ? 'grayscale' : ''}`}
+        />
+        {getStatusIndicator()}
+        {getPowerupIndicator()}
       </div>
       
-      <div className={cn('text-center font-medium', fontSizeClasses[size])}>
-        {player.name}
-      </div>
-
-      {showDetails && player.alliances && player.alliances.length > 0 && (
-        <div className="text-xs text-gray-300 mt-1">
-          Alliances: {player.alliances.join(', ')}
+      {showDetails && (
+        <div className="mt-2 text-center">
+          <div className="font-semibold text-sm">{player.name}</div>
+          {player.alliances && player.alliances.length > 0 && (
+            <div className="text-xs text-gray-400">{player.alliances[0]}</div>
+          )}
         </div>
       )}
     </div>
