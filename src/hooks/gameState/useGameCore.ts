@@ -1,6 +1,6 @@
 
-import { useGameSession } from './useGameSession';
-import { useGameWeek } from './useGameWeek';
+import { useGameSession } from './core/useGameSession';
+import { useGameWeek } from './core/useGameWeek';
 import { usePhaseProgress } from './usePhaseProgress';
 
 export function useGameCore() {
@@ -20,21 +20,10 @@ export function useGameCore() {
   
   return {
     // Game session management
-    gameId: gameSession.gameId,
-    isHost: gameSession.isHost,
-    playerName: gameSession.playerName,
-    setPlayerName: gameSession.setPlayerName,
-    gameState: gameSession.gameState,
-    createGame: gameSession.createGame,
-    joinGame: gameSession.joinGame,
-    startGame: gameSession.startGame,
-    endGame: gameSession.endGame,
-    resetGame: gameSession.resetGame,
-    toast: gameSession.toast,
+    ...gameSession,
     
     // Week management
-    currentWeek: gameWeek.currentWeek,
-    setCurrentWeek: gameWeek.setCurrentWeek,
+    ...gameWeek,
     
     // Phase progress tracking
     phaseProgress,
