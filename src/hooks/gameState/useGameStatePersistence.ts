@@ -24,7 +24,7 @@ interface DatabaseGameState {
   game_id: string;
   week: number;
   phase: string;
-  players: Json;
+  players?: Json;  // Add this field to match what we're storing
   hoh_id: string | null;
   veto_holder_id: string | null;
   nominees: Json | null;
@@ -53,12 +53,12 @@ export function useGameStatePersistence() {
       if (error) throw error;
       
       // Transform database records to SavedGameState format
-      const transformedData: SavedGameState[] = (data || []).map((item: DatabaseGameState) => ({
+      const transformedData: SavedGameState[] = (data as DatabaseGameState[] || []).map((item: DatabaseGameState) => ({
         id: item.id,
         game_id: item.game_id,
         week: item.week,
         phase: item.phase,
-        players: item.players as unknown as PlayerData[],
+        players: item.players as unknown as PlayerData[] || [],
         hoh: item.hoh_id,
         veto: item.veto_holder_id,
         nominees: item.nominees ? (item.nominees as unknown as string[]) : [],
@@ -176,6 +176,8 @@ export function useGameStatePersistence() {
         });
         return null;
       }
+
+      const dbState = data as DatabaseGameState;
       
       toast({
         title: 'Game Loaded',
@@ -183,13 +185,13 @@ export function useGameStatePersistence() {
       });
       
       return {
-        gameId: data.game_id,
-        week: data.week,
-        phase: data.phase,
-        players: data.players as unknown as PlayerData[],
-        hoh: data.hoh_id,
-        veto: data.veto_holder_id,
-        nominees: data.nominees ? (data.nominees as unknown as string[]) : []
+        gameId: dbState.game_id,
+        week: dbState.week,
+        phase: dbState.phase,
+        players: dbState.players as unknown as PlayerData[] || [],
+        hoh: dbState.hoh_id,
+        veto: dbState.veto_holder_id,
+        nominees: dbState.nominees ? (dbState.nominees as unknown as string[]) : []
       };
     } catch (err) {
       console.error('Error loading game state:', err);
