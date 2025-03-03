@@ -9,11 +9,15 @@ import { useEvictionPhase } from './useEvictionPhase';
 import { useSpecialCompetitionPhase } from './useSpecialCompetitionPhase';
 import { useJuryQuestionsPhase } from './useJuryQuestionsPhase';
 import { useJuryVotingPhase } from './useJuryVotingPhase';
-import { useGameActions } from './useGameActions';
-import { useGameState } from './useGameState';
 import { useFinaleManager } from './useFinaleManager';
-import { GamePhaseProps, WeekSummary } from './types';
+import { useGameState } from './useGameState';
+import { GamePhaseProps } from './types';
+import { useActionManager } from './managers/useActionManager';
+import { usePhaseRouter } from './managers/usePhaseRouter';
 
+/**
+ * Main hook for managing all game phases and their interactions
+ */
 export function useGamePhaseManager({ 
   players: initialPlayers, 
   week: initialWeek,
@@ -36,17 +40,9 @@ export function useGamePhaseManager({
   });
 
   // Import the game actions logic
-  const gameActions = useGameActions({
+  const gameActions = useActionManager({
     state,
-    setPlayers: setters.setPlayers,
-    setWeek: setters.setWeek,
-    setPhase: setters.setPhase,
-    setHoH: setters.setHoH,
-    setVeto: setters.setVeto,
-    setNominees: setters.setNominees,
-    setSelectedPlayers: setters.setSelectedPlayers,
-    setStatusMessage: setters.setStatusMessage,
-    setWeekSummaries: setters.setWeekSummaries,
+    setters,
     usePowerup,
     toast
   });
@@ -157,93 +153,32 @@ export function useGamePhaseManager({
     toast
   });
 
-  // Main action handler that routes to the appropriate phase handler
-  const handleAction = (action: string, data?: any) => {
-    switch (action) {
-      case 'selectHOH':
-        hohPhase.handleSelectHoH();
-        break;
-        
-      case 'nominate':
-        nominationPhase.handleNominate();
-        break;
-        
-      case 'selectVeto':
-        povPhase.handleSelectVeto();
-        break;
-        
-      case 'vetoAction':
-        vetoPhase.handleVetoAction(data);
-        break;
-        
-      case 'evict':
-        evictionPhase.handleEvict(data);
-        break;
-        
-      case 'nextWeek':
-        // Add current week's summary before moving to next week
-        const currentWeekSummary: WeekSummary = {
-          weekNumber: state.week,
-          hoh: state.hoh,
-          nominees: state.nominees,
-          vetoPlayers: state.players.filter(p => p.id === state.hoh || p.id === state.veto || state.nominees.includes(p.id)).map(p => p.id),
-          vetoWinner: state.veto,
-          vetoUsed: false, // This should be updated when veto is used
-          finalNominees: state.nominees,
-          evicted: state.selectedPlayers[0],
-          evictionVotes: "5-2" // Mock voting result
-        };
-        
-        setters.setWeekSummaries([...state.weekSummaries, currentWeekSummary]);
-        
-        // Now proceed to next week
-        gameActions.handleNextWeek();
-        break;
-        
-      case 'specialCompetition':
-        specialCompPhase.handleSpecialCompetition();
-        break;
-        
-      case 'setupFinale':
-        finaleManager.setupFinale();
-        break;
-        
-      case 'juryQuestions':
-        juryQuestionsPhase.handleJuryQuestions();
-        break;
-        
-      case 'proceedToVoting':
-        juryQuestionsPhase.handleProceedToVoting();
-        break;
-        
-      case 'juryVote':
-        if (data && data.jurorId && data.finalistId) {
-          juryVotingPhase.handleJuryVote(data.jurorId, data.finalistId);
-        }
-        break;
-        
-      case 'showResults':
-        juryVotingPhase.handleShowResults();
-        break;
-        
-      case 'showFinaleStats':
-        setters.setPhase('Statistics');
-        break;
-        
-      case 'showPlacements':
-        setters.setPhase('Placements');
-        break;
-        
-      case 'reSimulate':
-        window.location.reload();
-        break;
-    }
-  };
+  // Create the phase router to handle actions
+  const phaseRouter = usePhaseRouter({
+    hohPhase,
+    nominationPhase,
+    povPhase,
+    vetoPhase,
+    evictionPhase,
+    specialCompPhase,
+    finaleManager,
+    juryQuestionsPhase,
+    juryVotingPhase,
+    gameActions,
+    weekSummaries: state.weekSummaries,
+    setWeekSummaries: setters.setWeekSummaries,
+    week: state.week,
+    nominees: state.nominees,
+    hoh: state.hoh,
+    veto: state.veto,
+    selectedPlayers: state.selectedPlayers,
+    setPhase: setters.setPhase
+  });
 
   return {
     ...state,
     handlePlayerSelect: playerSelection.handlePlayerSelect,
-    handleAction,
+    handleAction: phaseRouter.handleAction,
     setWeek: setters.setWeek,
     setPhase: setters.setPhase
   };
