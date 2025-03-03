@@ -1,71 +1,77 @@
 
-import { AuthState, defaultSettings } from './types';
+import { AuthState } from './types';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { toast } from "@/components/ui/use-toast";
 
-export function useAuthActions(authState: AuthState, setAuthState: React.Dispatch<React.SetStateAction<AuthState>>) {
+export function useAuthActions(
+  authState: AuthState, 
+  setAuthState: React.Dispatch<React.SetStateAction<AuthState>>
+) {
   const login = (player: PlayerData) => {
     setAuthState({
       ...authState,
       isAuthenticated: true,
-      currentPlayer: player,
-      isGuest: false
+      isGuest: false,
+      currentPlayer: player
     });
     
     toast({
       title: "Welcome back!",
-      description: `You're now logged in as ${player.name}.`,
+      description: `You are now logged in as ${player.username}.`,
     });
   };
-
+  
   const register = (player: PlayerData) => {
-    // In a real app, we would register the user in a database
     setAuthState({
       ...authState,
       isAuthenticated: true,
-      currentPlayer: player,
-      isGuest: false
+      isGuest: false,
+      currentPlayer: player
     });
     
     toast({
-      title: "Account created!",
-      description: `Welcome to the game, ${player.name}!`,
+      title: "Registration successful!",
+      description: `Welcome to the game, ${player.username}!`,
     });
   };
-
+  
   const loginAsGuest = (guestName: string) => {
     const guestPlayer: PlayerData = {
       id: `guest-${Date.now()}`,
-      name: guestName,
-      stats: { hohWins: 0, povWins: 0, timesNominated: 0, daysInHouse: 0 }
+      username: guestName,
+      avatar: '/placeholder.svg',
+      level: 1,
+      stats: {
+        wins: 0,
+        losses: 0,
+        totalGames: 0
+      }
     };
     
     setAuthState({
       ...authState,
       isAuthenticated: true,
-      currentPlayer: guestPlayer,
-      isGuest: true
+      isGuest: true,
+      currentPlayer: guestPlayer
     });
     
     toast({
-      title: "Playing as guest",
-      description: `Welcome, ${guestName}! Your progress won't be saved when you leave.`,
+      title: "Guest login successful",
+      description: `You are playing as guest ${guestName}.`,
     });
   };
-
+  
   const logout = () => {
     setAuthState({
+      ...authState,
       isAuthenticated: false,
       currentPlayer: null,
-      isGuest: true,
-      friends: [],
-      notifications: [],
-      settings: defaultSettings
+      isGuest: false
     });
     
     toast({
       title: "Logged out",
-      description: "You've been logged out successfully.",
+      description: "You have been logged out successfully.",
     });
   };
 

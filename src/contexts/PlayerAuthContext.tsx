@@ -31,9 +31,9 @@ export const PlayerAuthProvider = ({ children }: { children: ReactNode }) => {
   return (
     <PlayerAuthContext.Provider
       value={{
-        isAuthenticated: playerAuth.authState.isAuthenticated,
-        currentPlayer: playerAuth.authState.currentPlayer,
-        isGuest: playerAuth.authState.isGuest,
+        isAuthenticated: playerAuth.isAuthenticated,
+        currentPlayer: playerAuth.currentPlayer,
+        isGuest: playerAuth.isGuest,
         login: playerAuth.login,
         register: playerAuth.register,
         loginAsGuest: playerAuth.loginAsGuest,
@@ -45,9 +45,9 @@ export const PlayerAuthProvider = ({ children }: { children: ReactNode }) => {
         addNotification: playerAuth.addNotification,
         markNotificationAsRead: playerAuth.markNotificationAsRead,
         clearNotifications: playerAuth.clearNotifications,
-        friends: playerAuth.authState.friends,
-        notifications: playerAuth.authState.notifications,
-        settings: playerAuth.authState.settings
+        friends: playerAuth.friends,
+        notifications: playerAuth.notifications,
+        settings: playerAuth.settings
       }}
     >
       {children}
