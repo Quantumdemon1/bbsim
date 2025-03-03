@@ -1,17 +1,5 @@
-
 import { PlayerData } from '@/components/PlayerProfile';
-import { type ToastProps } from '@/components/ui/toast';
-
-interface HoHPhaseProps {
-  players: PlayerData[];
-  setPlayers: (players: PlayerData[]) => void;
-  selectedPlayers: string[];
-  setHoH: (hohId: string | null) => void;
-  setStatusMessage: (message: string) => void;
-  setPhase: (phase: string) => void;
-  setSelectedPlayers: (players: string[]) => void;
-  toast: (props: { title: string; description: string; variant?: "default" | "destructive" }) => void;
-}
+import { HoHPhaseProps } from './types';
 
 export function useHoHPhase({
   players,

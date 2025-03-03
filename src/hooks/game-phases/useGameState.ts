@@ -2,18 +2,13 @@
 import { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { PlayerData } from '@/components/PlayerProfile';
-
-interface GameStateProps {
-  players: PlayerData[];
-  week: number;
-  initialPhase?: string;
-}
+import { GamePhaseProps, GamePhaseState, GamePhaseSetters } from './types';
 
 export function useGameState({ 
   players: initialPlayers, 
   week: initialWeek,
   initialPhase = 'HoH Competition'
-}: GameStateProps) {
+}: GamePhaseProps) {
   const [week, setWeek] = useState(initialWeek);
   const [players, setPlayers] = useState(initialPlayers);
   const [phase, setPhase] = useState(initialPhase);
@@ -27,7 +22,7 @@ export function useGameState({
   const [votes, setVotes] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
-  const gameState = {
+  const gameState: GamePhaseState = {
     week,
     phase,
     players,
@@ -41,7 +36,7 @@ export function useGameState({
     votes
   };
 
-  const setters = {
+  const setters: GamePhaseSetters = {
     setWeek,
     setPlayers,
     setPhase,

@@ -1,17 +1,5 @@
-
-import { toast } from "@/components/ui/use-toast";
+import { JuryVotingProps } from './types';
 import { PlayerData } from "@/components/PlayerProfile";
-
-interface JuryVotingProps {
-  players: PlayerData[];
-  setPlayers: (players: PlayerData[]) => void;
-  finalists: string[];
-  votes: Record<string, string>;
-  setVotes: (votes: Record<string, string>) => void;
-  setStatusMessage: (message: string) => void;
-  setPhase: (phase: string) => void;
-  setSelectedPlayers: (players: string[]) => void;
-}
 
 export function useJuryVotingPhase({
   players,
@@ -21,7 +9,8 @@ export function useJuryVotingPhase({
   setVotes,
   setStatusMessage,
   setPhase,
-  setSelectedPlayers
+  setSelectedPlayers,
+  toast
 }: JuryVotingProps) {
   
   const handleJuryVote = (jurorId: string, finalistId: string) => {

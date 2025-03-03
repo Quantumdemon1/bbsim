@@ -1,15 +1,33 @@
 
 import { PlayerData } from '@/components/PlayerProfile';
 
+// Game Phases
+export type GamePhase = 
+  | 'HoH Competition'
+  | 'Nomination Ceremony' 
+  | 'PoV Competition'
+  | 'Veto Ceremony'
+  | 'Eviction Voting'
+  | 'Special Competition'
+  | 'Jury Questions'
+  | 'Jury Voting'
+  | 'The Winner'
+  | 'Finale Stats'
+  | 'Eviction';
+
+// Game State Types
 export interface GamePhaseState {
   week: number;
-  phase: string;
+  phase: GamePhase | string; 
   players: PlayerData[];
   nominees: string[];
   hoh: string | null;
   veto: string | null;
   statusMessage: string;
   selectedPlayers: string[];
+  finalists: string[];
+  jurors: string[];
+  votes: Record<string, string>;
 }
 
 export interface GamePhaseActions {
@@ -25,6 +43,29 @@ export interface GamePhaseProps {
   initialPhase?: string;
 }
 
+// Game State Setters
+export interface GamePhaseSetters {
+  setWeek: (week: number) => void;
+  setPlayers: (players: PlayerData[]) => void;
+  setPhase: (phase: GamePhase | string) => void;
+  setHoH: (hohId: string | null) => void;
+  setVeto: (vetoId: string | null) => void;
+  setNominees: (nominees: string[]) => void;
+  setSelectedPlayers: (players: string[]) => void;
+  setStatusMessage: (message: string) => void;
+  setFinalists: (finalists: string[]) => void;
+  setJurors: (jurors: string[]) => void;
+  setVotes: (votes: Record<string, string>) => void;
+}
+
+// Toast interface
+export interface ToastProps {
+  title: string;
+  description: string;
+  variant?: "default" | "destructive";
+}
+
+// Player Attributes
 export interface PlayerAttributes {
   general: number;
   physical: number;
@@ -36,6 +77,7 @@ export interface PlayerAttributes {
   temperament: number;
 }
 
+// Player Relationships
 export interface PlayerRelationship {
   playerId: string;
   targetId: string;
@@ -58,6 +100,132 @@ export type RelationshipType =
   | 'Strong Dislike'
   | 'Nemesis';
 
+// Phase-specific interfaces
+export interface HoHPhaseProps {
+  players: PlayerData[];
+  setPlayers: (players: PlayerData[]) => void;
+  selectedPlayers: string[];
+  setHoH: (hohId: string | null) => void;
+  setStatusMessage: (message: string) => void;
+  setPhase: (phase: GamePhase | string) => void;
+  setSelectedPlayers: (players: string[]) => void;
+  toast: (props: ToastProps) => void;
+}
+
+export interface NominationPhaseProps {
+  players: PlayerData[];
+  setPlayers: (players: PlayerData[]) => void;
+  selectedPlayers: string[];
+  setNominees: (nominees: string[]) => void;
+  hoh: string | null;
+  setStatusMessage: (message: string) => void;
+  setPhase: (phase: GamePhase | string) => void;
+  setSelectedPlayers: (players: string[]) => void;
+  usePowerup: (playerId: string) => void;
+  toast: (props: ToastProps) => void;
+}
+
+export interface PoVPhaseProps {
+  players: PlayerData[];
+  setPlayers: (players: PlayerData[]) => void;
+  selectedPlayers: string[];
+  setVeto: (vetoId: string | null) => void;
+  setStatusMessage: (message: string) => void;
+  setPhase: (phase: GamePhase | string) => void;
+  setSelectedPlayers: (players: string[]) => void;
+  toast: (props: ToastProps) => void;
+}
+
+export interface VetoPhaseProps {
+  players: PlayerData[];
+  setPlayers: (players: PlayerData[]) => void;
+  nominees: string[];
+  setNominees: (nominees: string[]) => void;
+  veto: string | null;
+  hoh: string | null;
+  setStatusMessage: (message: string) => void;
+  setPhase: (phase: GamePhase | string) => void;
+  setSelectedPlayers: (players: string[]) => void;
+  usePowerup: (playerId: string) => void;
+  toast: (props: ToastProps) => void;
+}
+
+export interface EvictionPhaseProps {
+  players: PlayerData[];
+  setPlayers: (players: PlayerData[]) => void;
+  nominees: string[];
+  setSelectedPlayers: (players: string[]) => void;
+  setStatusMessage: (message: string) => void;
+  setPhase: (phase: GamePhase | string) => void;
+  usePowerup: (playerId: string) => void;
+  toast: (props: ToastProps) => void;
+}
+
+export interface SpecialCompetitionPhaseProps {
+  players: PlayerData[];
+  setPlayers: (players: PlayerData[]) => void;
+  selectedPlayers: string[];
+  week: number;
+  setWeek: (week: number) => void;
+  setPhase: (phase: GamePhase | string) => void;
+  setSelectedPlayers: (players: string[]) => void;
+  setStatusMessage: (message: string) => void;
+  toast: (props: ToastProps) => void;
+}
+
+export interface JuryQuestionsProps {
+  players: PlayerData[];
+  setPlayers: (players: PlayerData[]) => void;
+  finalists: string[];
+  setFinalists: (finalists: string[]) => void;
+  jurors: string[];
+  setJurors: (jurors: string[]) => void;
+  setStatusMessage: (message: string) => void;
+  setPhase: (phase: GamePhase | string) => void;
+  setSelectedPlayers: (players: string[]) => void;
+  toast: (props: ToastProps) => void;
+}
+
+export interface JuryVotingProps {
+  players: PlayerData[];
+  setPlayers: (players: PlayerData[]) => void;
+  finalists: string[];
+  votes: Record<string, string>;
+  setVotes: (votes: Record<string, string>) => void;
+  setStatusMessage: (message: string) => void;
+  setPhase: (phase: GamePhase | string) => void;
+  setSelectedPlayers: (players: string[]) => void;
+  toast: (props: ToastProps) => void;
+}
+
+export interface FinaleManagerProps {
+  players: PlayerData[];
+  setFinalists: (finalists: string[]) => void;
+  setJurors: (jurors: string[]) => void;
+  toast: (props: ToastProps) => void;
+}
+
+export interface PlayerSelectionProps {
+  selectedPlayers: string[];
+  setSelectedPlayers: (players: string[]) => void;
+  phase: GamePhase | string;
+}
+
+export interface GameActionsProps {
+  state: GamePhaseState;
+  setPlayers: (players: PlayerData[]) => void;
+  setWeek: (week: number) => void;
+  setPhase: (phase: GamePhase | string) => void;
+  setHoH: (hohId: string | null) => void;
+  setVeto: (vetoId: string | null) => void;
+  setNominees: (nominees: string[]) => void;
+  setSelectedPlayers: (players: string[]) => void;
+  setStatusMessage: (message: string) => void;
+  usePowerup: (playerId: string) => void;
+  toast: (props: ToastProps) => void;
+}
+
+// Constants
 export const attributeLevels = [
   { value: 1, label: "1: Terrible" },
   { value: 2, label: "2: Poor" },

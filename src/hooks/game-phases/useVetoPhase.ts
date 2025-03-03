@@ -1,19 +1,5 @@
-
 import { PlayerData } from '@/components/PlayerProfile';
-
-interface VetoPhaseProps {
-  players: PlayerData[];
-  setPlayers: (players: PlayerData[]) => void;
-  nominees: string[];
-  setNominees: (nominees: string[]) => void;
-  veto: string | null;
-  hoh: string | null;
-  setStatusMessage: (message: string) => void;
-  setPhase: (phase: string) => void;
-  setSelectedPlayers: (players: string[]) => void;
-  usePowerup: (playerId: string) => void;
-  toast: (props: { title: string; description: string; variant?: "default" | "destructive" }) => void;
-}
+import { VetoPhaseProps } from './types';
 
 export function useVetoPhase({
   players,

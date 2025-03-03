@@ -1,16 +1,5 @@
 import { PlayerData } from '@/components/PlayerProfile';
-
-interface SpecialCompetitionPhaseProps {
-  players: PlayerData[];
-  setPlayers: (players: PlayerData[]) => void;
-  selectedPlayers: string[];
-  week: number;
-  setWeek: (week: number) => void;
-  setPhase: (phase: string) => void;
-  setSelectedPlayers: (players: string[]) => void;
-  setStatusMessage: (message: string) => void;
-  toast: (props: { title: string; description: string; variant?: "default" | "destructive" }) => void;
-}
+import { SpecialCompetitionPhaseProps } from './types';
 
 export function useSpecialCompetitionPhase({
   players,

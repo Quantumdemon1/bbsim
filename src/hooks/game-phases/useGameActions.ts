@@ -1,20 +1,5 @@
-
-import { GamePhaseState } from './types';
+import { GameActionsProps, GamePhaseState } from './types';
 import { PlayerData } from '@/components/PlayerProfile';
-
-interface GameActionsProps {
-  state: GamePhaseState;
-  setPlayers: (players: PlayerData[]) => void;
-  setWeek: (week: number) => void;
-  setPhase: (phase: string) => void;
-  setHoH: (hohId: string | null) => void;
-  setVeto: (vetoId: string | null) => void;
-  setNominees: (nominees: string[]) => void;
-  setSelectedPlayers: (players: string[]) => void;
-  setStatusMessage: (message: string) => void;
-  usePowerup: (playerId: string) => void;
-  toast: (props: { title: string; description: string; variant?: "default" | "destructive" }) => void;
-}
 
 export function useGameActions({
   state,

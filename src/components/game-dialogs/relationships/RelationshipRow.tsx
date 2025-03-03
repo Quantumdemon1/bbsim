@@ -1,13 +1,13 @@
 
 import React from 'react';
 import { Checkbox } from "@/components/ui/checkbox";
-import { relationshipTypes } from '@/hooks/game-phases/types';
+import { relationshipTypes, RelationshipType } from '@/hooks/game-phases/types';
 
 interface RelationshipRowProps {
   targetId: string;
   targetName: string;
   targetImage: string;
-  relationshipType: string | null;
+  relationshipType: RelationshipType | null;
   extraPoints: number | null;
   isMutual: boolean | null;
   isPermanent: boolean | null;

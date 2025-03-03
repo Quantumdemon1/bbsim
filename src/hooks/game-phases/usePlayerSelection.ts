@@ -1,9 +1,4 @@
-
-interface PlayerSelectionProps {
-  selectedPlayers: string[];
-  setSelectedPlayers: (players: string[]) => void;
-  phase: string;
-}
+import { PlayerSelectionProps } from './types';
 
 export function usePlayerSelection({
   selectedPlayers,

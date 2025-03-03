@@ -1,16 +1,5 @@
-
 import { PlayerData } from '@/components/PlayerProfile';
-
-interface EvictionPhaseProps {
-  players: PlayerData[];
-  setPlayers: (players: PlayerData[]) => void;
-  nominees: string[];
-  setSelectedPlayers: (players: string[]) => void;
-  setStatusMessage: (message: string) => void;
-  setPhase: (phase: string) => void;
-  usePowerup: (playerId: string) => void;
-  toast: (props: { title: string; description: string; variant?: "default" | "destructive" }) => void;
-}
+import { EvictionPhaseProps } from './types';
 
 export function useEvictionPhase({
   players,

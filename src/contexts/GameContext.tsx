@@ -1,12 +1,11 @@
-
 import React, { createContext, useContext, ReactNode } from 'react';
 import { GameContextType, mockPlayers } from './types';
 import { useAllianceManager } from './allianceManager';
 import { usePowerupManager } from './powerupManager';
 import { usePlayerManager } from '@/hooks/usePlayerManager';
 import { useGameStateManager } from '@/hooks/useGameStateManager';
-import { PlayerData, PlayerStatus } from '@/components/PlayerProfile';
-import { PlayerAttributes, PlayerRelationship } from '@/hooks/game-phases/types';
+import { PlayerData } from '@/components/PlayerProfile';
+import { PlayerAttributes, PlayerRelationship, RelationshipType } from '@/hooks/game-phases/types';
 
 // Create the context with a default empty object
 const GameContext = createContext<GameContextType>({} as GameContextType);
@@ -65,12 +64,12 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       const randomPowerup = hasPowerup ? powerupTypes[Math.floor(Math.random() * powerupTypes.length)] : undefined;
       
       // Create default relationships
-      const relationships = mockPlayers
+      const relationships: PlayerRelationship[] = mockPlayers
         .filter(p => p.id !== player.id)
         .map(target => ({
           playerId: player.id,
           targetId: target.id,
-          type: 'Neutral',
+          type: 'Neutral' as RelationshipType,
           extraPoints: 0,
           isMutual: false,
           isPermanent: false

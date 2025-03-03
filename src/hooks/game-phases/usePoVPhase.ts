@@ -1,15 +1,5 @@
 import { PlayerData } from '@/components/PlayerProfile';
-
-interface PoVPhaseProps {
-  players: PlayerData[];
-  setPlayers: (players: PlayerData[]) => void;
-  selectedPlayers: string[];
-  setVeto: (vetoId: string | null) => void;
-  setStatusMessage: (message: string) => void;
-  setPhase: (phase: string) => void;
-  setSelectedPlayers: (players: string[]) => void;
-  toast: (props: { title: string; description: string; variant?: "default" | "destructive" }) => void;
-}
+import { PoVPhaseProps } from './types';
 
 export function usePoVPhase({
   players,

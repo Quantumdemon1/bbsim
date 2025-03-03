@@ -1,18 +1,5 @@
-
 import { PlayerData } from '@/components/PlayerProfile';
-
-interface NominationPhaseProps {
-  players: PlayerData[];
-  setPlayers: (players: PlayerData[]) => void;
-  selectedPlayers: string[];
-  setNominees: (nominees: string[]) => void;
-  hoh: string | null;
-  setStatusMessage: (message: string) => void;
-  setPhase: (phase: string) => void;
-  setSelectedPlayers: (players: string[]) => void;
-  usePowerup: (playerId: string) => void;
-  toast: (props: { title: string; description: string; variant?: "default" | "destructive" }) => void;
-}
+import { NominationPhaseProps } from './types';
 
 export function useNominationPhase({
   players,
