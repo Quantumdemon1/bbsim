@@ -25,7 +25,7 @@ export function usePersistenceManager({
   const [lastSaveSuccess, setLastSaveSuccess] = useState<Date | null>(null);
   const [saveError, setSaveError] = useState<Error | null>(null);
   
-  const saveCurrentGame = async () => {
+  const saveCurrentGame = async (): Promise<void> => {
     if (!gameId || gameState !== 'playing') {
       return;
     }
@@ -47,7 +47,6 @@ export function usePersistenceManager({
       });
       
       setLastSaveSuccess(new Date());
-      return true;
     } catch (error) {
       setSaveError(error instanceof Error ? error : new Error('Unknown error during save'));
       handleGameError({
@@ -55,13 +54,12 @@ export function usePersistenceManager({
         message: error instanceof Error ? error.message : 'Failed to save game state',
         originalError: error
       });
-      return false;
     } finally {
       performanceTracker.end();
     }
   };
   
-  const loadGame = async (gameId: string) => {
+  const loadGame = async (gameId: string): Promise<boolean> => {
     const performanceTracker = trackSaveGame();
     performanceTracker.start();
     
@@ -69,12 +67,7 @@ export function usePersistenceManager({
       const gameState = await gamePersistence.loadGameState(gameId);
       
       if (gameState) {
-        return {
-          gameId: gameState.gameId,
-          week: gameState.week,
-          phase: gameState.phase,
-          players: gameState.players
-        };
+        return true;
       }
       
       handleGameError({
@@ -83,7 +76,7 @@ export function usePersistenceManager({
         context: { gameId }
       });
       
-      return null;
+      return false;
     } catch (error) {
       handleGameError({
         code: GameErrorCode.LOAD_FAILED,
@@ -91,13 +84,13 @@ export function usePersistenceManager({
         originalError: error,
         context: { gameId }
       });
-      return null;
+      return false;
     } finally {
       performanceTracker.end();
     }
   };
   
-  const deleteSavedGame = async (gameId: string) => {
+  const deleteSavedGame = async (gameId: string): Promise<boolean> => {
     try {
       return await gamePersistence.deleteGameState(gameId);
     } catch (error) {
