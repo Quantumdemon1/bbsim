@@ -41,7 +41,7 @@ const PlayerSelectionGrid: React.FC<PlayerSelectionGridProps> = ({
                 </div>
               )}
               
-              {/* New: Show AI indicator */}
+              {/* Show AI indicator */}
               {!player.isHuman && !player.isAdmin && (
                 <div className="absolute top-1 right-1 bg-blue-500 rounded-full p-1">
                   <Bot size={14} className="text-white" />

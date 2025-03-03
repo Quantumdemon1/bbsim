@@ -33,6 +33,9 @@ const RelationshipRow: React.FC<RelationshipRowProps> = ({
           src={targetImage} 
           alt={targetName} 
           className="w-10 h-10 object-cover rounded-full mr-2" 
+          onError={(e) => {
+            e.currentTarget.style.display = 'none';
+          }}
         />
         <span className="font-medium">{targetName}</span>
       </div>
