@@ -38,7 +38,7 @@ const WeeklySummary: React.FC<WeeklySummaryProps> = ({
   onAction,
   alliances = []
 }) => {
-  const currentSummary = weekSummaries.find(summary => summary.weekNumber === currentWeek) || weekSummaries[weekSummaries.length - 1];
+  const currentSummary = weekSummaries.find(summary => summary.week === currentWeek) || weekSummaries[weekSummaries.length - 1];
   
   if (!currentSummary) {
     return <div className="text-center p-8">No summary available for this week</div>;
@@ -46,12 +46,12 @@ const WeeklySummary: React.FC<WeeklySummaryProps> = ({
   
   // Get player objects from IDs in the summary
   const hohPlayer = players.find(p => p.id === currentSummary.hoh);
-  const vetoWinner = players.find(p => p.id === currentSummary.vetoWinner);
+  const vetoWinner = players.find(p => p.id === currentSummary.vetoWinner || p.id === currentSummary.veto);
   const initialNominees = currentSummary.nominees.map(id => players.find(p => p.id === id)).filter(Boolean) as PlayerData[];
-  const finalNominees = currentSummary.finalNominees.map(id => players.find(p => p.id === id)).filter(Boolean) as PlayerData[];
+  const finalNominees = (currentSummary.finalNominees || currentSummary.nominees).map(id => players.find(p => p.id === id)).filter(Boolean) as PlayerData[];
   const evictedPlayer = players.find(p => p.id === currentSummary.evicted);
   
-  const vetoUsed = initialNominees.some(nominee => 
+  const vetoUsed = currentSummary.vetoUsed || initialNominees.some(nominee => 
     !finalNominees.some(finalNom => finalNom.id === nominee.id)
   );
   
@@ -67,7 +67,7 @@ const WeeklySummary: React.FC<WeeklySummaryProps> = ({
   
   return (
     <div className="glass-panel p-6 w-full max-w-4xl mx-auto animate-scale-in">
-      <h2 className="text-2xl font-bold text-center mb-6">Week {currentSummary.weekNumber} Summary</h2>
+      <h2 className="text-2xl font-bold text-center mb-6">Week {currentSummary.week} Summary</h2>
       
       <div className="space-y-8">
         {/* Head of Household */}

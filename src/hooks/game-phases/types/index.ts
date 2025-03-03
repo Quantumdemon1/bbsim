@@ -9,7 +9,18 @@ export {
 export type { 
   GamePhaseProps,
   GamePhaseState, 
-  GamePhaseSetters 
+  GamePhaseSetters, 
+  // Add missing Props types
+  GameActionsProps,
+  HoHPhaseProps,
+  NominationPhaseProps,
+  PoVPhaseProps,
+  VetoPhaseProps,
+  EvictionPhaseProps,
+  SpecialCompetitionPhaseProps,
+  PlayerSelectionProps,
+  JuryQuestionsProps,
+  JuryVotingProps
 } from './common';
 // Re-export component props types
 export type { 

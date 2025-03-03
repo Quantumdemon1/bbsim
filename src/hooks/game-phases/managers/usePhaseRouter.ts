@@ -71,7 +71,7 @@ export function usePhaseRouter({
       case 'nextWeek':
         // Add current week's summary before moving to next week
         const currentWeekSummary: WeekSummary = {
-          weekNumber: week,
+          week: week,
           hoh: hoh,
           nominees: nominees,
           vetoPlayers: nominees.concat(hoh ? [hoh] : []).concat(veto ? [veto] : []),

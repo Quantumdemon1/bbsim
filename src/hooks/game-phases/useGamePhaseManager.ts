@@ -168,7 +168,9 @@ export function useGamePhaseManager({
     vetoPhase,
     evictionPhase,
     specialCompPhase,
-    finaleManager,
+    finaleManager: { 
+      setupFinale: finaleManager.setupFinaleParticipants 
+    },
     juryQuestionsPhase,
     juryVotingPhase,
     gameActions,

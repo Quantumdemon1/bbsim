@@ -40,7 +40,7 @@ interface PhaseRendererProps {
 
 // Group 1: Regular Week Competition Phases
 const renderCompetitionPhase = (props: PhaseRendererProps) => {
-  const { phase, players, selectedPlayers, onPlayerSelect, onAction } = props;
+  const { phase, players, hoh, nominees, selectedPlayers, onPlayerSelect, onAction } = props;
   
   switch (phase) {
     case 'HoH Competition':
@@ -60,6 +60,8 @@ const renderCompetitionPhase = (props: PhaseRendererProps) => {
           selectedPlayers={selectedPlayers}
           onPlayerSelect={onPlayerSelect}
           onAction={onAction}
+          hoh={hoh}
+          nominees={nominees}
         />
       );
       
