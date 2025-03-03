@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Shield, Star } from 'lucide-react';
+import { PlayerAttributes, PlayerRelationship } from '@/hooks/game-phases/types';
 
 export interface PlayerData {
   id: string;
@@ -10,6 +10,8 @@ export interface PlayerData {
   status?: 'hoh' | 'nominated' | 'veto' | 'safe' | 'evicted';
   alliances?: string[];
   powerup?: 'immunity' | 'coup' | 'replay' | 'nullify';
+  attributes?: PlayerAttributes;
+  relationships?: PlayerRelationship[];
 }
 
 interface PlayerProfileProps {

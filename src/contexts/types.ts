@@ -1,5 +1,6 @@
 
 import { PlayerData } from '@/components/PlayerProfile';
+import { PlayerAttributes, PlayerRelationship } from '@/hooks/game-phases/types';
 
 export interface GameContextType {
   players: PlayerData[];
@@ -22,6 +23,8 @@ export interface GameContextType {
   removeFromAlliance: (allianceId: string, playerId: string) => void;
   awardPowerup: (playerId: string, powerup: PlayerData['powerup']) => void;
   usePowerup: (playerId: string) => void;
+  updatePlayerAttributes: (playerId: string, attributes: PlayerAttributes) => void;
+  updatePlayerRelationships: (playerId: string, relationships: PlayerRelationship[]) => void;
 }
 
 export interface Alliance {

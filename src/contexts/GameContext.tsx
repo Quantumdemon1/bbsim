@@ -5,6 +5,7 @@ import { GameContextType, mockPlayers } from './types';
 import { useAllianceManager } from './allianceManager';
 import { usePowerupManager } from './powerupManager';
 import { PlayerData } from '@/components/PlayerProfile';
+import { PlayerAttributes, PlayerRelationship } from '@/hooks/game-phases/types';
 
 // Create the context with a default empty object
 const GameContext = createContext<GameContextType>({} as GameContextType);
@@ -65,7 +66,19 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     
     allianceManager.setAlliances(newAlliances);
     
-    // Assign alliances to players
+    // Initialize default attributes for all players
+    const defaultAttributes: PlayerAttributes = {
+      general: 3,
+      physical: 3,
+      endurance: 3,
+      mentalQuiz: 3,
+      strategic: 3,
+      loyalty: 3,
+      social: 3,
+      temperament: 3
+    };
+    
+    // Assign alliances and default attributes to players
     const updatedPlayers = [...mockPlayers].map(player => {
       const playerAlliances: string[] = [];
       newAlliances.forEach(alliance => {
@@ -79,10 +92,24 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       const powerupTypes: PlayerData['powerup'][] = ['immunity', 'coup', 'replay', 'nullify'];
       const randomPowerup = hasPowerup ? powerupTypes[Math.floor(Math.random() * powerupTypes.length)] : undefined;
       
+      // Create default relationships
+      const relationships: PlayerRelationship[] = mockPlayers
+        .filter(p => p.id !== player.id)
+        .map(target => ({
+          playerId: player.id,
+          targetId: target.id,
+          type: 'Neutral',
+          extraPoints: 0,
+          isMutual: false,
+          isPermanent: false
+        }));
+      
       return {
         ...player,
         alliances: playerAlliances.length > 0 ? playerAlliances : undefined,
-        powerup: randomPowerup
+        powerup: randomPowerup,
+        attributes: defaultAttributes,
+        relationships
       };
     });
     
@@ -115,9 +142,65 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       ...player,
       status: undefined,
       alliances: undefined,
-      powerup: undefined
+      powerup: undefined,
+      attributes: undefined,
+      relationships: undefined
     })));
     allianceManager.setAlliances([]);
+  };
+  
+  const updatePlayerAttributes = (playerId: string, attributes: PlayerAttributes) => {
+    setPlayers(prevPlayers => prevPlayers.map(player => 
+      player.id === playerId ? { ...player, attributes } : player
+    ));
+  };
+  
+  const updatePlayerRelationships = (playerId: string, relationships: PlayerRelationship[]) => {
+    setPlayers(prevPlayers => prevPlayers.map(player => 
+      player.id === playerId ? { ...player, relationships } : player
+    ));
+    
+    // If any relationships are mutual, update the target player as well
+    relationships.forEach(relationship => {
+      if (relationship.isMutual) {
+        setPlayers(prevPlayers => prevPlayers.map(player => {
+          if (player.id === relationship.targetId) {
+            const existingRelationships = player.relationships || [];
+            const existingRelIndex = existingRelationships.findIndex(r => r.targetId === playerId);
+            
+            if (existingRelIndex >= 0) {
+              // Update existing relationship
+              const updatedRelationships = [...existingRelationships];
+              updatedRelationships[existingRelIndex] = {
+                ...updatedRelationships[existingRelIndex],
+                type: relationship.type,
+                extraPoints: relationship.extraPoints,
+                isMutual: true,
+                isPermanent: relationship.isPermanent
+              };
+              return { ...player, relationships: updatedRelationships };
+            } else {
+              // Create new relationship
+              return {
+                ...player,
+                relationships: [
+                  ...existingRelationships,
+                  {
+                    playerId: relationship.targetId,
+                    targetId: relationship.playerId,
+                    type: relationship.type,
+                    extraPoints: relationship.extraPoints,
+                    isMutual: true,
+                    isPermanent: relationship.isPermanent
+                  }
+                ]
+              };
+            }
+          }
+          return player;
+        }));
+      }
+    });
   };
 
   return (
@@ -137,6 +220,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         resetGame,
         currentWeek,
         setCurrentWeek,
+        updatePlayerAttributes,
+        updatePlayerRelationships,
         ...allianceManager,
         ...powerupManager
       }}
