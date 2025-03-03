@@ -21,6 +21,7 @@ interface AIPlayerContextType {
   getPlayerMemory: (playerId: string) => AIMemoryEntry[];
   isUsingLLM: boolean;
   toggleLLMDecisionMaking: () => void;
+  isThinking: Record<string, boolean>;
 }
 
 const AIPlayerContext = createContext<AIPlayerContextType>({} as AIPlayerContextType);
@@ -38,7 +39,8 @@ export const AIPlayerProvider = ({ children }: { children: ReactNode }) => {
         clearAIMemory: aiManager.clearAIMemory,
         getPlayerMemory: (playerId: string) => aiManager.getPlayerMemory(playerId),
         isUsingLLM: aiManager.isUsingLLM,
-        toggleLLMDecisionMaking: aiManager.toggleLLMDecisionMaking
+        toggleLLMDecisionMaking: aiManager.toggleLLMDecisionMaking,
+        isThinking: aiManager.isThinking
       }}
     >
       {children}
@@ -53,4 +55,3 @@ export const useAIPlayerContext = () => {
   }
   return context;
 };
-

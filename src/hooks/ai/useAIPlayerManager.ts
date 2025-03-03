@@ -14,6 +14,7 @@ import { generateLLMDialogue } from './dialogue/llmDialogue';
 export function useAIPlayerManager(players: PlayerData[]) {
   const memoryManager = useAIMemoryManager();
   const [isUsingLLM, setIsUsingLLM] = useState<boolean>(false);
+  const [isThinking, setIsThinking] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
   
   // Initialize AI memory for new players
@@ -67,26 +68,65 @@ export function useAIPlayerManager(players: PlayerData[]) {
       };
     }
     
+    // Set thinking state for this player
+    setIsThinking(prev => ({ ...prev, [playerId]: true }));
+    
     // Get player memory
     const memory = memoryManager.getPlayerMemory(playerId);
     
-    // If LLM decisions are enabled, use OpenAI to generate a decision
-    if (isUsingLLM) {
-      try {
-        return await generateLLMDecision(player, decisionType, options, players, memory);
-      } catch (error) {
-        console.error("Error generating LLM decision:", error);
-        toast({
-          title: "LLM Decision Failed",
-          description: "Falling back to rule-based decisions.",
-          variant: "destructive"
-        });
-        // Fall back to rule-based decision making if LLM fails
+    try {
+      // If LLM decisions are enabled, use OpenAI to generate a decision
+      if (isUsingLLM) {
+        try {
+          const decision = await generateLLMDecision(player, decisionType, options, players, memory);
+          // Add decision to memory
+          await memoryManager.addMemoryEntry(playerId, {
+            type: 'strategy_discussion',
+            week: gameState.currentWeek || 1,
+            description: `Made a decision: ${decision.reasoning}`,
+            impact: 'neutral',
+            importance: 3,
+            timestamp: new Date().toISOString()
+          });
+          
+          setIsThinking(prev => ({ ...prev, [playerId]: false }));
+          return decision;
+        } catch (error) {
+          console.error("Error generating LLM decision:", error);
+          toast({
+            title: "LLM Decision Failed",
+            description: "Falling back to rule-based decisions.",
+            variant: "destructive"
+          });
+          // Fall back to rule-based decision making if LLM fails
+        }
       }
+      
+      // Rule-based decision making
+      const decision = makeRuleBasedDecision(player, decisionType, options, players, memory);
+      
+      // Add decision to memory
+      await memoryManager.addMemoryEntry(playerId, {
+        type: 'strategy_discussion',
+        week: gameState.currentWeek || 1,
+        description: `Made a decision: ${decision.reasoning}`,
+        impact: 'neutral',
+        importance: 2,
+        timestamp: new Date().toISOString()
+      });
+      
+      setIsThinking(prev => ({ ...prev, [playerId]: false }));
+      return decision;
+    } catch (error) {
+      console.error("Error in makeAIDecision:", error);
+      setIsThinking(prev => ({ ...prev, [playerId]: false }));
+      
+      // Fallback to basic decision
+      return { 
+        decision: options[0] || null,
+        reasoning: "Default decision due to error in processing"
+      };
     }
-    
-    // Rule-based decision making
-    return makeRuleBasedDecision(player, decisionType, options, players, memory);
   };
   
   /**
@@ -100,21 +140,35 @@ export function useAIPlayerManager(players: PlayerData[]) {
     const player = players.find(p => p.id === playerId);
     if (!player) return "I have nothing to say.";
     
-    // If LLM is enabled, generate more natural dialogue with OpenAI
-    if (isUsingLLM) {
-      const memory = memoryManager.getPlayerMemory(playerId);
-      const recentMemory = memory.slice(-3).map(m => m.description).join("; ");
-      try {
-        return await generateLLMDialogue(player, situation, context, recentMemory);
-      } catch (error) {
-        console.error("Error using LLM dialogue:", error);
-        // Fall back to template-based responses if LLM fails
-        return generateTemplateDialogue(player, situation, context);
-      }
-    }
+    // Set thinking state for this player
+    setIsThinking(prev => ({ ...prev, [playerId]: true }));
     
-    // Otherwise use template-based responses
-    return generateTemplateDialogue(player, situation, context);
+    try {
+      // If LLM is enabled, generate more natural dialogue with OpenAI
+      if (isUsingLLM) {
+        const memory = memoryManager.getPlayerMemory(playerId);
+        const recentMemory = memory.slice(-3).map(m => m.description).join("; ");
+        
+        try {
+          const dialogue = await generateLLMDialogue(player, situation, context, recentMemory);
+          setIsThinking(prev => ({ ...prev, [playerId]: false }));
+          return dialogue;
+        } catch (error) {
+          console.error("Error using LLM dialogue:", error);
+          // Fall back to template-based responses if LLM fails
+          setIsThinking(prev => ({ ...prev, [playerId]: false }));
+          return generateTemplateDialogue(player, situation, context);
+        }
+      }
+      
+      // Otherwise use template-based responses
+      setIsThinking(prev => ({ ...prev, [playerId]: false }));
+      return generateTemplateDialogue(player, situation, context);
+    } catch (error) {
+      console.error("Error in generateAIDialogue:", error);
+      setIsThinking(prev => ({ ...prev, [playerId]: false }));
+      return "I'm just focusing on my game right now.";
+    }
   };
   
   return {
@@ -125,6 +179,7 @@ export function useAIPlayerManager(players: PlayerData[]) {
     makeAIDecision,
     generateAIDialogue,
     isUsingLLM,
-    toggleLLMDecisionMaking
+    toggleLLMDecisionMaking,
+    isThinking
   };
 }

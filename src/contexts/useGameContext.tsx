@@ -96,6 +96,7 @@ export const useGameContext = () => {
     clearAIMemory: aiPlayer.clearAIMemory,
     getPlayerMemory: aiPlayer.getPlayerMemory,
     isUsingLLM: aiPlayer.isUsingLLM,
-    toggleLLMDecisionMaking: aiPlayer.toggleLLMDecisionMaking
+    toggleLLMDecisionMaking: aiPlayer.toggleLLMDecisionMaking,
+    isThinking: aiPlayer.isThinking
   };
 }

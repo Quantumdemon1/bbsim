@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { AIMemoryEntry } from '../types';
+import { useToast } from '@/components/ui/use-toast';
 
 /**
  * Generate AI dialogue using the OpenAI API through Supabase Edge Functions
@@ -44,7 +45,8 @@ export const generateLLMDialogue = async (
         gamePhase,
         situation,
         recentMemory,
-        context
+        context,
+        responseType: 'dialogue'
       }
     });
     
