@@ -1,20 +1,28 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Users } from 'lucide-react';
 import { PlayerData } from '@/components/PlayerProfileTypes';
-import { useGameContext } from '@/contexts/GameContext';
+import { useGameContext } from '@/hooks/useGameContext';
 
 interface AllianceManagementDialogProps {
   players: PlayerData[];
+  onClose?: () => void;
 }
 
-const AllianceManagementDialog: React.FC<AllianceManagementDialogProps> = ({ players }) => {
+const AllianceManagementDialog: React.FC<AllianceManagementDialogProps> = ({ players, onClose }) => {
   const { alliances, createAlliance, addToAlliance, removeFromAlliance } = useGameContext();
   const [allianceName, setAllianceName] = useState('');
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [selectedAlliance, setSelectedAlliance] = useState<string | null>(null);
+  const [open, setOpen] = useState<boolean>(onClose ? true : false);
+
+  const handleDialogOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen && onClose) {
+      onClose();
+    }
+  };
 
   const handleCreateAlliance = () => {
     if (allianceName && selectedPlayers.length >= 2) {
@@ -45,13 +53,16 @@ const AllianceManagementDialog: React.FC<AllianceManagementDialogProps> = ({ pla
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="bg-game-dark/80 border-game-accent text-game-accent">
-          <Users className="mr-1" size={16} />
-          Alliances
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
+      {!onClose && (
+        <DialogTrigger asChild>
+          <Button variant="outline" size="sm" className="bg-game-dark/80 border-game-accent text-game-accent">
+            <Users className="mr-1" size={16} />
+            Alliances
+          </Button>
+        </DialogTrigger>
+      )}
+      
       <DialogContent className="bg-game-dark text-white border-game-accent">
         <DialogHeader>
           <DialogTitle>Manage Alliances</DialogTitle>

@@ -1,19 +1,27 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Zap, Shield } from 'lucide-react';
 import { PlayerData } from '@/components/PlayerProfileTypes';
-import { useGameContext } from '@/contexts/GameContext';
+import { useGameContext } from '@/hooks/useGameContext';
 
 interface PowerupsDialogProps {
   players: PlayerData[];
+  onClose?: () => void;
 }
 
-const PowerupsDialog: React.FC<PowerupsDialogProps> = ({ players }) => {
+const PowerupsDialog: React.FC<PowerupsDialogProps> = ({ players, onClose }) => {
   const { awardPowerup, usePowerup } = useGameContext();
   const [powerupType, setPowerupType] = useState<PlayerData['powerup']>('immunity');
   const [playerForPowerup, setPlayerForPowerup] = useState<string | null>(null);
+  const [open, setOpen] = useState<boolean>(onClose ? true : false);
+
+  const handleDialogOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen && onClose) {
+      onClose();
+    }
+  };
 
   const handleAwardPowerup = () => {
     if (playerForPowerup && powerupType) {
@@ -23,13 +31,16 @@ const PowerupsDialog: React.FC<PowerupsDialogProps> = ({ players }) => {
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="bg-game-dark/80 border-purple-500 text-purple-400">
-          <Zap className="mr-1" size={16} />
-          Power-Ups
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
+      {!onClose && (
+        <DialogTrigger asChild>
+          <Button variant="outline" size="sm" className="bg-game-dark/80 border-purple-500 text-purple-400">
+            <Zap className="mr-1" size={16} />
+            Power-Ups
+          </Button>
+        </DialogTrigger>
+      )}
+      
       <DialogContent className="bg-game-dark text-white border-purple-500">
         <DialogHeader>
           <DialogTitle>Power-Ups</DialogTitle>

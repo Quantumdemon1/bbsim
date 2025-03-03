@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Heart } from 'lucide-react';
 import { PlayerData } from '@/components/PlayerProfileTypes';
-import { useGameContext } from '@/contexts/GameContext';
+import { useGameContext } from '@/hooks/useGameContext';
 import { relationshipTypes } from '@/hooks/game-phases/types';
 import PlayerSelectionGrid from './relationships/PlayerSelectionGrid';
 import PlayerRelationships from './relationships/PlayerRelationships';
@@ -12,13 +11,22 @@ import RelationshipControls from './relationships/RelationshipControls';
 
 interface RelationshipsDialogProps {
   players: PlayerData[];
+  onClose?: () => void;
 }
 
-const RelationshipsDialog: React.FC<RelationshipsDialogProps> = ({ players }) => {
+const RelationshipsDialog: React.FC<RelationshipsDialogProps> = ({ players, onClose }) => {
   const { updatePlayerRelationships } = useGameContext();
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
+  const [open, setOpen] = useState<boolean>(onClose ? true : false);
   
   const extraOptions = Array.from({ length: 21 }, (_, i) => i - 10); // -10 to +10
+
+  const handleDialogOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen && onClose) {
+      onClose();
+    }
+  };
 
   const handleRandomizeAll = () => {
     // For each player, generate random relationships with all other players
@@ -145,13 +153,16 @@ const RelationshipsDialog: React.FC<RelationshipsDialogProps> = ({ players }) =>
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="bg-game-dark/80 border-game-accent text-game-accent">
-          <Heart className="mr-1" size={16} />
-          Relationships
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
+      {!onClose && (
+        <DialogTrigger asChild>
+          <Button variant="outline" size="sm" className="bg-game-dark/80 border-game-accent text-game-accent">
+            <Heart className="mr-1" size={16} />
+            Relationships
+          </Button>
+        </DialogTrigger>
+      )}
+      
       <DialogContent className="bg-game-dark text-white border-game-accent max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Manage Relationships</DialogTitle>
