@@ -1,12 +1,15 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { Shield, Star } from 'lucide-react';
 
 export interface PlayerData {
   id: string;
   name: string;
   image: string;
   status?: 'hoh' | 'nominated' | 'veto' | 'safe' | 'evicted';
+  alliances?: string[];
+  powerup?: 'immunity' | 'coup' | 'replay' | 'nullify';
 }
 
 interface PlayerProfileProps {
@@ -15,6 +18,7 @@ interface PlayerProfileProps {
   onClick?: () => void;
   selected?: boolean;
   className?: string;
+  showDetails?: boolean;
 }
 
 const PlayerProfile: React.FC<PlayerProfileProps> = ({ 
@@ -22,7 +26,8 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
   size = 'md', 
   onClick,
   selected,
-  className
+  className,
+  showDetails = false
 }) => {
   const sizeClasses = {
     sm: 'w-16 h-16',
@@ -42,6 +47,13 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
     veto: 'bg-purple-500',
     safe: 'bg-green-500',
     evicted: 'bg-gray-500'
+  };
+
+  const powerupIcons = {
+    immunity: <Shield className="text-green-400" />,
+    coup: <Star className="text-yellow-400" />,
+    replay: <Star className="text-blue-400" />,
+    nullify: <Shield className="text-red-400" />
   };
 
   return (
@@ -72,11 +84,23 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
             {player.status.toUpperCase()}
           </div>
         )}
+
+        {player.powerup && (
+          <div className="absolute top-1 right-1 bg-black/50 rounded-full p-1">
+            {powerupIcons[player.powerup]}
+          </div>
+        )}
       </div>
       
       <div className={cn('text-center font-medium', fontSizeClasses[size])}>
         {player.name}
       </div>
+
+      {showDetails && player.alliances && player.alliances.length > 0 && (
+        <div className="text-xs text-gray-300 mt-1">
+          Alliances: {player.alliances.join(', ')}
+        </div>
+      )}
     </div>
   );
 };

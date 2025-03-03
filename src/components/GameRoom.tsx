@@ -4,6 +4,7 @@ import WeekSidebar from './WeekSidebar';
 import GamePhaseDisplay from './GamePhaseDisplay';
 import { PlayerData } from './PlayerProfile';
 import { useToast } from "@/components/ui/use-toast";
+import { useGameContext } from '@/contexts/GameContext';
 
 interface GameRoomProps {
   players: PlayerData[];
@@ -23,6 +24,7 @@ const GameRoom: React.FC<GameRoomProps> = ({
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [statusMessage, setStatusMessage] = useState('');
   const { toast } = useToast();
+  const { alliances, usePowerup } = useGameContext();
 
   const phases = [
     'HoH Competition',
@@ -30,7 +32,8 @@ const GameRoom: React.FC<GameRoomProps> = ({
     'PoV Competition',
     'Veto Ceremony',
     'Eviction Voting',
-    'Eviction'
+    'Eviction',
+    'Special Competition'
   ];
 
   const handleWeekChange = (newWeek: number) => {
@@ -100,24 +103,65 @@ const GameRoom: React.FC<GameRoomProps> = ({
         
       case 'nominate':
         if (selectedPlayers.length === 2) {
-          setNominees(selectedPlayers);
+          // Check if any nominees have immunity
+          const immuneNominee = players.find(p => 
+            selectedPlayers.includes(p.id) && p.powerup === 'immunity'
+          );
           
-          // Update player status
-          setPlayers(players.map(player => ({
-            ...player,
-            status: selectedPlayers.includes(player.id) 
-              ? 'nominated' 
-              : (player.status === 'nominated' ? undefined : player.status)
-          })));
-          
-          const nominee1 = players.find(p => p.id === selectedPlayers[0])?.name;
-          const nominee2 = players.find(p => p.id === selectedPlayers[1])?.name;
-          
-          setStatusMessage(`${nominee1} and ${nominee2} have been nominated for eviction!`);
+          if (immuneNominee) {
+            usePowerup(immuneNominee.id);
+            
+            // Replace the immune nominee with another player
+            const availablePlayers = players.filter(p => 
+              !selectedPlayers.includes(p.id) && 
+              p.id !== hoh && 
+              p.status !== 'evicted' &&
+              p.powerup !== 'immunity'
+            );
+            
+            if (availablePlayers.length > 0) {
+              const replacementIndex = Math.floor(Math.random() * availablePlayers.length);
+              const replacementId = availablePlayers[replacementIndex].id;
+              
+              const updatedNominees = selectedPlayers.filter(id => id !== immuneNominee.id);
+              updatedNominees.push(replacementId);
+              
+              setNominees(updatedNominees);
+              
+              // Update player status
+              setPlayers(players.map(player => ({
+                ...player,
+                status: updatedNominees.includes(player.id) 
+                  ? 'nominated' 
+                  : (player.id === immuneNominee.id ? 'safe' : 
+                     (player.status === 'nominated' ? undefined : player.status))
+              })));
+              
+              const nominee1 = players.find(p => p.id === updatedNominees[0])?.name;
+              const nominee2 = players.find(p => p.id === updatedNominees[1])?.name;
+              
+              setStatusMessage(`${immuneNominee.name} used immunity! ${nominee1} and ${nominee2} are now nominated for eviction!`);
+            }
+          } else {
+            setNominees(selectedPlayers);
+            
+            // Update player status
+            setPlayers(players.map(player => ({
+              ...player,
+              status: selectedPlayers.includes(player.id) 
+                ? 'nominated' 
+                : (player.status === 'nominated' ? undefined : player.status)
+            })));
+            
+            const nominee1 = players.find(p => p.id === selectedPlayers[0])?.name;
+            const nominee2 = players.find(p => p.id === selectedPlayers[1])?.name;
+            
+            setStatusMessage(`${nominee1} and ${nominee2} have been nominated for eviction!`);
+          }
           
           toast({
             title: "Nomination Ceremony",
-            description: `${nominee1} and ${nominee2} have been nominated`,
+            description: statusMessage,
           });
           
           setTimeout(() => {
@@ -157,6 +201,28 @@ const GameRoom: React.FC<GameRoomProps> = ({
         break;
         
       case 'vetoAction':
+        // Check if any player has a veto nullifier
+        const nullifier = players.find(p => p.powerup === 'nullify');
+        
+        if (nullifier && data === 'use') {
+          // Use the nullifier
+          usePowerup(nullifier.id);
+          
+          setStatusMessage(`${nullifier.name} used the Veto Nullifier! The Power of Veto has been nullified this week.`);
+          
+          toast({
+            title: "Veto Nullified",
+            description: statusMessage,
+          });
+          
+          setTimeout(() => {
+            setPhase('Eviction Voting');
+            setSelectedPlayers([]);
+          }, 1500);
+          
+          break;
+        }
+        
         if (data === 'use') {
           // If using veto, go to replacement nominee selection
           // For simplicity, we'll just randomly select a replacement
@@ -217,6 +283,31 @@ const GameRoom: React.FC<GameRoomProps> = ({
         if (data) {
           const evictedId = data;
           
+          // Check for coup d'état
+          const coupPlayer = players.find(p => p.powerup === 'coup');
+          if (coupPlayer) {
+            usePowerup(coupPlayer.id);
+            
+            // Prevent eviction and force a new HoH competition
+            setStatusMessage(`${coupPlayer.name} used the Coup d'État power! The eviction has been canceled and a new HoH will be selected!`);
+            
+            toast({
+              title: "Coup d'État",
+              description: statusMessage,
+              variant: "destructive"
+            });
+            
+            setTimeout(() => {
+              setHoH(null);
+              setNominees([]);
+              setPhase('HoH Competition');
+              setSelectedPlayers([]);
+              setStatusMessage('');
+            }, 1500);
+            
+            break;
+          }
+          
           // Update player status
           setPlayers(players.map(player => ({
             ...player,
@@ -243,25 +334,83 @@ const GameRoom: React.FC<GameRoomProps> = ({
         break;
         
       case 'nextWeek':
-        // Reset game state for next week
-        setWeek(week + 1);
-        setPhase('HoH Competition');
-        setHoH(null);
-        setVeto(null);
-        setNominees([]);
-        setSelectedPlayers([]);
-        setStatusMessage('');
+        // Check if we should have a special competition
+        const hasSpecialComp = week % 3 === 0 || Math.random() < 0.2; // Every 3rd week or 20% chance
         
-        // Reset player statuses except for evicted players
-        setPlayers(players.map(player => ({
-          ...player,
-          status: player.status === 'evicted' ? 'evicted' : undefined
-        })));
-        
-        toast({
-          title: `Week ${week + 1}`,
-          description: `Starting week ${week + 1}`,
-        });
+        if (hasSpecialComp) {
+          // Reset player statuses except for evicted players
+          setPlayers(players.map(player => ({
+            ...player,
+            status: player.status === 'evicted' ? 'evicted' : undefined
+          })));
+          
+          setHoH(null);
+          setVeto(null);
+          setNominees([]);
+          setSelectedPlayers([]);
+          setPhase('Special Competition');
+          
+          toast({
+            title: "Special Competition",
+            description: "A special competition is taking place!",
+          });
+        } else {
+          // Reset game state for next week
+          setWeek(week + 1);
+          setPhase('HoH Competition');
+          setHoH(null);
+          setVeto(null);
+          setNominees([]);
+          setSelectedPlayers([]);
+          setStatusMessage('');
+          
+          // Reset player statuses except for evicted players
+          setPlayers(players.map(player => ({
+            ...player,
+            status: player.status === 'evicted' ? 'evicted' : undefined
+          })));
+          
+          toast({
+            title: `Week ${week + 1}`,
+            description: `Starting week ${week + 1}`,
+          });
+        }
+        break;
+
+      case 'specialCompetition':
+        // Award a random power-up to the winner
+        if (selectedPlayers.length === 1) {
+          const winnerId = selectedPlayers[0];
+          const powerupTypes: PlayerData['powerup'][] = ['immunity', 'coup', 'replay', 'nullify'];
+          const randomPowerup = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
+          
+          // Update the player with the new power-up
+          setPlayers(players.map(player => {
+            if (player.id === winnerId) {
+              return {
+                ...player,
+                powerup: randomPowerup
+              };
+            }
+            return player;
+          }));
+          
+          const winnerName = players.find(p => p.id === winnerId)?.name;
+          setStatusMessage(`${winnerName} has won the special competition and earned a power-up!`);
+          
+          toast({
+            title: "Special Competition",
+            description: `${winnerName} has won a special power!`,
+          });
+          
+          // Move to next week
+          setTimeout(() => {
+            setWeek(week + 1);
+            setPhase('HoH Competition');
+            setSelectedPlayers([]);
+            setStatusMessage('');
+          }, 1500);
+        }
         break;
     }
   };
@@ -287,6 +436,7 @@ const GameRoom: React.FC<GameRoomProps> = ({
         statusMessage={statusMessage}
         selectedPlayers={selectedPlayers}
         onPlayerSelect={handlePlayerSelect}
+        alliances={alliances}
       />
     </div>
   );
