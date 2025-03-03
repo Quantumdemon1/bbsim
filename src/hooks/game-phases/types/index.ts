@@ -3,7 +3,7 @@
 export * from './common';
 export * from './player';
 export * from './phaseProps';
-export { 
+export type { 
   HoHCompetitionProps,
   NominationCeremonyProps,
   PoVCompetitionProps,

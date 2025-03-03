@@ -2,17 +2,25 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Shield, Star, UserRound, Trophy } from 'lucide-react';
-import { PlayerAttributes, PlayerRelationship } from '@/hooks/game-phases/types';
+import { PlayerAttributes, PlayerRelationship } from '@/hooks/game-phases/types/player';
 
 export interface PlayerData {
   id: string;
   name: string;
-  image: string;
-  status?: 'hoh' | 'nominated' | 'veto' | 'safe' | 'evicted' | 'winner';
-  alliances?: string[];
-  powerup?: 'immunity' | 'coup' | 'replay' | 'nullify';
+  image?: string;
+  status?: 'hoh' | 'nominated' | 'veto' | 'safe' | 'evicted' | 'winner' | 'juror' | 'runner-up';
+  powerup?: 'immunity' | 'nullify' | 'coup' | 'replay';
   attributes?: PlayerAttributes;
   relationships?: PlayerRelationship[];
+  stats?: {
+    hohWins?: number;
+    povWins?: number;
+    timesNominated?: number;
+    daysInHouse?: number;
+    juryVotes?: number;
+    placement?: number;
+  };
+  alliances?: string[];
 }
 
 interface PlayerProfileProps {
@@ -67,7 +75,9 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
     veto: 'bg-purple-500',
     safe: 'bg-green-500',
     evicted: 'bg-gray-500',
-    winner: 'bg-yellow-400'
+    winner: 'bg-yellow-400',
+    juror: 'bg-purple-400',
+    'runner-up': 'bg-silver-400'
   };
 
   const powerupIcons = {
@@ -117,7 +127,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
           <DefaultAvatar size={size} />
         </div>
         
-        {player.status && (
+        {player.status && statusColors[player.status] && (
           <div className={cn(
             'absolute bottom-0 left-0 right-0 py-1 text-center text-white font-medium text-xs',
             statusColors[player.status]

@@ -1,7 +1,10 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import PlayerProfile, { PlayerData } from '@/components/PlayerProfile';
+import PlayerProfile from '@/components/PlayerProfile';
+import { PlayerData } from '@/components/PlayerProfile';
 import { WeekSummary } from '@/hooks/game-phases/types';
+import { Alliance } from '@/contexts/types';
 import { 
   Crown, 
   Target, 
@@ -19,20 +22,21 @@ import {
   TableHeader, 
   TableRow,
 } from "@/components/ui/table";
-import { Alliance } from '@/contexts/types';
 
 interface WeeklySummaryProps {
   players: PlayerData[];
   weekSummaries: WeekSummary[];
   currentWeek: number;
   onAction: (action: string) => void;
+  alliances?: Alliance[];
 }
 
 const WeeklySummary: React.FC<WeeklySummaryProps> = ({
   players,
   weekSummaries,
   currentWeek,
-  onAction
+  onAction,
+  alliances = []
 }) => {
   const currentSummary = weekSummaries.find(summary => summary.weekNumber === currentWeek) || weekSummaries[weekSummaries.length - 1];
   

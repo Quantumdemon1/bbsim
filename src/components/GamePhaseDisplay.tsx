@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { PlayerData } from './PlayerProfile';
 import { Alliance } from '@/contexts/types';
@@ -128,6 +129,7 @@ const GamePhaseDisplay: React.FC<GamePhaseDisplayProps> = ({
             weekSummaries={weekSummaries}
             currentWeek={week - 1}
             onAction={onAction}
+            alliances={alliances}
           />
         );
         
