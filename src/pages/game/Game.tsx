@@ -77,7 +77,7 @@ const Game = () => {
       
       {/* Phase Progress Tracker */}
       <PhaseProgressTracker 
-        currentPhase={currentPhase}
+        phase={currentPhase}
         onPhaseComplete={handlePhaseComplete}
       />
       
