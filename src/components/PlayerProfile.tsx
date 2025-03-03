@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { PlayerData } from './PlayerProfileTypes';
-import { Home } from 'lucide-react';
+import { User } from 'lucide-react';
 
 interface PlayerProfileProps {
   player: PlayerData;
@@ -66,36 +67,40 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
     );
   };
   
-  // Generate a default house SVG if no image provided
-  const getPlayerImage = () => {
-    if (player.image) {
-      return player.image;
-    }
-    
-    // Return null here, we'll render the Home icon directly in the JSX
-    return null;
-  };
-  
   return (
     <div 
       className={`relative cursor-pointer transition-all duration-200 ${selected ? 'scale-110 ring-2 ring-game-accent' : 'hover:scale-105'}`}
       onClick={onClick}
     >
       <div className={`relative rounded-md overflow-hidden ${sizeClasses[size]} flex items-center justify-center bg-game-medium ${player.status === 'evicted' ? 'grayscale' : ''}`}>
-        {getPlayerImage() ? (
+        {player.image ? (
           <img 
-            src={getPlayerImage()} 
+            src={player.image} 
             alt={player.name} 
             className="w-full h-full object-cover"
+            onError={(e) => {
+              // If image fails to load, replace with User icon
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.parentElement?.classList.add('fallback-icon');
+            }}
           />
         ) : (
-          // Use the Home icon from lucide-react as default
-          <Home 
-            className={`text-white ${player.status === 'evicted' ? 'opacity-50' : ''}`} 
-            size={size === 'sm' ? 32 : size === 'md' ? 48 : 64}
+          <User 
+            className="text-white" 
+            size={size === 'sm' ? 32 : size === 'md' ? 48 : 64} 
             strokeWidth={1.5}
           />
         )}
+        
+        {/* Render fallback icon if image fails to load */}
+        <div className="hidden fallback-icon absolute inset-0 flex items-center justify-center">
+          <User 
+            className="text-white" 
+            size={size === 'sm' ? 32 : size === 'md' ? 48 : 64}
+            strokeWidth={1.5}
+          />
+        </div>
+        
         {getStatusIndicator()}
         {getPowerupIndicator()}
       </div>
@@ -103,8 +108,14 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       {showDetails && (
         <div className="mt-2 text-center">
           <div className="font-semibold text-sm">{player.name}</div>
-          {player.alliances && player.alliances.length > 0 && (
-            <div className="text-xs text-gray-400">{player.alliances[0]}</div>
+          {player.stats && (
+            <div className="text-xs text-gray-400 mt-1">
+              {player.stats.hohWins > 0 && <span className="mr-2">HoH: {player.stats.hohWins}</span>}
+              {player.stats.povWins > 0 && <span className="mr-2">PoV: {player.stats.povWins}</span>}
+              {player.alliances && player.alliances.length > 0 && (
+                <div className="mt-1">{player.alliances[0]}</div>
+              )}
+            </div>
           )}
         </div>
       )}

@@ -9,6 +9,10 @@ export interface PlayerData {
   powerup?: 'immunity' | 'nullify' | 'coup' | 'replay';
   attributes?: PlayerAttributes;
   relationships?: PlayerRelationship[];
+  bio?: string;
+  age?: number;
+  hometown?: string;
+  occupation?: string;
   stats?: {
     hohWins?: number;
     povWins?: number;
@@ -16,6 +20,7 @@ export interface PlayerData {
     daysInHouse?: number;
     juryVotes?: number;
     placement?: number;
+    competitionsWon?: number;
   };
   alliances?: string[];
 }

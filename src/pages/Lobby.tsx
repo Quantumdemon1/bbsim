@@ -3,10 +3,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NavigationBar from '@/components/NavigationBar';
 import { useGameContext } from '@/contexts/GameContext';
 import PlayerProfile from '@/components/PlayerProfile';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 
 const Lobby = () => {
   const { 
@@ -20,14 +23,16 @@ const Lobby = () => {
   } = useGameContext();
   
   const [newPlayerName, setNewPlayerName] = useState('');
+  const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleAddPlayer = () => {
     if (newPlayerName.trim()) {
       const newPlayer = {
-        id: `custom-${players.length + 1}`,
+        id: `custom-${Date.now()}`,
         name: newPlayerName,
-        image: '/placeholder.svg'
+        image: '/lovable-uploads/cc8e18cc-c692-4d0e-a9bd-f846d4d214c6.png',
+        stats: { hohWins: 0, povWins: 0, timesNominated: 0, daysInHouse: 0 }
       };
       
       setPlayers([...players, newPlayer]);
@@ -44,6 +49,12 @@ const Lobby = () => {
     resetGame();
     navigate('/');
   };
+
+  const handlePlayerSelect = (id: string) => {
+    setSelectedPlayer(id);
+  };
+
+  const selectedPlayerData = players.find(p => p.id === selectedPlayer);
 
   if (!gameId) {
     navigate('/');
@@ -117,41 +128,142 @@ const Lobby = () => {
             </Card>
           </div>
           
-          {/* Middle Column: Players */}
+          {/* Middle and Right Columns */}
           <div className="lg:col-span-2 animate-fade-in">
-            <Card className="bg-game-medium border-none shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold">Houseguests</h2>
-                  
-                  {isHost && (
-                    <div className="flex gap-2">
-                      <Input
-                        type="text"
-                        placeholder="Add custom player"
-                        value={newPlayerName}
-                        onChange={(e) => setNewPlayerName(e.target.value)}
-                        className="bg-game-dark border-game-light focus:border-game-accent"
-                      />
-                      <Button
-                        variant="outline"
-                        className="bg-game-dark hover:bg-game-light border border-white/20"
-                        onClick={handleAddPlayer}
-                        disabled={!newPlayerName.trim()}
-                      >
-                        Add
-                      </Button>
+            <Tabs defaultValue="players" className="w-full">
+              <TabsList className="bg-game-dark w-full mb-4">
+                <TabsTrigger value="players" className="flex-1">Houseguests</TabsTrigger>
+                <TabsTrigger value="profiles" className="flex-1">Profiles</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="players">
+                <Card className="bg-game-medium border-none shadow-lg">
+                  <CardHeader className="pb-0">
+                    <div className="flex justify-between items-center">
+                      <CardTitle>Houseguests</CardTitle>
+                      
+                      {isHost && (
+                        <div className="flex gap-2">
+                          <Input
+                            type="text"
+                            placeholder="Add custom player"
+                            value={newPlayerName}
+                            onChange={(e) => setNewPlayerName(e.target.value)}
+                            className="bg-game-dark border-game-light focus:border-game-accent"
+                          />
+                          <Button
+                            variant="outline"
+                            className="bg-game-dark hover:bg-game-light border border-white/20"
+                            onClick={handleAddPlayer}
+                            disabled={!newPlayerName.trim()}
+                          >
+                            Add
+                          </Button>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-                
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                  {players.map((player) => (
-                    <PlayerProfile key={player.id} player={player} />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                  </CardHeader>
+                  
+                  <CardContent className="p-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4">
+                      {players.map((player) => (
+                        <PlayerProfile 
+                          key={player.id} 
+                          player={player} 
+                          onClick={() => handlePlayerSelect(player.id)}
+                          showDetails
+                        />
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="profiles">
+                <Card className="bg-game-medium border-none shadow-lg">
+                  <CardHeader>
+                    <CardTitle>Player Profiles</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {players.map((player) => (
+                        <Dialog key={player.id}>
+                          <DialogTrigger asChild>
+                            <Card className="bg-game-dark hover:bg-game-light/20 cursor-pointer transition-colors">
+                              <CardContent className="p-4 flex items-center gap-4">
+                                <PlayerProfile 
+                                  player={player} 
+                                  size="sm"
+                                />
+                                <div>
+                                  <h3 className="font-medium">{player.name}</h3>
+                                  {player.alliances && player.alliances.length > 0 && (
+                                    <Badge variant="outline" className="mt-1">{player.alliances[0]}</Badge>
+                                  )}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </DialogTrigger>
+                          <DialogContent className="bg-game-medium">
+                            <DialogHeader>
+                              <DialogTitle>Player Profile</DialogTitle>
+                            </DialogHeader>
+                            <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
+                              <PlayerProfile player={player} size="lg" />
+                              <div className="flex-1">
+                                <h2 className="text-xl font-bold mb-2">{player.name}</h2>
+                                
+                                <div className="grid grid-cols-2 gap-2 mb-4">
+                                  <div>
+                                    <p className="text-sm text-gray-400">Age</p>
+                                    <p>{player.age || "Unknown"}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-sm text-gray-400">Hometown</p>
+                                    <p>{player.hometown || "Unknown"}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-sm text-gray-400">Occupation</p>
+                                    <p>{player.occupation || "Unknown"}</p>
+                                  </div>
+                                </div>
+                                
+                                <h3 className="font-semibold mt-4 mb-2">Game Stats</h3>
+                                <div className="grid grid-cols-3 gap-2">
+                                  <div className="bg-game-dark p-2 rounded text-center">
+                                    <p className="text-xs text-gray-400">HoH Wins</p>
+                                    <p className="text-lg font-bold">{player.stats?.hohWins || 0}</p>
+                                  </div>
+                                  <div className="bg-game-dark p-2 rounded text-center">
+                                    <p className="text-xs text-gray-400">PoV Wins</p>
+                                    <p className="text-lg font-bold">{player.stats?.povWins || 0}</p>
+                                  </div>
+                                  <div className="bg-game-dark p-2 rounded text-center">
+                                    <p className="text-xs text-gray-400">Nominated</p>
+                                    <p className="text-lg font-bold">{player.stats?.timesNominated || 0}</p>
+                                  </div>
+                                </div>
+                                
+                                {player.alliances && player.alliances.length > 0 && (
+                                  <>
+                                    <h3 className="font-semibold mt-4 mb-2">Alliances</h3>
+                                    <div className="flex flex-wrap gap-2">
+                                      {player.alliances.map(alliance => (
+                                        <Badge key={alliance} variant="secondary">{alliance}</Badge>
+                                      ))}
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </div>
