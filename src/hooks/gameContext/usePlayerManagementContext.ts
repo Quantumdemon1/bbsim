@@ -1,5 +1,5 @@
 
-import { usePlayerManagerContext } from '../PlayerManagerContext';
+import { usePlayerManagerContext } from '../../contexts/PlayerManagerContext';
 
 export function usePlayerManagementContext() {
   const playerManager = usePlayerManagerContext();
