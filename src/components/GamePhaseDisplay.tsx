@@ -5,7 +5,7 @@ import PhaseRenderer from './game-phases/PhaseRenderer';
 import RandomEventHandler from './game-phases/event-handling/RandomEventHandler';
 import PlayerDecisionHandler from './game-phases/decisions/PlayerDecisionHandler';
 import StatusDisplay from './game-phases/StatusDisplay';
-import { useEventDecisionManager } from '@/hooks/game-phases/useEventDecisionManager';
+import { useEventDecisionManager } from '@/hooks/game-phases/decisions/useEventDecisionManager';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { Alliance } from '@/contexts/types';
 import { WeekSummary } from '@/hooks/game-phases/types';
@@ -32,7 +32,7 @@ interface GamePhaseDisplayProps {
 
 const GamePhaseDisplay: React.FC<GamePhaseDisplayProps> = (props) => {
   const { playerName } = useGameContext();
-  const { handleRandomEvent, triggerRandomEvent } = useEventDecisionManager();
+  const { handleRandomEvent } = useEventDecisionManager();
   const currentPlayerId = props.players.find(p => p.isHuman)?.id || null;
   
   // This effect will check for random events based on the phase

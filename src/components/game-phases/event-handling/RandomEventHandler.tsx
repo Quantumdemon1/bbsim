@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useEventDecisionManager } from '@/hooks/game-phases/useEventDecisionManager';
+import { useEventDecisionManager } from '@/hooks/game-phases/decisions/useEventDecisionManager';
 import { PlayerDecisionPrompt } from '@/components/game-ui/PlayerDecisionPrompt';
 
 interface RandomEventHandlerProps {

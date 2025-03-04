@@ -1,21 +1,9 @@
 
 import { useEventDecisionManager } from './useEventDecisionManager';
 import { PlayerData } from '@/components/PlayerProfileTypes';
+import { DecisionData, DecisionOption } from './decisions/types';
 
-export interface DecisionOption {
-  id: string;
-  label: string;
-  description?: string;
-  consequence?: string;
-}
-
-export interface DecisionData {
-  title: string;
-  description: string;
-  situation: string;
-  options: DecisionOption[];
-  targetPlayerId?: string;
-}
+export { DecisionData, DecisionOption };
 
 interface UsePlayerDecisionsProps {
   players: PlayerData[];
