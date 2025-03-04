@@ -34,8 +34,15 @@ export function useGameContext() {
   const adminTakeControl = (phase?: string) => {
     console.log("Admin taking control", phase);
     // This is a fallback implementation
-    if (gameState.setPhase && phase) {
-      gameState.setPhase(phase);
+    if (phase && gameState.markPhaseProgress) {
+      // Instead of directly setting the phase, use the phase progress tracking
+      // which is available in the gameState context
+      gameState.clearPhaseProgress('*');
+      
+      // If there's a way to navigate to a specific phase in the game state context, use it
+      if (gameState.adminTakeControl) {
+        gameState.adminTakeControl(phase);
+      }
     }
   };
   
