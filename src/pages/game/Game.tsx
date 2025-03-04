@@ -1,5 +1,5 @@
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { adaptGameNotificationToAuthNotification, isGameNotificationArray } from '@/types/notificationTypes';
 import { Notification } from '@/hooks/auth/types';
 import { useGameContext } from '@/hooks/useGameContext';
@@ -40,6 +40,16 @@ const Game = () => {
     handlePhaseChange,
     handlePhaseComplete,
   } = useGameInit();
+
+  // Add debugging logs
+  useEffect(() => {
+    console.log("Game component - Rendered with showAdminPanel:", showAdminPanel);
+    
+    // Return cleanup function
+    return () => {
+      console.log("Game component - Unmounted");
+    };
+  }, [showAdminPanel]);
   
   const adaptedNotifications: Notification[] = React.useMemo(() => {
     if (!notifications || notifications.length === 0) return [];
@@ -50,6 +60,11 @@ const Game = () => {
     
     return notifications as unknown as Notification[];
   }, [notifications]);
+
+  const handleAdminPanelOpenChange = (open: boolean) => {
+    console.log("handleAdminPanelOpenChange called with:", open);
+    setShowAdminPanel(open);
+  };
 
   return (
     <GameContainer isLoading={isLoading || !players || players.length === 0} error={error}>
@@ -69,7 +84,7 @@ const Game = () => {
       {/* Always render AdminPanel, but control visibility with open prop */}
       <AdminPanel 
         open={showAdminPanel}
-        onOpenChange={setShowAdminPanel}
+        onOpenChange={handleAdminPanelOpenChange}
       />
       
       <Suspense fallback={<LoadingState text="Loading game controls..." />}>
