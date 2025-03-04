@@ -6,7 +6,7 @@ import GameHeader from './components/GameHeader';
 import GameContainer from './components/GameContainer';
 import GameContent from './components/GameContent';
 import GameOverlaysContainer from './components/GameOverlaysContainer';
-import GameNotifications from './components/GameNotifications';
+import { useGameNotifications } from './components/GameNotifications';
 import { useGameInit } from './hooks/useGameInit';
 import { useGameState } from './hooks/useGameState';
 
@@ -41,7 +41,7 @@ const Game = () => {
     setShowAdminPanel
   } = useGameState();
 
-  const { adaptedNotifications } = GameNotifications({ notifications });
+  const { adaptedNotifications } = useGameNotifications({ notifications });
   
   useEffect(() => {
     console.log("Game component - Rendered with showAdminPanel:", showAdminPanel);
