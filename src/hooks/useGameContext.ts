@@ -21,6 +21,16 @@ export function useGameContext() {
   const playerAuth = usePlayerAuthContext();
   const aiPlayer = useAIPlayerContext();
   
+  // Create fallback functions for common operations that might not be available in all contexts
+  const handleNextWeek = gameState.incrementWeek || (() => {
+    console.log("Default next week handler");
+  });
+  
+  const handlePlayerSelect = (playerId: string) => {
+    console.log("Default player select handler:", playerId);
+    // This is a fallback implementation, actual implementation should be provided by context
+  };
+  
   // Combine all contexts into a single API
   return {
     // Game State
@@ -41,11 +51,15 @@ export function useGameContext() {
     // AI Player Management
     ...aiPlayer,
     
-    // Ensure notifications and saveGame are properly exposed with appropriate fallbacks
+    // Ensure core functions are properly exposed with appropriate fallbacks
     notifications: (gameState.notifications || []) as GameNotification[],
     clearNotifications: gameState.clearNotifications || (() => {}),
     markNotificationAsRead: gameState.markNotificationAsRead || (() => {}),
     saveGame: gameState.saveCurrentGame || (() => Promise.resolve()),
-    savedGames: gameState.savedGames || []
+    savedGames: gameState.savedGames || [],
+    
+    // Expose handleNextWeek and handlePlayerSelect with fallbacks
+    handleNextWeek: gameState.handleNextWeek || handleNextWeek,
+    handlePlayerSelect: playerManager.handlePlayerSelect || handlePlayerSelect
   };
 }

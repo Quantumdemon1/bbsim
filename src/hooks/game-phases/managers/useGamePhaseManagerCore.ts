@@ -25,15 +25,15 @@ export function useGamePhaseManagerCore(props: GamePhaseProps) {
     phaseHooks.juryQuestionsPhase.handleJuryQuestions,
     phaseHooks.juryQuestionsPhase.handleProceedToVoting,
     // Create a fallback for handleNextWeek if it doesn't exist in gameContext
-    () => {
+    gameContext.handleNextWeek || (() => {
       console.log("Advancing to next week");
       setters.setWeek(state.week + 1);
       setters.setPhase('HoH Competition');
-    }
+    })
   );
 
   // Create a player select handler if not available in gameContext
-  const handlePlayerSelect = (playerId: string) => {
+  const localHandlePlayerSelect = (playerId: string) => {
     const currentSelected = [...state.selectedPlayers];
     const index = currentSelected.indexOf(playerId);
     
@@ -52,7 +52,7 @@ export function useGamePhaseManagerCore(props: GamePhaseProps) {
     state,
     setters,
     handleAction,
-    handlePlayerSelect: gameContext.handlePlayerSelect || handlePlayerSelect,
+    handlePlayerSelect: gameContext.handlePlayerSelect || localHandlePlayerSelect,
     usePowerup: gameContext.usePowerup || (() => console.warn("Powerup functionality not available")),
     phaseHooks
   };
