@@ -6,6 +6,7 @@ export * from './phaseSetters';
 export * from './weekSummary';
 export * from './phaseComponents';
 export * from './player';
+export * from './eventTypes';
 
 // Re-export constants from player types
 export { 

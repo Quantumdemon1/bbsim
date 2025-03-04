@@ -21,12 +21,15 @@ export interface GamePhaseState {
 
 // Add AIMemoryEntry type
 export interface AIMemoryEntry {
-  type: string;
+  type: 'nomination' | 'veto' | 'eviction' | 'hoh' | 'alliance' | 'betrayal' | 
+        'conversation' | 'competition_win' | 'competition_loss' | 'argument' | 
+        'celebration' | 'strategy_discussion' | 'private_conversation' | 
+        'random_event' | 'player_decision';
   week: number;
   description: string;
   impact: 'positive' | 'negative' | 'neutral';
   importance: number;
-  timestamp: number;
+  timestamp: number | string;
 }
 
 // Add BotEmotions type

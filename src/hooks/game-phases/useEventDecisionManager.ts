@@ -5,6 +5,7 @@ import { useRandomEvents, GameEvent } from './useRandomEvents';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { DecisionData } from './usePlayerDecisions';
 import { useToast } from "@/components/ui/use-toast";
+import { AIMemoryEntry } from '@/hooks/game-phases/types';
 
 /**
  * Custom hook that provides unified management of random events and player decisions
@@ -44,8 +45,8 @@ export function useEventDecisionManager() {
       if (event) {
         const player = players.find(p => p.id === event.playerId);
         if (player) {
-          const memoryEntry = {
-            type: 'random_event',
+          const memoryEntry: AIMemoryEntry = {
+            type: "strategy_discussion", // Use a valid type from AIMemoryEntry
             week: currentWeek || 1,
             description: `${player.name} ${result.outcome}`,
             impact: choiceId === 'positive' ? 'positive' : choiceId === 'negative' ? 'negative' : 'neutral',
@@ -73,7 +74,7 @@ export function useEventDecisionManager() {
   
   // Handle a random event
   const handleRandomEvent = async () => {
-    const newEvent = await generateRandomEvent(players, currentWeek || 1);
+    const newEvent = await generateRandomEvent();
     if (newEvent) {
       setCurrentEvent(newEvent);
       setEventModalOpen(true);
@@ -113,8 +114,8 @@ export function useEventDecisionManager() {
         
         // Create a memory entry for target player if applicable
         if (currentDecision.targetPlayerId) {
-          const memoryEntry = {
-            type: 'player_decision',
+          const memoryEntry: AIMemoryEntry = {
+            type: "conversation", // Use a valid type from AIMemoryEntry
             week: currentWeek || 1,
             description: `The human player chose: ${selectedOption.label}`,
             impact: 'neutral',
