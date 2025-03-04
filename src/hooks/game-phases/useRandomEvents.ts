@@ -1,4 +1,3 @@
-
 import { useCallback, useState } from 'react';
 import { useGameContext } from '@/hooks/useGameContext';
 import { PlayerData } from '@/components/PlayerProfileTypes';
@@ -23,6 +22,7 @@ export function useRandomEvents() {
     generateAIDialogue,
     addMemoryEntry,
     updateBotEmotion,
+    currentWeek
   } = useGameContext();
   
   const [lastEventDay, setLastEventDay] = useState(0);
@@ -59,7 +59,8 @@ export function useRandomEvents() {
       description: eventContent.summary,
       impact: eventContent.impact as "neutral" | "positive" | "negative", // Add proper type assertion
       importance: 3,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      week: currentWeek || 1 // Add the missing week property
     };
     
     addMemoryEntry(randomPlayer.id, memoryEntry);
@@ -74,7 +75,7 @@ export function useRandomEvents() {
       content: eventContent.text,
       summary: eventContent.summary
     };
-  }, [players, lastEventDay, eventProbability, generateAIDialogue, addMemoryEntry, updateBotEmotion]);
+  }, [players, lastEventDay, eventProbability, generateAIDialogue, addMemoryEntry, updateBotEmotion, currentWeek]);
   
   const generateEventContent = async (player: PlayerData, eventType: string) => {
     // Generate appropriate dialogue for the event - use 'general' instead of 'random_event'
