@@ -4,7 +4,8 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
+  DialogTrigger
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Shield, SkipForward, X } from 'lucide-react';
@@ -16,6 +17,7 @@ interface AdminPanelProps {
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
   const [selectedPhase, setSelectedPhase] = useState('');
+  const [open, setOpen] = useState(true);
   const { adminTakeControl } = useGameContext();
   
   const phases = [
@@ -30,11 +32,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
   
   const handleTakeControl = () => {
     adminTakeControl(selectedPhase || undefined);
+    handleClose();
+  };
+
+  const handleClose = () => {
+    setOpen(false);
     onClose();
   };
 
   return (
-    <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen);
+      if (!isOpen) onClose();
+    }}>
       <DialogContent className="bg-black/90 border border-red-500 rounded-lg p-4 w-64">
         <DialogHeader>
           <DialogTitle className="text-red-500 font-bold flex items-center">
@@ -70,7 +80,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
             <Button 
               size="sm" 
               variant="outline"
-              onClick={onClose}
+              onClick={handleClose}
               className="border-gray-700 text-gray-400"
             >
               <X className="w-3 h-3" />
