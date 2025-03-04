@@ -2,6 +2,7 @@
 import React from 'react';
 import { usePlayerDecisions } from '@/hooks/game-phases/usePlayerDecisions';
 import { PlayerDecisionPrompt } from '@/components/game-ui/PlayerDecisionPrompt';
+import { PlayerData } from '@/components/PlayerProfileTypes';
 
 interface PlayerDecisionHandlerProps {
   currentPlayerId: string | null;

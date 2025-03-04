@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRandomEvents, GameEvent } from '@/hooks/game-phases/useRandomEvents';
 import { PlayerDecisionPrompt } from '@/components/game-ui/PlayerDecisionPrompt';
 

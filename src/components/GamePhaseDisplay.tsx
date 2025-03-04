@@ -4,8 +4,9 @@ import { useGameContext } from '@/hooks/useGameContext';
 import PhaseRenderer from './game-phases/PhaseRenderer';
 import RandomEventHandler from './game-phases/event-handling/RandomEventHandler';
 import PlayerDecisionHandler from './game-phases/decisions/PlayerDecisionHandler';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
+import { PlayerData } from '@/components/PlayerProfileTypes';
+import { Alliance } from '@/contexts/types';
+import { WeekSummary } from '@/hooks/game-phases/types';
 
 interface GamePhaseDisplayProps {
   phase: string;
