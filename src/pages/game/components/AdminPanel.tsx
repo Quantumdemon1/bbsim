@@ -7,9 +7,7 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogTrigger
+  DialogTitle
 } from '@/components/ui/dialog';
 
 interface AdminPanelProps {
@@ -36,11 +34,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
     onClose();
   };
   
+  // Handle dialog state changes
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) onClose();
+  };
+
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      setOpen(isOpen);
-      if (!isOpen) onClose();
-    }}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="bg-black/90 border border-red-500 rounded-lg p-4 w-64">
         <DialogHeader>
           <DialogTitle className="text-red-500 font-bold flex items-center">
