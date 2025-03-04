@@ -5,7 +5,8 @@ import { createEventMemoryEntry } from './events/eventGenerator';
 import { useEventManager } from './events/eventManager';
 import { GameEvent } from './types/eventTypes';
 
-export { GameEvent } from './types/eventTypes';
+// Use "export type" instead of "export" when re-exporting type definitions
+export type { GameEvent } from './types/eventTypes';
 
 export function useRandomEvents() {
   const { 
