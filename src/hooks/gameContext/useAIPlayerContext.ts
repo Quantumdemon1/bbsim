@@ -8,7 +8,7 @@ export function useAIPlayerContext() {
     // AI Player
     makeAIDecision: aiPlayer.makeAIDecision,
     generateAIDialogue: aiPlayer.generateAIDialogue,
-    addAIMemoryEntry: aiPlayer.addMemoryEntry,
+    addMemoryEntry: aiPlayer.addMemoryEntry,
     clearAIMemory: aiPlayer.clearAIMemory,
     getPlayerMemory: aiPlayer.getPlayerMemory,
     isUsingLLM: aiPlayer.isUsingLLM,

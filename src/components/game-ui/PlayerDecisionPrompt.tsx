@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { useGameContext } from '@/hooks/useGameContext';
-import { AIThinkingIndicator } from './AIThinkingIndicator';
+import AIThinkingIndicator from './AIThinkingIndicator';
 
 interface DecisionOption {
   id: string;

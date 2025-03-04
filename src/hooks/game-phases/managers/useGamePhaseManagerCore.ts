@@ -8,7 +8,7 @@ import { useGameContext } from '@/hooks/useGameContext';
 
 export function useGamePhaseManagerCore(props: GamePhaseProps) {
   const { state, setters, toast } = useGameState(props);
-  const { activePowerups, usePowerup } = usePowerupContext();
+  const { usePowerup } = usePowerupContext();
   const { isHost, playerName } = useGameContext();
   
   const [isHumanPlayerTurn, setIsHumanPlayerTurn] = useState(false);
