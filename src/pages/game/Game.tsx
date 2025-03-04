@@ -66,9 +66,11 @@ const Game = () => {
         advanceDay={advanceDay} 
       />
       
-      {showAdminPanel && (
-        <AdminPanel onClose={() => setShowAdminPanel(false)} />
-      )}
+      {/* Always render AdminPanel, but control visibility with open prop */}
+      <AdminPanel 
+        open={showAdminPanel}
+        onOpenChange={setShowAdminPanel}
+      />
       
       <Suspense fallback={<LoadingState text="Loading game controls..." />}>
         <GameControls 

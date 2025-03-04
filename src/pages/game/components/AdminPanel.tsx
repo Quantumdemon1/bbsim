@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { 
   Dialog,
   DialogContent,
@@ -11,12 +11,12 @@ import { Shield, SkipForward, X } from 'lucide-react';
 import { useGameContext } from '@/hooks/useGameContext';
 
 interface AdminPanelProps {
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
-  const [selectedPhase, setSelectedPhase] = useState('');
-  const [isOpen, setIsOpen] = useState(true);
+const AdminPanel: React.FC<AdminPanelProps> = ({ open, onOpenChange }) => {
+  const [selectedPhase, setSelectedPhase] = React.useState('');
   const { adminTakeControl } = useGameContext();
   
   const phases = [
@@ -31,27 +31,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
   
   const handleTakeControl = () => {
     adminTakeControl(selectedPhase || undefined);
-    handleClose();
+    onOpenChange(false);
   };
-
-  const handleClose = () => {
-    setIsOpen(false);
-    onClose();
-  };
-
-  // Ensure dialog state syncs with the component lifecycle
-  useEffect(() => {
-    setIsOpen(true);
-    return () => setIsOpen(false);
-  }, []);
 
   return (
     <Dialog 
-      open={isOpen} 
-      onOpenChange={(open) => {
-        setIsOpen(open);
-        if (!open) onClose();
-      }}
+      open={open} 
+      onOpenChange={onOpenChange}
     >
       <DialogContent className="bg-black/90 border border-red-500 rounded-lg p-4 w-64">
         <DialogHeader>
@@ -88,7 +74,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
             <Button 
               size="sm" 
               variant="outline"
-              onClick={handleClose}
+              onClick={() => onOpenChange(false)}
               className="border-gray-700 text-gray-400"
             >
               <X className="w-3 h-3" />
