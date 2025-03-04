@@ -69,15 +69,12 @@ const GamePhaseDisplay: React.FC<GamePhaseDisplayProps> = (props) => {
     weeklyEvents,
     generateRandomEvent,
     processEventChoice,
-    resetWeeklyEvents
-  } = useRandomEvents({
-    players,
-    currentPlayerId,
-    week
-  });
+    resetWeeklyEvents,
+    triggerRandomEvent
+  } = useRandomEvents();
   
   // Trigger a random event (for testing purposes)
-  const triggerRandomEvent = async () => {
+  const handleRandomEvent = async () => {
     const newEvent = await generateRandomEvent();
     if (newEvent) {
       setCurrentEvent(newEvent);
@@ -148,7 +145,7 @@ const GamePhaseDisplay: React.FC<GamePhaseDisplayProps> = (props) => {
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={triggerRandomEvent}
+                onClick={handleRandomEvent}
                 className="bg-game-dark/80 border-game-accent text-game-accent"
               >
                 Trigger Event

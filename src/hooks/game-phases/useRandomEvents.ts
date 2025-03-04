@@ -1,20 +1,33 @@
+
 import { useCallback, useState } from 'react';
 import { useGameContext } from '@/hooks/useGameContext';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { AIMemoryEntry } from '@/hooks/ai/types';
+
+// Define a GameEvent type to export
+export interface GameEvent {
+  id: string;
+  playerId: string;
+  playerName: string;
+  type: string;
+  title: string;
+  description: string;
+  choices?: { id: string; text: string; outcome: string }[];
+  participants: string[];
+}
 
 export function useRandomEvents() {
   const { 
     players, 
     makeAIDecision, 
     generateAIDialogue,
-    addMemoryEntry, // This should now be available from the context
+    addMemoryEntry,
     updateBotEmotion,
-    // other context values
   } = useGameContext();
   
   const [lastEventDay, setLastEventDay] = useState(0);
   const [eventProbability, setEventProbability] = useState(0.3); // 30% chance by default
+  const [weeklyEvents, setWeeklyEvents] = useState<GameEvent[]>([]);
   
   const triggerRandomEvent = useCallback(async (currentDay: number) => {
     // Only trigger events once per day
@@ -26,8 +39,8 @@ export function useRandomEvents() {
     // Mark this day as having had an event
     setLastEventDay(currentDay);
     
-    // Get AI players only
-    const aiPlayers = players.filter(p => !p.isHuman && !p.isEvicted);
+    // Get AI players only (filter out evicted players)
+    const aiPlayers = players.filter(p => !p.isHuman && p.status !== 'evicted');
     if (aiPlayers.length === 0) return null;
     
     // Pick a random AI player to be involved
@@ -42,9 +55,9 @@ export function useRandomEvents() {
     
     // Add to AI memory
     const memoryEntry: AIMemoryEntry = {
-      type: 'random_event',
+      type: "strategy_discussion", // Changed from 'random_event' to a valid type
       description: eventContent.summary,
-      impact: eventContent.impact,
+      impact: eventContent.impact as "neutral" | "positive" | "negative", // Add proper type assertion
       importance: 3,
       timestamp: new Date().toISOString()
     };
@@ -64,28 +77,28 @@ export function useRandomEvents() {
   }, [players, lastEventDay, eventProbability, generateAIDialogue, addMemoryEntry, updateBotEmotion]);
   
   const generateEventContent = async (player: PlayerData, eventType: string) => {
-    // Generate appropriate dialogue for the event
-    const dialogue = await generateAIDialogue(player.id, 'random_event', { eventType });
+    // Generate appropriate dialogue for the event - use 'general' instead of 'random_event'
+    const dialogue = await generateAIDialogue(player.id, 'general', { eventType });
     
     // Determine impact and emotion based on event type
-    let impact = 'neutral';
+    let impact: "neutral" | "positive" | "negative" = "neutral";
     let emotion = 'neutral';
     
     switch (eventType) {
       case 'alliance_offer':
-        impact = Math.random() > 0.5 ? 'positive' : 'neutral';
+        impact = Math.random() > 0.5 ? "positive" : "neutral";
         emotion = impact === 'positive' ? 'excited' : 'thoughtful';
         break;
       case 'strategy_discussion':
-        impact = 'neutral';
+        impact = "neutral";
         emotion = 'focused';
         break;
       case 'secret_reveal':
-        impact = Math.random() > 0.7 ? 'negative' : 'neutral';
+        impact = Math.random() > 0.7 ? "negative" : "neutral";
         emotion = impact === 'negative' ? 'worried' : 'relieved';
         break;
       case 'game_insight':
-        impact = 'positive';
+        impact = "positive";
         emotion = 'confident';
         break;
     }
@@ -116,6 +129,59 @@ export function useRandomEvents() {
     }
   };
   
+  // Add these functions to match what's being used in GamePhaseDisplay
+  const generateRandomEvent = async (): Promise<GameEvent | null> => {
+    // Generate a unique ID for the event
+    const eventId = Math.random().toString(36).substring(2, 9);
+    
+    // Get random AI player
+    const aiPlayers = players.filter(p => !p.isHuman && p.status !== 'evicted');
+    if (aiPlayers.length === 0) return null;
+    
+    const randomPlayer = aiPlayers[Math.floor(Math.random() * aiPlayers.length)];
+    
+    // Create random event
+    const eventTypes = ['alliance_offer', 'strategy_discussion', 'secret_reveal', 'game_insight'];
+    const eventType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
+    
+    const newEvent: GameEvent = {
+      id: eventId,
+      playerId: randomPlayer.id,
+      playerName: randomPlayer.name,
+      type: eventType,
+      title: `${randomPlayer.name} wants to talk...`,
+      description: `${randomPlayer.name} ${getEventSummary(eventType)}`,
+      participants: [randomPlayer.id],
+      choices: [
+        { id: 'positive', text: 'React positively', outcome: 'You strengthen your relationship' },
+        { id: 'neutral', text: 'Stay neutral', outcome: 'Your relationship stays the same' },
+        { id: 'negative', text: 'React negatively', outcome: 'Your relationship weakens' }
+      ]
+    };
+    
+    // Add to weekly events
+    setWeeklyEvents(prev => [...prev, newEvent]);
+    
+    return newEvent;
+  };
+  
+  const processEventChoice = (eventId: string, choiceId: string) => {
+    // Find the event
+    const event = weeklyEvents.find(e => e.id === eventId);
+    if (!event) return null;
+    
+    // Process the outcome (this would affect relationships in a real implementation)
+    return {
+      outcome: event.choices?.find(c => c.id === choiceId)?.outcome || 'No effect',
+      relationshipEffect: choiceId === 'positive' ? 10 : choiceId === 'negative' ? -10 : 0
+    };
+  };
+  
+  const resetWeeklyEvents = () => {
+    setWeeklyEvents([]);
+    setLastEventDay(0);
+  };
+  
   const setEventFrequency = (probability: number) => {
     setEventProbability(Math.max(0, Math.min(1, probability)));
   };
@@ -123,6 +189,11 @@ export function useRandomEvents() {
   return {
     triggerRandomEvent,
     setEventFrequency,
-    eventProbability
+    eventProbability,
+    // Add new functions to match what GamePhaseDisplay expects
+    weeklyEvents,
+    generateRandomEvent,
+    processEventChoice,
+    resetWeeklyEvents
   };
 }
