@@ -22,9 +22,9 @@ export function useGameContext() {
   const aiPlayer = useAIPlayerContext();
   
   // Create fallback functions for common operations that might not be available in all contexts
-  const handleNextWeek = gameState.incrementWeek || (() => {
+  const handleNextWeek = () => {
     console.log("Default next week handler");
-  });
+  };
   
   const handlePlayerSelect = (playerId: string) => {
     console.log("Default player select handler:", playerId);
@@ -59,7 +59,8 @@ export function useGameContext() {
     savedGames: gameState.savedGames || [],
     
     // Expose handleNextWeek and handlePlayerSelect with fallbacks
-    handleNextWeek: gameState.handleNextWeek || handleNextWeek,
-    handlePlayerSelect: playerManager.handlePlayerSelect || handlePlayerSelect
+    // We check if these methods exist on their respective contexts, otherwise use our fallbacks
+    handleNextWeek: gameState.handleNextWeek !== undefined ? gameState.handleNextWeek : handleNextWeek,
+    handlePlayerSelect: playerManager.handlePlayerSelect !== undefined ? playerManager.handlePlayerSelect : handlePlayerSelect
   };
 }
