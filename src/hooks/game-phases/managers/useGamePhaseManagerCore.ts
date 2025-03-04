@@ -1,21 +1,14 @@
 
 import { GamePhaseProps } from '../types';
-import { useGameState } from '../useGameState';
+import { useGameContext } from '@/hooks/useGameContext';
 import { usePhaseHooks } from './usePhaseHooks';
 import { usePhaseActionHandler } from '../handlers/usePhaseActionHandler';
 import { usePowerupContext } from '@/hooks/gameContext/usePowerupContext';
 
 export function useGamePhaseManagerCore(props: GamePhaseProps) {
-  // Get the core state and utilities
-  const {
-    state,
-    setters,
-    toast,
-    handlePlayerSelect,
-    usePowerup,
-    handleNextWeek
-  } = useGameState(props);
-
+  const { state, setters, toast } = useGameState(props);
+  const { handlePlayerSelect, usePowerup, handleNextWeek } = useGameContext();
+  
   // Get all phase-specific hooks
   const phaseHooks = usePhaseHooks(state, setters, toast);
 
