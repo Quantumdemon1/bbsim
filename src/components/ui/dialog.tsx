@@ -32,13 +32,8 @@ const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
 >(({ className, children, ...props }, ref) => {
-  // Check if the component is being used within a Dialog
-  // Use the Root context instead of DialogContext which doesn't exist
-  const dialogContext = React.useContext(DialogPrimitive.Root.contextName ? 
-    React.createContext(null) : React.createContext(null))
-  
+  // Since we can't reliably check the context directly, we'll just provide helpful development logs
   React.useEffect(() => {
-    // We can't reliably check the context, so just log a general recommendation
     if (process.env.NODE_ENV !== 'production') {
       console.log(
         "Note: DialogContent should be used within a Dialog component for proper functionality."
