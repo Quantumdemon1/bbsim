@@ -1,13 +1,13 @@
 
+import { GamePhaseState, GamePhaseSetters } from '../types';
 import { useHoHPhase } from '../useHoHPhase';
 import { useNominationPhase } from '../useNominationPhase';
 import { usePoVPhase } from '../usePoVPhase';
 import { useVetoPhase } from '../useVetoPhase';
 import { useEvictionPhase } from '../useEvictionPhase';
+import { useSpecialCompetitionPhase } from '../useSpecialCompetitionPhase';
 import { useJuryQuestionsPhase } from '../useJuryQuestionsPhase';
 import { useJuryVotingPhase } from '../useJuryVotingPhase';
-import { useSpecialCompetitionPhase } from '../useSpecialCompetitionPhase';
-import { GamePhaseState, GamePhaseSetters } from '../types';
 
 export function usePhaseHooks(
   state: GamePhaseState,

@@ -1,39 +1,24 @@
 
 import { GamePhaseProps } from './types';
 import { useGamePhaseManagerCore } from './managers/useGamePhaseManagerCore';
-import { usePhaseHooks } from './managers/usePhaseHooks';
-import { usePhaseActionHandler } from './handlers/usePhaseActionHandler';
 
 export function useGamePhaseManager(props: GamePhaseProps) {
-  // Get the core state and utilities
+  // Get the core functionality
   const {
     state,
     setters,
-    toast,
+    handleAction,
     handlePlayerSelect,
     usePowerup,
-    handleNextWeek
+    phaseHooks
   } = useGamePhaseManagerCore(props);
-
-  // Get all phase-specific hooks
-  const {
-    hohPhase,
-    nominationPhase,
-    povPhase,
-    vetoPhase,
-    evictionPhase,
-    specialCompetitionPhase,
-    juryQuestionsPhase,
-    juryVotingPhase
-  } = usePhaseHooks(state, setters, toast);
 
   // Inject the usePowerup function into phase hooks that need it
   const enhancedNominationPhase = {
-    ...nominationPhase,
+    ...phaseHooks.nominationPhase,
     handleNominate: () => {
-      // Creating a version with the actual usePowerup function
       const enhancedNominationContext = {
-        ...nominationPhase,
+        ...phaseHooks.nominationPhase,
         usePowerup
       };
       return enhancedNominationContext.handleNominate();
@@ -41,10 +26,10 @@ export function useGamePhaseManager(props: GamePhaseProps) {
   };
 
   const enhancedVetoPhase = {
-    ...vetoPhase,
+    ...phaseHooks.vetoPhase,
     handleVetoAction: (action: string) => {
       const enhancedVetoContext = {
-        ...vetoPhase,
+        ...phaseHooks.vetoPhase,
         usePowerup
       };
       return enhancedVetoContext.handleVetoAction(action);
@@ -52,31 +37,17 @@ export function useGamePhaseManager(props: GamePhaseProps) {
   };
 
   const enhancedEvictionPhase = {
-    ...evictionPhase,
+    ...phaseHooks.evictionPhase,
     handleEvict: (evictedId: string) => {
       const enhancedEvictionContext = {
-        ...evictionPhase,
+        ...phaseHooks.evictionPhase,
         usePowerup
       };
       return enhancedEvictionContext.handleEvict(evictedId);
     }
   };
 
-  // Use the phase action handler to manage actions for different phases
-  const handleAction = usePhaseActionHandler(
-    state,
-    setters,
-    enhancedNominationPhase.handleNominate,
-    hohPhase.handleSelectHoH,
-    povPhase.handleSelectVeto,
-    enhancedVetoPhase.handleVetoAction,
-    enhancedEvictionPhase.handleEvict,
-    juryQuestionsPhase.handleJuryQuestions,
-    juryQuestionsPhase.handleProceedToVoting,
-    handleNextWeek
-  );
-
-  // Return the public API for the game phase manager - same structure as before
+  // Return the public API for the game phase manager
   return {
     // State
     week: state.week,

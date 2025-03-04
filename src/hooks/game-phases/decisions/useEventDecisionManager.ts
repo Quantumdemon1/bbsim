@@ -9,7 +9,7 @@ import { DecisionData } from './types';
  * Main hook that combines event and decision management
  */
 export function useEventDecisionManager() {
-  const { players, nominees } = useGameContext();
+  const { players } = useGameContext();
   
   // Initialize sub-hooks
   const eventManager = useEventManager();
