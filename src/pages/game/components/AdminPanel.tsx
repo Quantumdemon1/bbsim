@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Dialog,
   DialogContent,
@@ -16,7 +16,7 @@ interface AdminPanelProps {
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
   const [selectedPhase, setSelectedPhase] = useState('');
-  const [open, setOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(true);
   const { adminTakeControl } = useGameContext();
   
   const phases = [
@@ -35,15 +35,24 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
   };
 
   const handleClose = () => {
-    setOpen(false);
+    setIsOpen(false);
     onClose();
   };
 
+  // Ensure dialog state syncs with the component lifecycle
+  useEffect(() => {
+    setIsOpen(true);
+    return () => setIsOpen(false);
+  }, []);
+
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      setOpen(isOpen);
-      if (!isOpen) onClose();
-    }}>
+    <Dialog 
+      open={isOpen} 
+      onOpenChange={(open) => {
+        setIsOpen(open);
+        if (!open) onClose();
+      }}
+    >
       <DialogContent className="bg-black/90 border border-red-500 rounded-lg p-4 w-64">
         <DialogHeader>
           <DialogTitle className="text-red-500 font-bold flex items-center">
