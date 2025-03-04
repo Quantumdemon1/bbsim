@@ -30,8 +30,10 @@ export interface AIPlayerAttributes {
 export interface AIMemoryEntry {
   id?: string;
   player_id?: string;    // Added for database integration
-  type: 'nomination' | 'veto' | 'eviction' | 'hoh' | 'alliance' | 'betrayal' | 'conversation' | 
-        'competition_win' | 'competition_loss' | 'argument' | 'celebration' | 'strategy_discussion' | 'private_conversation';
+  type: 'nomination' | 'veto' | 'eviction' | 'hoh' | 'alliance' | 'betrayal' | 
+        'conversation' | 'competition_win' | 'competition_loss' | 'argument' | 
+        'celebration' | 'strategy_discussion' | 'private_conversation' |
+        'random_event' | 'player_decision';
   week: number;
   description: string;
   relatedPlayerId?: string;  // Other player involved in this memory

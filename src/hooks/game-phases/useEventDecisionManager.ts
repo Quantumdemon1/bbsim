@@ -5,7 +5,7 @@ import { useRandomEvents, GameEvent } from './useRandomEvents';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { DecisionData } from './usePlayerDecisions';
 import { useToast } from "@/components/ui/use-toast";
-import { AIMemoryEntry } from '@/hooks/game-phases/types';
+import { AIMemoryEntry } from '@/hooks/ai/types';
 
 /**
  * Custom hook that provides unified management of random events and player decisions
