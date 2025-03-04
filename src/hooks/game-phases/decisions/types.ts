@@ -33,3 +33,13 @@ export interface EventDecisionState {
   currentDecision: DecisionData | null;
   pendingDecisionCallback: ((optionId: string) => void) | null;
 }
+
+/**
+ * Decision generator function signatures
+ */
+export interface DecisionGenerators {
+  generateAllianceDecision: (targetPlayerId: string, players: PlayerData[]) => DecisionData;
+  generateNominationDecision: (eligiblePlayers: PlayerData[]) => DecisionData;
+  generateEvictionVoteDecision: (nominees: string[], players: PlayerData[]) => DecisionData;
+  generateVetoDecision: (nominees: string[], hasVeto: boolean, players: PlayerData[]) => DecisionData;
+}

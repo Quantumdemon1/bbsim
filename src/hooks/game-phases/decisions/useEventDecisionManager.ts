@@ -16,23 +16,6 @@ export function useEventDecisionManager() {
   const decisionManager = useDecisionManager();
   const decisionGenerators = useDecisionGenerators();
   
-  // Generate various decision types
-  const generateAllianceDecision = async (targetPlayerId: string): Promise<DecisionData> => {
-    return decisionGenerators.generateAllianceDecision(targetPlayerId, players);
-  };
-  
-  const generateNominationDecision = (eligiblePlayers: typeof players): DecisionData => {
-    return decisionGenerators.generateNominationDecision(eligiblePlayers);
-  };
-  
-  const generateEvictionVoteDecision = (nominees: string[]): DecisionData => {
-    return decisionGenerators.generateEvictionVoteDecision(nominees, players);
-  };
-  
-  const generateVetoDecision = (nominees: string[], hasVeto: boolean): DecisionData => {
-    return decisionGenerators.generateVetoDecision(nominees, hasVeto, players);
-  };
-  
   return {
     // Expose event manager functionality
     weeklyEvents: eventManager.weeklyEvents,
@@ -52,9 +35,9 @@ export function useEventDecisionManager() {
     handleDecisionMade: decisionManager.handleDecisionMade,
     
     // Expose decision generators
-    generateAllianceDecision,
-    generateNominationDecision,
-    generateEvictionVoteDecision,
-    generateVetoDecision
+    generateAllianceDecision: decisionGenerators.generateAllianceDecision,
+    generateNominationDecision: decisionGenerators.generateNominationDecision,
+    generateEvictionVoteDecision: decisionGenerators.generateEvictionVoteDecision,
+    generateVetoDecision: decisionGenerators.generateVetoDecision
   };
 }

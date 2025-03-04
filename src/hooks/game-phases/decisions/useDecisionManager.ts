@@ -2,9 +2,8 @@
 import { useState } from 'react';
 import { useGameContext } from '@/hooks/useGameContext';
 import { useToast } from "@/components/ui/use-toast";
-import { PlayerData } from '@/components/PlayerProfileTypes';
 import { DecisionData } from './types';
-import { AIMemoryEntry } from '@/hooks/ai/types';
+import { AIMemoryEntry } from '@/hooks/game-phases/types/gamePhaseState';
 
 /**
  * Hook to manage player decisions
