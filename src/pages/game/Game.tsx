@@ -1,4 +1,3 @@
-
 import React, { Suspense, useEffect } from 'react';
 import { adaptGameNotificationToAuthNotification, isGameNotificationArray } from '@/types/notificationTypes';
 import { Notification } from '@/hooks/auth/types';
@@ -41,11 +40,9 @@ const Game = () => {
     handlePhaseComplete,
   } = useGameInit();
 
-  // Add debugging logs
   useEffect(() => {
     console.log("Game component - Rendered with showAdminPanel:", showAdminPanel);
     
-    // Return cleanup function
     return () => {
       console.log("Game component - Unmounted");
     };
@@ -81,7 +78,6 @@ const Game = () => {
         advanceDay={advanceDay} 
       />
       
-      {/* Always render AdminPanel, but control visibility with open prop */}
       <AdminPanel 
         open={showAdminPanel}
         onOpenChange={handleAdminPanelOpenChange}

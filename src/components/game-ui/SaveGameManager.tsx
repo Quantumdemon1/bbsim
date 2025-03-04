@@ -171,40 +171,41 @@ export const SaveGameManager = ({
 
   return (
     <>
-      <div className="flex gap-2">
-        <DialogTrigger asChild>
-          <Button variant="outline" className="gap-1 whitespace-nowrap text-blue-950">
-            <Save className="h-4 w-4" />
-            Saved Games
-          </Button>
-        </DialogTrigger>
-        
-        {gameId && gameState === 'playing' && (
-          <div className="flex gap-2">
-            <Button 
-              variant="default" 
-              onClick={() => handleSaveGame()} 
-              disabled={isLoadingSave} 
-              className="gap-1 whitespace-nowrap"
-            >
-              {isLoadingSave ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              Save
-            </Button>
-            
-            <Button
-              variant="outline"
-              onClick={handleToggleAutoSave}
-              className={`gap-1 whitespace-nowrap ${isAutoSaveEnabled ? 'bg-green-600/20 text-green-500' : 'bg-red-600/20 text-red-500'}`}
-              title={`Auto-save is ${isAutoSaveEnabled ? 'enabled' : 'disabled'}`}
-            >
-              <Clock className="h-4 w-4" />
-              {isAutoSaveEnabled ? 'Auto: ON' : 'Auto: OFF'}
-            </Button>
-          </div>
-        )}
-      </div>
-
+      {/* FIXED: Restructured to properly place DialogTrigger inside Dialog component */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <div className="flex gap-2">
+          <DialogTrigger asChild>
+            <Button variant="outline" className="gap-1 whitespace-nowrap text-blue-950">
+              <Save className="h-4 w-4" />
+              Saved Games
+            </Button>
+          </DialogTrigger>
+          
+          {gameId && gameState === 'playing' && (
+            <div className="flex gap-2">
+              <Button 
+                variant="default" 
+                onClick={() => handleSaveGame()} 
+                disabled={isLoadingSave} 
+                className="gap-1 whitespace-nowrap"
+              >
+                {isLoadingSave ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                Save
+              </Button>
+              
+              <Button
+                variant="outline"
+                onClick={handleToggleAutoSave}
+                className={`gap-1 whitespace-nowrap ${isAutoSaveEnabled ? 'bg-green-600/20 text-green-500' : 'bg-red-600/20 text-red-500'}`}
+                title={`Auto-save is ${isAutoSaveEnabled ? 'enabled' : 'disabled'}`}
+              >
+                <Clock className="h-4 w-4" />
+                {isAutoSaveEnabled ? 'Auto: ON' : 'Auto: OFF'}
+              </Button>
+            </div>
+          )}
+        </div>
+
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Saved Games</DialogTitle>
