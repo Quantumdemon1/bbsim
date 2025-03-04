@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GameRoom from '@/components/GameRoom';
@@ -17,6 +16,7 @@ import { GamePhase } from '@/types/gameTypes';
 import { adaptGameNotificationToAuthNotification, isGameNotificationArray } from '@/types/notificationTypes';
 import { Notification } from '@/hooks/auth/types';
 import { initPerformanceMonitoring, trackGameLoading, trackPhaseChange } from '@/services/performance-monitoring';
+import { useToast } from '@/components/ui/use-toast';
 
 const Game = () => {
   const navigate = useNavigate();
@@ -34,6 +34,7 @@ const Game = () => {
     markNotificationAsRead,
     savedGames = []
   } = useGameContext();
+  const { toast } = useToast();
   
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
@@ -41,6 +42,9 @@ const Game = () => {
   const [currentPhase, setCurrentPhase] = useState<GamePhase>('HoH Competition');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  
+  const [dayCount, setDayCount] = useState(1);
+  const [actionsRemaining, setActionsRemaining] = useState(3);
   
   const adaptedNotifications: Notification[] = React.useMemo(() => {
     if (!notifications || notifications.length === 0) return [];
@@ -52,7 +56,6 @@ const Game = () => {
     return notifications as unknown as Notification[];
   }, [notifications]);
   
-  // Initialize performance monitoring
   useEffect(() => {
     initPerformanceMonitoring();
   }, []);
@@ -93,6 +96,39 @@ const Game = () => {
       gameLoadTracker.end();
     }
   }, [gameState, isAuthenticated, navigate, gameMode]);
+  
+  const advanceDay = () => {
+    setDayCount(prev => prev + 1);
+    setActionsRemaining(3);
+    
+    toast({
+      title: "New Day",
+      description: `Day ${dayCount + 1} in the Big Brother house begins. You have 3 actions remaining.`,
+    });
+  };
+  
+  const useAction = () => {
+    if (actionsRemaining > 0) {
+      setActionsRemaining(prev => prev - 1);
+      
+      if (actionsRemaining === 1) {
+        toast({
+          title: "Last Action Used",
+          description: "You have no more actions for today. Advance to the next day when ready.",
+          variant: "destructive"
+        });
+      }
+      
+      return true;
+    } else {
+      toast({
+        title: "No Actions Left",
+        description: "You have no more actions for today. Advance to the next day to continue.",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
   
   const handlePhaseChange = (newPhase: GamePhase) => {
     const phaseChangeTracker = trackPhaseChange();
@@ -183,10 +219,29 @@ const Game = () => {
           setShowNotifications={setShowNotifications}
         />
         
+        <div className="bg-game-dark border-b border-game-accent px-4 py-2 flex justify-between items-center">
+          <div className="flex space-x-4 items-center">
+            <span className="text-game-accent">Day {dayCount}</span>
+            <span className="text-white">Actions: {actionsRemaining}/3</span>
+          </div>
+          <button
+            className="px-3 py-1 bg-game-accent text-black rounded hover:bg-game-highlight transition-colors"
+            onClick={advanceDay}
+            disabled={actionsRemaining > 0}
+          >
+            {actionsRemaining > 0 ? "Use All Actions First" : "Next Day"}
+          </button>
+        </div>
+        
         {showAdminPanel && <AdminPanel onClose={() => setShowAdminPanel(false)} />}
         
         <Suspense fallback={<LoadingState text="Loading game controls..." />}>
-          <GameControls players={players} />
+          <GameControls 
+            players={players} 
+            dayCount={dayCount}
+            actionsRemaining={actionsRemaining}
+            useAction={useAction}
+          />
         </Suspense>
         
         {saveGame && (
