@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, ReactNode } from 'react';
 import { usePlayerManagerContext } from '../PlayerManagerContext';
 import { useGameStateHooks } from './useGameStateHooks';
@@ -36,20 +35,24 @@ export const GameStateProviderCore = ({ children }: { children: ReactNode }) => 
     gameCore.resetGame(handleGameReset);
   };
 
-  const loadGame = async (gameId: string) => {
-    const loadedState = await persistenceManager.loadGame(gameId);
+  const loadGame = async (gameId: string): Promise<boolean> => {
+    const loadSuccess = await persistenceManager.loadGame(gameId);
     
-    if (loadedState) {
-      gameCore.joinGame(loadedState.gameId, gameCore.playerName || 'Player');
-      gameCore.setCurrentWeek(loadedState.week);
-      gameCore.startGame(() => {
-        setPlayers(loadedState.players);
-        chatState.setShowChat(true);
-        
-        phaseProgressTracker.clearPhaseProgress('*');
-      });
+    if (loadSuccess) {
+      const savedGame = persistenceManager.savedGames.find(game => game.game_id === gameId);
       
-      return true;
+      if (savedGame) {
+        gameCore.joinGame(gameId, gameCore.playerName || 'Player');
+        gameCore.setCurrentWeek(savedGame.week);
+        gameCore.startGame(() => {
+          setPlayers(savedGame.players);
+          chatState.setShowChat(true);
+          
+          phaseProgressTracker.clearPhaseProgress('*');
+        });
+        
+        return true;
+      }
     }
     
     return false;
