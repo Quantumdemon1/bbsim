@@ -4,6 +4,7 @@ import { useGameContext } from '@/hooks/useGameContext';
 import PhaseRenderer from './game-phases/PhaseRenderer';
 import RandomEventHandler from './game-phases/event-handling/RandomEventHandler';
 import PlayerDecisionHandler from './game-phases/decisions/PlayerDecisionHandler';
+import StatusDisplay from './game-phases/StatusDisplay';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { Alliance } from '@/contexts/types';
 import { WeekSummary } from '@/hooks/game-phases/types';
@@ -35,19 +36,15 @@ const GamePhaseDisplay: React.FC<GamePhaseDisplayProps> = (props) => {
   return (
     <div className="flex-1 p-6 overflow-y-auto">
       {currentPlayerId && (
-        <div className="mb-6 bg-game-medium rounded-lg p-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-xl font-bold">Week {props.week}: {props.phase}</h2>
-              <p className="text-gray-300">
-                You are playing as {playerName || 'Human Player'}
-                {props.hoh === currentPlayerId && " - You are the Head of Household!"}
-                {props.veto === currentPlayerId && " - You hold the Power of Veto!"}
-                {props.nominees.includes(currentPlayerId) && " - You are nominated for eviction!"}
-              </p>
-            </div>
-          </div>
-        </div>
+        <StatusDisplay 
+          week={props.week}
+          phase={props.phase}
+          playerName={playerName}
+          currentPlayerId={currentPlayerId}
+          hoh={props.hoh}
+          veto={props.veto}
+          nominees={props.nominees}
+        />
       )}
       
       {/* Regular phase content */}
