@@ -58,9 +58,9 @@ export function useGameContext() {
     saveGame: gameState.saveCurrentGame || (() => Promise.resolve()),
     savedGames: gameState.savedGames || [],
     
-    // Expose handleNextWeek and handlePlayerSelect with fallbacks
-    // We check if these methods exist on their respective contexts, otherwise use our fallbacks
-    handleNextWeek: gameState.handleNextWeek !== undefined ? gameState.handleNextWeek : handleNextWeek,
-    handlePlayerSelect: playerManager.handlePlayerSelect !== undefined ? playerManager.handlePlayerSelect : handlePlayerSelect
+    // Define the handleNextWeek and handlePlayerSelect directly
+    // instead of trying to access them from gameState or playerManager
+    handleNextWeek: handleNextWeek,
+    handlePlayerSelect: handlePlayerSelect
   };
 }
