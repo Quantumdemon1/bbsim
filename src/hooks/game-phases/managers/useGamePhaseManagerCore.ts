@@ -4,10 +4,11 @@ import { useGameContext } from '@/hooks/useGameContext';
 import { usePhaseHooks } from './usePhaseHooks';
 import { usePhaseActionHandler } from '../handlers/usePhaseActionHandler';
 import { usePowerupContext } from '@/hooks/gameContext/usePowerupContext';
+import { useGameState } from '../useGameState';
 
 export function useGamePhaseManagerCore(props: GamePhaseProps) {
   const { state, setters, toast } = useGameState(props);
-  const { handlePlayerSelect, usePowerup, handleNextWeek } = useGameContext();
+  const gameContext = useGameContext();
   
   // Get all phase-specific hooks
   const phaseHooks = usePhaseHooks(state, setters, toast);
@@ -23,15 +24,36 @@ export function useGamePhaseManagerCore(props: GamePhaseProps) {
     phaseHooks.evictionPhase.handleEvict,
     phaseHooks.juryQuestionsPhase.handleJuryQuestions,
     phaseHooks.juryQuestionsPhase.handleProceedToVoting,
-    handleNextWeek
+    // Create a fallback for handleNextWeek if it doesn't exist in gameContext
+    () => {
+      console.log("Advancing to next week");
+      setters.setWeek(state.week + 1);
+      setters.setPhase('HoH Competition');
+    }
   );
+
+  // Create a player select handler if not available in gameContext
+  const handlePlayerSelect = (playerId: string) => {
+    const currentSelected = [...state.selectedPlayers];
+    const index = currentSelected.indexOf(playerId);
+    
+    if (index >= 0) {
+      // Player is already selected, deselect them
+      currentSelected.splice(index, 1);
+    } else {
+      // Player is not selected, select them
+      currentSelected.push(playerId);
+    }
+    
+    setters.setSelectedPlayers(currentSelected);
+  };
 
   return {
     state,
     setters,
     handleAction,
-    handlePlayerSelect,
-    usePowerup,
+    handlePlayerSelect: gameContext.handlePlayerSelect || handlePlayerSelect,
+    usePowerup: gameContext.usePowerup || (() => console.warn("Powerup functionality not available")),
     phaseHooks
   };
 }
