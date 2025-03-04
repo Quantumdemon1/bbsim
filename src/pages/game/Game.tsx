@@ -1,16 +1,14 @@
-import React, { Suspense, useEffect } from 'react';
-import { adaptGameNotificationToAuthNotification, isGameNotificationArray } from '@/types/notificationTypes';
-import { Notification } from '@/hooks/auth/types';
+
+import React, { useEffect } from 'react';
 import { useGameContext } from '@/hooks/useGameContext';
 import { LoadingState } from '@/components/ui/loading-state';
 import GameHeader from './components/GameHeader';
-import GameControls from './components/GameControls';
-import AdminPanel from './components/AdminPanel';
-import GameRoom from '@/components/GameRoom';
 import GameContainer from './components/GameContainer';
-import DayTracker from './components/DayTracker';
-import GameOverlays from './components/GameOverlays';
+import GameContent from './components/GameContent';
+import GameOverlaysContainer from './components/GameOverlaysContainer';
+import GameNotifications from './components/GameNotifications';
 import { useGameInit } from './hooks/useGameInit';
+import { useGameState } from './hooks/useGameState';
 
 const Game = () => {
   const { 
@@ -26,20 +24,25 @@ const Game = () => {
     dayCount,
     actionsRemaining,
     currentPhase,
-    showNotifications,
-    selectedPlayer,
-    showAdminPanel,
     isLoading,
     error,
-    setShowNotifications,
-    setSelectedPlayer,
-    setShowAdminPanel,
     advanceDay,
     useAction,
     handlePhaseChange,
     handlePhaseComplete,
   } = useGameInit();
 
+  const {
+    showNotifications,
+    selectedPlayer,
+    showAdminPanel,
+    setShowNotifications,
+    setSelectedPlayer,
+    setShowAdminPanel
+  } = useGameState();
+
+  const { adaptedNotifications } = GameNotifications({ notifications });
+  
   useEffect(() => {
     console.log("Game component - Rendered with showAdminPanel:", showAdminPanel);
     
@@ -47,16 +50,6 @@ const Game = () => {
       console.log("Game component - Unmounted");
     };
   }, [showAdminPanel]);
-  
-  const adaptedNotifications: Notification[] = React.useMemo(() => {
-    if (!notifications || notifications.length === 0) return [];
-    
-    if (isGameNotificationArray(notifications)) {
-      return notifications.map(adaptGameNotificationToAuthNotification);
-    }
-    
-    return notifications as unknown as Notification[];
-  }, [notifications]);
 
   const handleAdminPanelOpenChange = (open: boolean) => {
     console.log("handleAdminPanelOpenChange called with:", open);
@@ -72,35 +65,20 @@ const Game = () => {
         setShowNotifications={setShowNotifications}
       />
       
-      <DayTracker 
-        dayCount={dayCount} 
-        actionsRemaining={actionsRemaining} 
-        advanceDay={advanceDay} 
+      <GameContent
+        players={players}
+        dayCount={dayCount}
+        actionsRemaining={actionsRemaining}
+        currentPhase={currentPhase}
+        showAdminPanel={showAdminPanel}
+        onAdminPanelOpenChange={handleAdminPanelOpenChange}
+        advanceDay={advanceDay}
+        useAction={useAction}
+        handlePhaseChange={handlePhaseChange}
+        handlePhaseComplete={handlePhaseComplete}
       />
       
-      <AdminPanel 
-        open={showAdminPanel}
-        onOpenChange={handleAdminPanelOpenChange}
-      />
-      
-      <Suspense fallback={<LoadingState text="Loading game controls..." />}>
-        <GameControls 
-          players={players} 
-          dayCount={dayCount}
-          actionsRemaining={actionsRemaining}
-          useAction={useAction}
-        />
-      </Suspense>
-      
-      <Suspense fallback={<LoadingState text="Loading game room..." />}>
-        <GameRoom 
-          players={players} 
-          initialWeek={1} 
-          onPhaseChange={handlePhaseChange} 
-        />
-      </Suspense>
-      
-      <GameOverlays
+      <GameOverlaysContainer
         showChat={showChat}
         showNotifications={showNotifications}
         setShowNotifications={setShowNotifications}
@@ -112,7 +90,7 @@ const Game = () => {
         players={players}
         currentPhase={currentPhase}
         onPhaseComplete={handlePhaseComplete}
-        saveGame={savedGames.length > 0 ? () => Promise.resolve() : undefined}
+        savedGames={savedGames}
       />
     </GameContainer>
   );
