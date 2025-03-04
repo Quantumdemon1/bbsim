@@ -66,7 +66,9 @@ const Game = () => {
         advanceDay={advanceDay} 
       />
       
-      {showAdminPanel && <AdminPanel onClose={() => setShowAdminPanel(false)} />}
+      {showAdminPanel && (
+        <AdminPanel onClose={() => setShowAdminPanel(false)} />
+      )}
       
       <Suspense fallback={<LoadingState text="Loading game controls..." />}>
         <GameControls 

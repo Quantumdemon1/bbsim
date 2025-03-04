@@ -31,6 +31,14 @@ export function useGameContext() {
     // This is a fallback implementation, actual implementation should be provided by context
   };
   
+  const adminTakeControl = (phase?: string) => {
+    console.log("Admin taking control", phase);
+    // This is a fallback implementation
+    if (gameState.setPhase && phase) {
+      gameState.setPhase(phase);
+    }
+  };
+  
   // Combine all contexts into a single API
   return {
     // Game State
@@ -58,9 +66,9 @@ export function useGameContext() {
     saveGame: gameState.saveCurrentGame || (() => Promise.resolve()),
     savedGames: gameState.savedGames || [],
     
-    // Define the handleNextWeek and handlePlayerSelect directly
-    // instead of trying to access them from gameState or playerManager
-    handleNextWeek: handleNextWeek,
-    handlePlayerSelect: handlePlayerSelect
+    // Make sure these handlers are always available
+    handleNextWeek,
+    handlePlayerSelect,
+    adminTakeControl,
   };
 }

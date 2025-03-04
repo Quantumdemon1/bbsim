@@ -1,14 +1,14 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Shield, SkipForward, X } from 'lucide-react';
-import { useGameContext } from '@/hooks/useGameContext';
 import { 
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Shield, SkipForward, X } from 'lucide-react';
+import { useGameContext } from '@/hooks/useGameContext';
 
 interface AdminPanelProps {
   onClose: () => void;
@@ -16,7 +16,6 @@ interface AdminPanelProps {
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
   const [selectedPhase, setSelectedPhase] = useState('');
-  const [open, setOpen] = useState(true);
   const { adminTakeControl } = useGameContext();
   
   const phases = [
@@ -33,15 +32,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
     adminTakeControl(selectedPhase || undefined);
     onClose();
   };
-  
-  // Handle dialog state changes
-  const handleOpenChange = (isOpen: boolean) => {
-    setOpen(isOpen);
-    if (!isOpen) onClose();
-  };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="bg-black/90 border border-red-500 rounded-lg p-4 w-64">
         <DialogHeader>
           <DialogTitle className="text-red-500 font-bold flex items-center">
