@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { usePlayerDecisions } from '@/hooks/game-phases/usePlayerDecisions';
+import { useEventDecisionManager } from '@/hooks/game-phases/useEventDecisionManager';
 import { PlayerDecisionPrompt } from '@/components/game-ui/PlayerDecisionPrompt';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 
@@ -14,21 +14,18 @@ const PlayerDecisionHandler: React.FC<PlayerDecisionHandlerProps> = ({
   players 
 }) => {
   const {
-    isDecisionPromptOpen,
-    setIsDecisionPromptOpen,
     currentDecision,
+    decisionPromptOpen,
+    setDecisionPromptOpen,
     handleDecisionMade
-  } = usePlayerDecisions({ 
-    players, 
-    currentPlayerId 
-  });
+  } = useEventDecisionManager();
 
   return (
     <>
       {currentDecision && (
         <PlayerDecisionPrompt
-          open={isDecisionPromptOpen}
-          onOpenChange={setIsDecisionPromptOpen}
+          open={decisionPromptOpen}
+          onOpenChange={setDecisionPromptOpen}
           title={currentDecision.title}
           description={currentDecision.description}
           situation={currentDecision.situation}

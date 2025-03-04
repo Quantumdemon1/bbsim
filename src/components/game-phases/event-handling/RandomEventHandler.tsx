@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { useRandomEvents, GameEvent } from '@/hooks/game-phases/useRandomEvents';
+import React from 'react';
+import { useEventDecisionManager } from '@/hooks/game-phases/useEventDecisionManager';
 import { PlayerDecisionPrompt } from '@/components/game-ui/PlayerDecisionPrompt';
 
 interface RandomEventHandlerProps {
@@ -9,35 +9,11 @@ interface RandomEventHandlerProps {
 
 const RandomEventHandler: React.FC<RandomEventHandlerProps> = ({ currentPlayerId }) => {
   const {
-    weeklyEvents,
-    generateRandomEvent,
-    processEventChoice,
-    resetWeeklyEvents
-  } = useRandomEvents();
-  
-  const [eventModalOpen, setEventModalOpen] = useState(false);
-  const [currentEvent, setCurrentEvent] = useState<GameEvent | null>(null);
-  
-  // Handle a random event
-  const handleRandomEvent = async () => {
-    const newEvent = await generateRandomEvent();
-    if (newEvent) {
-      setCurrentEvent(newEvent);
-      setEventModalOpen(true);
-    }
-  };
-  
-  // Handle an event choice
-  const handleEventChoice = (eventId: string, choiceId: string) => {
-    const result = processEventChoice(eventId, choiceId);
-    if (result) {
-      console.log("Event outcome:", result.outcome);
-      console.log("Relationship effects:", result.relationshipEffect);
-      
-      setEventModalOpen(false);
-      setCurrentEvent(null);
-    }
-  };
+    currentEvent,
+    eventModalOpen,
+    setEventModalOpen,
+    handleEventChoice
+  } = useEventDecisionManager();
   
   return (
     <>
