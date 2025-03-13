@@ -42,8 +42,8 @@ const EnvironmentIndicator: React.FC<EnvironmentIndicatorProps> = ({ currentPhas
           description: 'The house is somber as someone will leave'
         };
       default:
-        // Check if currentPhase is a string and includes 'night' before trying to use includes()
-        const isNightPhase = typeof currentPhase === 'string' && currentPhase.includes('night');
+        // Check if currentPhase is a string before trying to use includes()
+        const isNightPhase = typeof currentPhase === 'string' && currentPhase.toLowerCase().includes('night');
         
         return {
           bgColor: 'bg-gray-500/10',
