@@ -46,7 +46,7 @@ export function useStorylineActions(
       setStoryEventOpen(true);
       
       // Remove from queue
-      setStoryQueue(prev => prev.slice(1));
+      setStoryQueue((prev: StoryEvent[]) => prev.slice(1));
     }
   }, [storyQueue, currentStoryEvent, setCurrentStoryEvent, setStoryEventOpen, setStoryQueue]);
 
@@ -60,8 +60,8 @@ export function useStorylineActions(
     
     const diaryEvent = createDiaryRoomEvent(currentPhase);
     
-    setStoryQueue(prev => [...prev, diaryEvent]);
-    setDayEvents(prev => [...prev, 'diary']);
+    setStoryQueue((prev: StoryEvent[]) => [...prev, diaryEvent]);
+    setDayEvents((prev: string[]) => [...prev, 'diary']);
     
     return true;
   }, [currentPhase, dayEvents, useAction, setStoryQueue, setDayEvents]);
@@ -76,8 +76,8 @@ export function useStorylineActions(
     
     const socialEvent = createSocialEvent(targetPlayer);
     
-    setStoryQueue(prev => [...prev, socialEvent]);
-    setDayEvents(prev => [...prev, `social_${targetPlayerId}`]);
+    setStoryQueue((prev: StoryEvent[]) => [...prev, socialEvent]);
+    setDayEvents((prev: string[]) => [...prev, `social_${targetPlayerId}`]);
     
     return true;
   }, [players, useAction, setStoryQueue, setDayEvents]);
@@ -134,8 +134,8 @@ export function useStorylineActions(
     if (!newEvent) return false;
     
     // Add to queue
-    setStoryQueue(prev => [...prev, newEvent]);
-    setDayEvents(prev => [...prev, newEvent.type]);
+    setStoryQueue((prev: StoryEvent[]) => [...prev, newEvent]);
+    setDayEvents((prev: string[]) => [...prev, newEvent.type]);
     
     return true;
   }, [context.actionsRemaining, dayEvents, useAction, players, setStoryQueue, setDayEvents]);
