@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Book, Users } from 'lucide-react';
+import { Book, Users, Network, MessageCircle } from 'lucide-react';
 
 interface ActionButtonsProps {
   actionsRemaining: number;
@@ -16,23 +16,23 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
     <div className="grid grid-cols-2 gap-2 mb-4">
       <Button 
         variant="outline" 
-        className="flex items-center gap-2 justify-center"
+        className="flex items-center gap-2 justify-center bg-game-medium/30 hover:bg-game-medium/50 border-game-accent/30"
         onClick={() => triggerDiaryRoomEvent()}
         disabled={actionsRemaining === 0}
       >
-        <Book className="w-4 h-4" />
+        <MessageCircle className="w-4 h-4" />
         Diary Room
       </Button>
       
       <Button 
         variant="outline" 
-        className="flex items-center gap-2 justify-center"
+        className="flex items-center gap-2 justify-center bg-game-medium/30 hover:bg-game-medium/50 border-game-accent/30"
         disabled={actionsRemaining === 0}
-        // Placeholder for future functionality
+        // Placeholder for future alliance functionality
         onClick={() => {}}
       >
-        <Users className="w-4 h-4" />
-        Alliances
+        <Network className="w-4 h-4" />
+        Strategy
       </Button>
     </div>
   );
