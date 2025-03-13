@@ -15,13 +15,15 @@ export function useAIPlayerManager(players: PlayerData[]) {
     core.isUsingLLM, 
     core.setIsThinking, 
     core.memoryManager.addMemoryEntry,
-    core.memoryManager.getPlayerMemory
+    core.memoryManager.getPlayerMemory,
+    core.memoryManager.getTriggeredMemories
   );
   const dialogueManager = useAIDialogueManager(
     core.isUsingLLM,
     core.setIsThinking,
     core.updateBotEmotion,
-    core.memoryManager.getPlayerMemory
+    core.memoryManager.getPlayerMemory,
+    core.memoryManager.getTriggeredMemories
   );
   
   /**
@@ -52,6 +54,8 @@ export function useAIPlayerManager(players: PlayerData[]) {
     addMemoryEntry: core.memoryManager.addMemoryEntry,
     clearAIMemory: core.memoryManager.clearAIMemory,
     getPlayerMemory: core.memoryManager.getPlayerMemory,
+    getRelationshipMemories: core.memoryManager.getRelationshipMemories,
+    getTriggeredMemories: core.memoryManager.getTriggeredMemories,
     makeAIDecision,
     generateAIDialogue,
     isUsingLLM: core.isUsingLLM,

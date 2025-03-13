@@ -1,4 +1,3 @@
-
 /**
  * AI Player attributes extend the basic player attributes with more detailed personality traits
  */
@@ -39,7 +38,9 @@ export interface AIMemoryEntry {
   relatedPlayerId?: string;  // Other player involved in this memory
   impact: 'positive' | 'negative' | 'neutral';
   importance: number;        // 1-5 scale of how important this memory is
-  timestamp: string | number;         // When this memory was created - updated to accept both string and number
+  timestamp: string | number; // When this memory was created - updated to accept both string and number
+  emotion?: string;          // Emotional response associated with this memory
+  decayFactor?: number;      // How quickly this memory fades (0-1, where 1 = no decay)
 }
 
 /**

@@ -68,7 +68,7 @@ export const AIPlayerService = {
       .select('*')
       .eq('player_id', playerId)
       .order('timestamp', { ascending: false })
-      .limit(20);
+      .limit(30); // Increased from 20 to 30
     
     if (error) {
       console.error("Error fetching player memory:", error);
@@ -78,7 +78,9 @@ export const AIPlayerService = {
     // Convert timestamp from string to number if needed
     return data.map(entry => ({
       ...entry,
-      timestamp: entry.timestamp // Keep as string since our interface now accepts both string and number
+      timestamp: entry.timestamp, // Keep as string since our interface now accepts both string and number
+      emotion: entry.emotion || getDefaultEmotion(entry.impact),
+      decayFactor: entry.decay_factor || (entry.importance / 5)
     })) as AIMemoryEntry[];
   },
   
@@ -101,7 +103,9 @@ export const AIPlayerService = {
         importance: entry.importance,
         type: entry.type,
         week: entry.week,
-        timestamp: timestamp || new Date().toISOString()
+        timestamp: timestamp || new Date().toISOString(),
+        emotion: entry.emotion || getDefaultEmotion(entry.impact),
+        decay_factor: entry.decayFactor || (entry.importance / 5)
       }]);
     
     if (error) {
@@ -120,5 +124,20 @@ export const AIPlayerService = {
     if (error) {
       console.error("Error updating game state:", error);
     }
+  }
+};
+
+/**
+ * Get default emotion based on impact
+ */
+const getDefaultEmotion = (impact: 'positive' | 'negative' | 'neutral'): string => {
+  switch (impact) {
+    case 'positive':
+      return 'happy';
+    case 'negative':
+      return 'upset';
+    case 'neutral':
+    default:
+      return 'neutral';
   }
 };

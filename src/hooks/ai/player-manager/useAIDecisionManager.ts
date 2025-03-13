@@ -10,9 +10,16 @@ export function useAIDecisionManager(
   isUsingLLM: boolean,
   setIsThinking: React.Dispatch<React.SetStateAction<Record<string, boolean>>>,
   addMemoryEntry: (playerId: string, entry: AIMemoryEntry) => void,
-  getPlayerMemory: (playerId: string) => AIMemoryEntry[]
+  getPlayerMemory: (playerId: string) => AIMemoryEntry[],
+  getTriggeredMemories?: (playerId: string, context: any) => AIMemoryEntry[]
 ) {
-  const { makeDecision } = useAIPlayerDecision(isUsingLLM, setIsThinking, addMemoryEntry);
+  const { makeDecision } = useAIPlayerDecision(
+    isUsingLLM, 
+    setIsThinking, 
+    addMemoryEntry,
+    getPlayerMemory,
+    getTriggeredMemories
+  );
 
   /**
    * Make a strategic decision for an AI player
