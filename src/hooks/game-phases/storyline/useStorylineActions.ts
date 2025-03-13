@@ -6,10 +6,14 @@ import { PlayerData } from '@/components/PlayerProfileTypes';
 import { Alliance } from '@/contexts/types';
 
 // Import refactored action modules
-import { triggerDiaryRoomEvent, triggerSocialEvent } from './actions/eventTriggers';
-import { handleStoryChoice as handleChoice } from './actions/eventHandler';
-import { generateRandomEvent as generateEvent } from './actions/randomEventGenerator';
-import { presentNextEvent as presentEvent, startStoryline as startNewStoryline } from './actions/storylineManager';
+import {
+  handleStoryChoice as handleChoice,
+  generateRandomEvent as generateEvent,
+  presentNextEvent as presentEvent,
+  startStoryline as startNewStoryline,
+  triggerDiaryRoomEvent,
+  triggerSocialEvent
+} from './actions';
 
 export function useStorylineActions(
   storyState: StorylineState,
