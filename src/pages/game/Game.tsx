@@ -1,5 +1,5 @@
 
-import React, { useEffect, memo } from 'react';
+import React, { useEffect, memo, useMemo } from 'react';
 import { useGameContext } from '@/hooks/useGameContext';
 import GameHeader from './components/GameHeader';
 import GameContainer from './components/GameContainer';
@@ -43,59 +43,87 @@ const Game = memo(() => {
 
   const { adaptedNotifications } = useGameNotifications({ notifications });
   
-  // Optimized effect with better logging
+  // Memoized handler to prevent recreation
+  const handleAdminPanelOpenChange = React.useCallback((open: boolean) => {
+    setShowAdminPanel(open);
+  }, [setShowAdminPanel]);
+  
+  // Memoize props for child components to prevent unnecessary renders
+  const gameHeaderProps = useMemo(() => ({
+    showAdminPanel,
+    setShowAdminPanel,
+    showNotifications,
+    setShowNotifications,
+  }), [showAdminPanel, setShowAdminPanel, showNotifications, setShowNotifications]);
+  
+  const gameContentProps = useMemo(() => ({
+    players,
+    dayCount,
+    actionsRemaining,
+    currentPhase,
+    showAdminPanel,
+    onAdminPanelOpenChange: handleAdminPanelOpenChange,
+    advanceDay,
+    useAction,
+    handlePhaseChange,
+    handlePhaseComplete,
+  }), [
+    players, 
+    dayCount, 
+    actionsRemaining, 
+    currentPhase, 
+    showAdminPanel, 
+    handleAdminPanelOpenChange,
+    advanceDay,
+    useAction,
+    handlePhaseChange,
+    handlePhaseComplete
+  ]);
+  
+  const gameOverlaysProps = useMemo(() => ({
+    showChat,
+    showNotifications,
+    setShowNotifications,
+    notifications: adaptedNotifications,
+    clearNotifications,
+    markNotificationAsRead,
+    selectedPlayer,
+    setSelectedPlayer,
+    players,
+    currentPhase,
+    onPhaseComplete: handlePhaseComplete,
+    savedGames,
+  }), [
+    showChat,
+    showNotifications,
+    setShowNotifications,
+    adaptedNotifications,
+    clearNotifications,
+    markNotificationAsRead,
+    selectedPlayer,
+    setSelectedPlayer,
+    players,
+    currentPhase,
+    handlePhaseComplete,
+    savedGames
+  ]);
+  
+  // Improved effect with better logging
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
-      console.log("Game component - Rendered with showAdminPanel:", showAdminPanel);
+      console.log("Game component - Rendered with gameState:", currentPhase);
       
       return () => {
         console.log("Game component - Unmounted");
       };
     }
-  }, [showAdminPanel]);
-
-  // Memoized handler to prevent recreation
-  const handleAdminPanelOpenChange = React.useCallback((open: boolean) => {
-    console.log("handleAdminPanelOpenChange called with:", open);
-    setShowAdminPanel(open);
-  }, [setShowAdminPanel]);
+  }, [currentPhase]);
 
   return (
     <GameContainer isLoading={isLoading || !players || players.length === 0} error={error}>
-      <GameHeader 
-        showAdminPanel={showAdminPanel}
-        setShowAdminPanel={setShowAdminPanel}
-        showNotifications={showNotifications}
-        setShowNotifications={setShowNotifications}
-      />
-      
-      <GameContent
-        players={players}
-        dayCount={dayCount}
-        actionsRemaining={actionsRemaining}
-        currentPhase={currentPhase}
-        showAdminPanel={showAdminPanel}
-        onAdminPanelOpenChange={handleAdminPanelOpenChange}
-        advanceDay={advanceDay}
-        useAction={useAction}
-        handlePhaseChange={handlePhaseChange}
-        handlePhaseComplete={handlePhaseComplete}
-      />
-      
-      <GameOverlaysContainer
-        showChat={showChat}
-        showNotifications={showNotifications}
-        setShowNotifications={setShowNotifications}
-        notifications={adaptedNotifications}
-        clearNotifications={clearNotifications}
-        markNotificationAsRead={markNotificationAsRead}
-        selectedPlayer={selectedPlayer}
-        setSelectedPlayer={setSelectedPlayer}
-        players={players}
-        currentPhase={currentPhase}
-        onPhaseComplete={handlePhaseComplete}
-        savedGames={savedGames}
-      />
+      <GameHeader {...gameHeaderProps} />
+      <GameContent {...gameContentProps} />
+      <GameOverlaysContainer {...gameOverlaysProps} />
     </GameContainer>
   );
 });

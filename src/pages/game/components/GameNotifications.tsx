@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Notification } from '@/hooks/auth/types';
 import { adaptGameNotificationToAuthNotification, isGameNotificationArray } from '@/types/notificationTypes';
 
@@ -13,9 +13,10 @@ interface GameNotificationsProps {
  */
 export const useGameNotifications = ({ notifications }: GameNotificationsProps) => {
   // Use memoization to prevent unnecessary recalculations
-  const adaptedNotifications: Notification[] = React.useMemo(() => {
+  const adaptedNotifications: Notification[] = useMemo(() => {
     if (!notifications || notifications.length === 0) return [];
     
+    // Only process if there are notifications to process
     if (isGameNotificationArray(notifications)) {
       return notifications.map(adaptGameNotificationToAuthNotification);
     }
@@ -28,10 +29,10 @@ export const useGameNotifications = ({ notifications }: GameNotificationsProps) 
 
 /**
  * This component doesn't render anything, it's just a wrapper for the hook logic
- * It's kept for backwards compatibility but can be removed in future refactoring
+ * Kept for backwards compatibility but can be removed in future refactoring
  */
 const GameNotifications: React.FC<GameNotificationsProps> = () => {
   return null;
 };
 
-export default GameNotifications;
+export default React.memo(GameNotifications);

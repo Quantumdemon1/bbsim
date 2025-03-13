@@ -1,5 +1,5 @@
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { PhaseProgressTracker } from '@/components/game-ui/PhaseProgressTracker';
 import ChatPanel from '@/components/chat/ChatPanel';
 import NotificationPanel from '@/components/notifications/NotificationPanel';
@@ -25,7 +25,7 @@ interface GameOverlaysContainerProps {
 }
 
 // Use memo to prevent unnecessary re-renders
-const GameOverlaysContainer: React.FC<GameOverlaysContainerProps> = memo(({
+const GameOverlaysContainer = memo(({
   showChat,
   showNotifications,
   setShowNotifications,
@@ -38,20 +38,51 @@ const GameOverlaysContainer: React.FC<GameOverlaysContainerProps> = memo(({
   currentPhase,
   onPhaseComplete,
   savedGames
-}) => {
+}: GameOverlaysContainerProps) => {
   // Memoize computed values to prevent recalculation on every render
   const selectedPlayerData = useMemo(() => 
     selectedPlayer ? players?.find(p => p.id === selectedPlayer) || null : null, 
     [selectedPlayer, players]
   );
 
-  const hasSaveGame = useMemo(() => savedGames.length > 0, [savedGames]);
+  const hasSaveGame = useMemo(() => 
+    savedGames && savedGames.length > 0, 
+    [savedGames]
+  );
 
-  // Memoize handlers to prevent recreation on render
-  const handlePlayerModalClose = useMemo(() => 
-    () => setSelectedPlayer(null), 
+  // Memoize handler to prevent creation on render
+  const handlePlayerModalClose = useCallback(() => 
+    setSelectedPlayer(null), 
     [setSelectedPlayer]
   );
+  
+  // Memoize notification panel props
+  const notificationPanelProps = useMemo(() => ({
+    open: showNotifications,
+    onOpenChange: setShowNotifications,
+    notifications,
+    onClearAll: clearNotifications,
+    onMarkAsRead: markNotificationAsRead,
+  }), [
+    showNotifications, 
+    setShowNotifications, 
+    notifications, 
+    clearNotifications, 
+    markNotificationAsRead
+  ]);
+  
+  // Memoize phase tracker props
+  const phaseTrackerProps = useMemo(() => ({
+    phase: currentPhase,
+    onPhaseComplete: onPhaseComplete
+  }), [currentPhase, onPhaseComplete]);
+  
+  // Log renders in development mode
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('GameOverlaysContainer rendered with phase:', currentPhase);
+    }
+  }, [currentPhase]);
 
   return (
     <>
@@ -62,22 +93,13 @@ const GameOverlaysContainer: React.FC<GameOverlaysContainerProps> = memo(({
       )}
       
       {clearNotifications && (
-        <PhaseProgressTracker 
-          phase={currentPhase}
-          onPhaseComplete={onPhaseComplete}
-        />
+        <PhaseProgressTracker {...phaseTrackerProps} />
       )}
       
       {showChat && <ChatPanel minimizable />}
       
       {notifications.length > 0 && (
-        <NotificationPanel 
-          open={showNotifications}
-          onOpenChange={setShowNotifications}
-          notifications={notifications}
-          onClearAll={clearNotifications}
-          onMarkAsRead={markNotificationAsRead}
-        />
+        <NotificationPanel {...notificationPanelProps} />
       )}
       
       {selectedPlayerData && (

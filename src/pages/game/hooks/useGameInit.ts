@@ -42,16 +42,19 @@ export function useGameInit() {
     gameLoadTracker.start();
     
     const checkRequirements = () => {
+      // Check if game mode is set
       if (!gameMode) {
         navigate('/');
         return false;
       }
       
+      // Check if user is authenticated
       if (!isAuthenticated) {
         navigate('/');
         return false;
       }
       
+      // Check if game is in a valid state
       if (gameState === 'idle') {
         navigate('/lobby');
         return false;
@@ -64,6 +67,7 @@ export function useGameInit() {
     let timer: number | undefined;
     
     if (requirementsMet) {
+      // Delay showing content to prevent flashing
       timer = window.setTimeout(() => {
         setIsLoading(false);
         gameLoadTracker.end();
@@ -114,6 +118,7 @@ export function useGameInit() {
   }, [actionsRemaining, toast]);
   
   const handlePhaseChange = useCallback((newPhase: GamePhase) => {
+    console.log(`Phase changing to: ${newPhase}`);
     setCurrentPhase(newPhase);
   }, []);
   
@@ -140,13 +145,18 @@ export function useGameInit() {
   // Auto-save with proper cleanup
   useEffect(() => {
     if (gameState === 'playing' && saveGame) {
+      console.log("Setting up auto-save interval");
       const saveInterval = window.setInterval(() => {
+        console.log("Auto-saving game");
         saveGame().catch(error => {
           console.error("Failed to auto-save game:", error);
         });
       }, 5 * 60 * 1000); // 5 minutes
       
-      return () => window.clearInterval(saveInterval);
+      return () => {
+        console.log("Clearing auto-save interval");
+        window.clearInterval(saveInterval);
+      };
     }
   }, [gameState, saveGame]);
 

@@ -1,5 +1,5 @@
 
-import React, { Suspense, memo } from 'react';
+import React, { Suspense, memo, useMemo } from 'react';
 import { LoadingState } from '@/components/ui/loading-state';
 import GameControls from './GameControls';
 import AdminPanel from './AdminPanel';
@@ -21,8 +21,8 @@ interface GameContentProps {
   handlePhaseComplete: () => void;
 }
 
-// Use memo to prevent unnecessary re-renders
-const GameContent: React.FC<GameContentProps> = memo(({
+// Use memo to prevent unnecessary re-renders with custom equality function
+const GameContent = memo(({
   players,
   dayCount,
   actionsRemaining,
@@ -33,16 +33,16 @@ const GameContent: React.FC<GameContentProps> = memo(({
   useAction,
   handlePhaseChange,
   handlePhaseComplete
-}) => {
+}: GameContentProps) => {
   // Memoize GameRoom props to prevent unnecessary re-renders
-  const gameRoomProps = React.useMemo(() => ({
+  const gameRoomProps = useMemo(() => ({
     players,
     initialWeek: 1,
     onPhaseChange: handlePhaseChange
   }), [players, handlePhaseChange]);
 
   // Memoize GameControls props
-  const gameControlsProps = React.useMemo(() => ({
+  const gameControlsProps = useMemo(() => ({
     players,
     dayCount,
     actionsRemaining,
@@ -50,20 +50,30 @@ const GameContent: React.FC<GameContentProps> = memo(({
   }), [players, dayCount, actionsRemaining, useAction]);
 
   // Memoize DayTracker props
-  const dayTrackerProps = React.useMemo(() => ({
+  const dayTrackerProps = useMemo(() => ({
     dayCount,
     actionsRemaining,
     advanceDay
   }), [dayCount, actionsRemaining, advanceDay]);
 
+  // Memoize AdminPanel props
+  const adminPanelProps = useMemo(() => ({
+    open: showAdminPanel,
+    onOpenChange: onAdminPanelOpenChange
+  }), [showAdminPanel, onAdminPanelOpenChange]);
+
+  // Log render in development only to track component rendering
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('GameContent rendered with phase:', currentPhase);
+    }
+  }, [currentPhase]);
+
   return (
     <>
       <DayTracker {...dayTrackerProps} />
       
-      <AdminPanel 
-        open={showAdminPanel}
-        onOpenChange={onAdminPanelOpenChange}
-      />
+      <AdminPanel {...adminPanelProps} />
       
       <Suspense fallback={<LoadingState text="Loading game controls..." />}>
         <GameControls {...gameControlsProps} />
@@ -73,6 +83,15 @@ const GameContent: React.FC<GameContentProps> = memo(({
         <GameRoom {...gameRoomProps} />
       </Suspense>
     </>
+  );
+}, (prevProps, nextProps) => {
+  // Custom equality check to prevent unnecessary renders
+  return (
+    prevProps.currentPhase === nextProps.currentPhase &&
+    prevProps.dayCount === nextProps.dayCount &&
+    prevProps.actionsRemaining === nextProps.actionsRemaining &&
+    prevProps.showAdminPanel === nextProps.showAdminPanel &&
+    prevProps.players === nextProps.players
   );
 });
 
