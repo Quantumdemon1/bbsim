@@ -6,12 +6,25 @@ import { usePlayerGameContext } from './usePlayerGameContext';
 import { usePlayerStorylineActions } from './usePlayerStorylineActions';
 import { usePlayerStorylineState } from './usePlayerStorylineState';
 import { StoryEvent } from '../types';
+import { useStorylineEventSystem } from '../useStorylineEventSystem';
+import { 
+  EventCategory, 
+  EventCategoryMetadata, 
+  EventFilterOptions 
+} from '../types/eventCategories';
 
 export { 
   usePlayerStorylineManager, 
   usePlayerStorylineEffects,
   usePlayerGameContext,
   usePlayerStorylineActions,
-  usePlayerStorylineState
+  usePlayerStorylineState,
+  useStorylineEventSystem
 };
-export type { StoryEvent };
+
+export type { 
+  StoryEvent, 
+  EventCategory, 
+  EventCategoryMetadata, 
+  EventFilterOptions 
+};
