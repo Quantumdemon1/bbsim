@@ -7,6 +7,7 @@ import GameRoom from '@/components/GameRoom';
 import DayTracker from './DayTracker';
 import { GamePhase } from '@/types/gameTypes';
 import { PlayerData } from '@/components/PlayerProfileTypes';
+import FirstPersonView from '@/components/game-storyline/FirstPersonView';
 
 interface GameContentProps {
   players: PlayerData[];
@@ -62,6 +63,11 @@ const GameContent = memo(({
     onOpenChange: onAdminPanelOpenChange
   }), [showAdminPanel, onAdminPanelOpenChange]);
 
+  // Get current player ID for the FirstPersonView
+  const currentPlayerId = useMemo(() => {
+    return players.find(p => p.isHuman)?.id || null;
+  }, [players]);
+
   // Log render in development only to track component rendering
   React.useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
@@ -75,6 +81,13 @@ const GameContent = memo(({
       
       {/* Fixed: AdminPanel is now rendered directly, not inside any unnecessary wrappers */}
       <AdminPanel {...adminPanelProps} />
+      
+      {/* Add the FirstPersonView component */}
+      <div className="mb-4">
+        <Suspense fallback={<LoadingState text="Loading your storyline..." />}>
+          <FirstPersonView currentPlayerId={currentPlayerId} />
+        </Suspense>
+      </div>
       
       <Suspense fallback={<LoadingState text="Loading game controls..." />}>
         <GameControls {...gameControlsProps} />

@@ -9,6 +9,8 @@ import { useEventDecisionManager } from '@/hooks/game-phases/decisions/useEventD
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { Alliance } from '@/contexts/types';
 import { WeekSummary } from '@/hooks/game-phases/types';
+import { usePlayerStorylineManager } from '@/hooks/game-phases/usePlayerStorylineManager';
+import StoryEventDisplay from './game-storyline/StoryEventDisplay';
 
 interface GamePhaseDisplayProps {
   phase: string;
@@ -35,15 +37,30 @@ const GamePhaseDisplay: React.FC<GamePhaseDisplayProps> = (props) => {
   const { handleRandomEvent } = useEventDecisionManager();
   const currentPlayerId = props.players.find(p => p.isHuman)?.id || null;
   
-  // This effect will check for random events based on the phase
+  // Add storyline manager integration
+  const { 
+    currentStoryEvent, 
+    storyEventOpen, 
+    setStoryEventOpen,
+    handleStoryChoice,
+    generateRandomEvent
+  } = usePlayerStorylineManager();
+  
+  // This effect will check for both random events and storyline events
   useEffect(() => {
     const randomEventChance = Math.random();
+    
+    // Try both event systems
     if (randomEventChance < 0.1) { // 10% chance of random event
       setTimeout(() => {
+        // Try game event first
         handleRandomEvent();
+        
+        // Also try storyline event
+        generateRandomEvent();
       }, 5000); // Add a delay after phase change
     }
-  }, [props.phase, handleRandomEvent]);
+  }, [props.phase, handleRandomEvent, generateRandomEvent]);
 
   return (
     <div className="flex-1 p-6 overflow-y-auto">
@@ -70,6 +87,16 @@ const GamePhaseDisplay: React.FC<GamePhaseDisplayProps> = (props) => {
       <RandomEventHandler 
         currentPlayerId={currentPlayerId}
       />
+      
+      {/* Add Story Event Handler */}
+      {currentStoryEvent && (
+        <StoryEventDisplay
+          event={currentStoryEvent}
+          open={storyEventOpen}
+          onOpenChange={setStoryEventOpen}
+          onChoiceMade={handleStoryChoice}
+        />
+      )}
     </div>
   );
 };
