@@ -9,7 +9,7 @@ import { useEventDecisionManager } from '@/hooks/game-phases/decisions/useEventD
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { Alliance } from '@/contexts/types';
 import { WeekSummary } from '@/hooks/game-phases/types';
-import { usePlayerStorylineManager } from '@/hooks/game-phases/usePlayerStorylineManager';
+import { usePlayerStorylineManager } from '@/hooks/game-phases/storyline/player-storyline';
 import StoryEventDisplay from './game-storyline/StoryEventDisplay';
 
 interface GamePhaseDisplayProps {

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useGameContext } from '@/hooks/useGameContext';
 import { GamePhase } from '@/types/gameTypes';
-import { usePlayerStorylineManager } from '@/hooks/game-phases/usePlayerStorylineManager';
+import { usePlayerStorylineManager } from '@/hooks/game-phases/storyline/player-storyline';
 import StoryEventDisplay from './StoryEventDisplay';
 import PlayerStatusHeader from './PlayerStatusHeader';
 import GameStatusMessage from './GameStatusMessage';
