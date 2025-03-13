@@ -1,134 +1,59 @@
 
-import { useGameContext } from '@/hooks/useGameContext';
-import { useStorylineState } from '../state';
-import { useStorylineActions } from '../useStorylineActions';
+import { usePlayerGameContext } from './usePlayerGameContext';
+import { usePlayerStorylineState } from './usePlayerStorylineState';
+import { usePlayerStorylineActions } from './usePlayerStorylineActions';
 import { usePlayerStorylineEffects } from './usePlayerStorylineEffects';
 import { StoryEvent } from '../types';
-import { GamePhase } from '@/types/gameTypes';
 
 export type { StoryEvent };
 
 /**
  * Primary hook for player storyline management
- * Provides a unified API for storyline features
+ * Provides a unified API for storyline features by composing smaller, focused hooks
  */
 export function usePlayerStorylineManager() {
-  // Get game context and explicitly type it to include required properties
-  const gameContext = useGameContext();
+  // Get game context
+  const gameContext = usePlayerGameContext();
   
-  // Extract common properties from gameContext
-  const { 
-    players, 
-    currentWeek,
-    addMemoryEntry,
-    alliances
-  } = gameContext;
+  // Get storyline state
+  const storyState = usePlayerStorylineState();
   
-  // Safely extract properties that might not be directly available in all useGameContext implementations
-  // by using type assertion to a more specific type that includes these properties
-  const gamePhaseContext = gameContext as unknown as {
-    currentPhase: GamePhase;
-    dayCount: number;
-    actionsRemaining: number;
-    useAction: () => boolean;
-    nominees: string[];
-    hoh: string | null;
-    veto: string | null;
-  } & typeof gameContext;
-
-  const { 
-    currentPhase, 
-    dayCount, 
-    actionsRemaining, 
-    useAction,
-    nominees,
-    hoh,
-    veto
-  } = gamePhaseContext;
+  // Get storyline actions
+  const storyActions = usePlayerStorylineActions();
   
-  // Use our storyline state hook with updated interface
-  const storyState = useStorylineState();
-  
-  // Get state and setters for passing to actions hook
-  const { 
-    currentStoryEvent, storyEventOpen, storyQueue, dayEvents, playerMood,
-    completedStorylines, activeStorylines,
-    setCurrentStoryEvent, setStoryEventOpen, setStoryQueue, setDayEvents, 
-    setPlayerMood, setCompletedStorylines, setActiveStorylines
-  } = storyState;
-  
-  // Use our storyline actions hook with enhanced interface
-  const storyActions = useStorylineActions(
-    { 
-      currentStoryEvent, 
-      storyEventOpen, 
-      storyQueue, 
-      dayEvents, 
-      playerMood,
-      completedStorylines,
-      activeStorylines
-    },
-    { 
-      setCurrentStoryEvent, 
-      setStoryEventOpen, 
-      setStoryQueue, 
-      setDayEvents, 
-      setPlayerMood,
-      setCompletedStorylines,
-      setActiveStorylines
-    },
-    { 
-      currentPhase, 
-      dayCount, 
-      actionsRemaining, 
-      players, 
-      currentWeek, 
-      useAction, 
-      addMemoryEntry,
-      alliances,
-      nominees,
-      hoh
-    }
-  );
-  
-  // Get all the action methods
-  const { 
-    presentNextEvent, 
-    triggerDiaryRoomEvent, 
-    triggerSocialEvent, 
-    handleStoryChoice, 
-    generateRandomEvent,
-    startStoryline
-  } = storyActions;
-
   // Apply side effects (useEffects)
   usePlayerStorylineEffects({
-    currentPhase,
-    dayCount,
-    actionsRemaining,
-    dayEvents,
-    storyEventOpen,
+    currentPhase: gameContext.currentPhase,
+    dayCount: gameContext.dayCount,
+    actionsRemaining: gameContext.actionsRemaining,
+    dayEvents: storyState.dayEvents,
+    storyEventOpen: storyState.storyEventOpen,
     currentStoryEvent: storyState.currentStoryEvent,
-    activeStorylines,
-    setDayEvents,
-    presentNextEvent,
-    generateRandomEvent,
-    startStoryline
+    activeStorylines: storyState.activeStorylines,
+    setDayEvents: storyState.setDayEvents,
+    presentNextEvent: storyActions.presentNextEvent,
+    generateRandomEvent: storyActions.generateRandomEvent,
+    startStoryline: storyActions.startStoryline
   });
 
-  // Return the same API as before
+  // Return a unified API
   return {
-    currentStoryEvent,
-    storyEventOpen, 
-    setStoryEventOpen,
-    storyQueue,
-    triggerDiaryRoomEvent,
-    triggerSocialEvent,
-    handleStoryChoice,
-    generateRandomEvent,
-    startStoryline,
-    playerMood,
-    activeStorylines,
-    completedStorylines
+    // State
+    currentStoryEvent: storyState.currentStoryEvent,
+    storyEventOpen: storyState.storyEventOpen, 
+    storyQueue: storyState.storyQueue,
+    playerMood: storyState.playerMood,
+    activeStorylines: storyState.activeStorylines,
+    completedStorylines: storyState.completedStorylines,
+    
+    // Setters
+    setStoryEventOpen: storyState.setStoryEventOpen,
+    
+    // Actions
+    triggerDiaryRoomEvent: storyActions.triggerDiaryRoomEvent,
+    triggerSocialEvent: storyActions.triggerSocialEvent,
+    handleStoryChoice: storyActions.handleStoryChoice,
+    generateRandomEvent: storyActions.generateRandomEvent,
+    startStoryline: storyActions.startStoryline
   };
 }
