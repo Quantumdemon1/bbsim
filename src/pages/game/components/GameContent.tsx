@@ -73,6 +73,7 @@ const GameContent = memo(({
     <>
       <DayTracker {...dayTrackerProps} />
       
+      {/* Fixed: AdminPanel is now rendered directly, not inside any unnecessary wrappers */}
       <AdminPanel {...adminPanelProps} />
       
       <Suspense fallback={<LoadingState text="Loading game controls..." />}>

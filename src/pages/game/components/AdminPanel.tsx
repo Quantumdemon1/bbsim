@@ -4,8 +4,7 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle,
-  DialogTrigger
+  DialogTitle
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Shield, SkipForward, X } from 'lucide-react';
@@ -22,8 +21,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ open, onOpenChange }) => {
   
   // Add logging to help identify lifecycle issues
   useEffect(() => {
-    console.log("AdminPanel - Rendered with open:", open);
-    return () => console.log("AdminPanel - Unmounted");
+    if (process.env.NODE_ENV === 'development') {
+      console.log("AdminPanel - Rendered with open:", open);
+    }
+    return () => {
+      if (process.env.NODE_ENV === 'development') {
+        console.log("AdminPanel - Unmounted");
+      }
+    };
   }, [open]);
   
   const phases = [
@@ -42,14 +47,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ open, onOpenChange }) => {
     onOpenChange(false);
   };
 
-  // The Dialog is now properly controlled by the open and onOpenChange props
+  // Fixed: Don't use DialogTrigger within a controlled Dialog component
   return (
     <Dialog 
       open={open} 
-      onOpenChange={(newOpen) => {
-        console.log("Dialog onOpenChange called with:", newOpen);
-        onOpenChange(newOpen);
-      }}
+      onOpenChange={onOpenChange}
     >
       <DialogContent className="bg-black/90 border border-red-500 rounded-lg p-4 w-64">
         <DialogHeader>

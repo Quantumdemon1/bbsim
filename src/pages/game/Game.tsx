@@ -45,16 +45,17 @@ const Game = memo(() => {
   
   // Memoized handler to prevent recreation
   const handleAdminPanelOpenChange = React.useCallback((open: boolean) => {
+    console.log("Admin panel open changed to:", open);
     setShowAdminPanel(open);
   }, [setShowAdminPanel]);
   
   // Memoize props for child components to prevent unnecessary renders
   const gameHeaderProps = useMemo(() => ({
     showAdminPanel,
-    setShowAdminPanel,
+    setShowAdminPanel: handleAdminPanelOpenChange,
     showNotifications,
     setShowNotifications,
-  }), [showAdminPanel, setShowAdminPanel, showNotifications, setShowNotifications]);
+  }), [showAdminPanel, handleAdminPanelOpenChange, showNotifications, setShowNotifications]);
   
   const gameContentProps = useMemo(() => ({
     players,
@@ -111,13 +112,13 @@ const Game = memo(() => {
   // Improved effect with better logging
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
-      console.log("Game component - Rendered with gameState:", currentPhase);
+      console.log("Game component - Rendered with gameState:", currentPhase, "showAdminPanel:", showAdminPanel);
       
       return () => {
         console.log("Game component - Unmounted");
       };
     }
-  }, [currentPhase]);
+  }, [currentPhase, showAdminPanel]);
 
   return (
     <GameContainer isLoading={isLoading || !players || players.length === 0} error={error}>
