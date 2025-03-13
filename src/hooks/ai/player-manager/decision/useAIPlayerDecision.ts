@@ -70,7 +70,7 @@ export function useAIPlayerDecision(
 
       // Add decision to memory with emotional context
       const emotionalImpact = 
-        decisionType === 'nominate' || decisionType === 'eviction' 
+        decisionType === 'nominate' || decisionType === 'vote' 
           ? 'negative'
           : decisionType === 'alliance' 
             ? 'positive' 

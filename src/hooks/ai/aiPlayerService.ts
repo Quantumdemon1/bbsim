@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { AIMemoryEntry, AIPlayerDecision, AIPlayerAttributes, PlayerArchetype, PersonalityTrait } from './types';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { PlayerAttributes } from '@/hooks/game-phases/types/player';
+import { getDefaultEmotion } from './memory/memoryUtils';
 
 /**
  * Service for interacting with AI player data in Supabase
@@ -75,12 +76,13 @@ export const AIPlayerService = {
       return [];
     }
     
-    // Convert timestamp from string to number if needed
+    // Convert database entries to AIMemoryEntry format
     return data.map(entry => ({
       ...entry,
       timestamp: entry.timestamp, // Keep as string since our interface now accepts both string and number
-      emotion: entry.emotion || getDefaultEmotion(entry.impact),
-      decayFactor: entry.decay_factor || (entry.importance / 5)
+      emotion: entry.emotion || getDefaultEmotion(entry.impact as 'positive' | 'negative' | 'neutral'),
+      decayFactor: entry.decay_factor || (entry.importance / 5),
+      relatedPlayerId: entry.related_player_id
     })) as AIMemoryEntry[];
   },
   
