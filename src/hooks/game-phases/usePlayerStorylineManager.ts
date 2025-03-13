@@ -6,32 +6,44 @@ import { useStorylineState } from './storyline/useStorylineState';
 import { useStorylineActions } from './storyline/useStorylineActions';
 import { StoryEvent } from './storyline/types';
 import { useAllianceContext } from '../gameContext/useAllianceContext';
+import { PlayerData } from '@/components/PlayerProfileTypes';
+import { GamePhaseState } from './types';
 
 export type { StoryEvent } from './storyline/types';
 
 export function usePlayerStorylineManager() {
-  // Get game context
+  // Get game context and explicitly type it to include required properties
+  const gameContext = useGameContext();
+  
+  // Extract common properties from gameContext
   const { 
     players, 
     currentWeek,
     addMemoryEntry,
-    nominees,
-    hoh,
-    veto,
-  } = useGameContext();
-
-  // Get alliance info
-  const { alliances } = useAllianceContext();
-
-  // Access these properties from GameContext but with type checking
-  const gameContext = useGameContext() as unknown as {
-    currentPhase: any;
+    alliances
+  } = gameContext;
+  
+  // Safely extract properties that might not be directly available in all useGameContext implementations
+  // by using type assertion to a more specific type that includes these properties
+  const gamePhaseContext = gameContext as unknown as {
+    currentPhase: string;
     dayCount: number;
     actionsRemaining: number;
     useAction: () => boolean;
-  } & ReturnType<typeof useGameContext>;
+    nominees: string[];
+    hoh: string | null;
+    veto: string | null;
+  } & typeof gameContext;
 
-  const { currentPhase, dayCount, actionsRemaining, useAction } = gameContext;
+  const { 
+    currentPhase, 
+    dayCount, 
+    actionsRemaining, 
+    useAction,
+    nominees,
+    hoh,
+    veto
+  } = gamePhaseContext;
   
   // Get decision manager to use its mechanism
   const { 
