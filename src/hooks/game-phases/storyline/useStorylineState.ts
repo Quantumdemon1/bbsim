@@ -1,31 +1,34 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { StoryEvent, StorylineState } from './types';
-import { GamePhase } from '@/types/gameTypes';
 
-export function useStorylineState(): StorylineState & {
-  setCurrentStoryEvent: (event: StoryEvent | null) => void;
-  setStoryEventOpen: (open: boolean) => void;
-  setStoryQueue: (queue: StoryEvent[]) => void;
-  setDayEvents: (events: string[]) => void;
-  setPlayerMood: (mood: string) => void;
-} {
+export function useStorylineState() {
   const [currentStoryEvent, setCurrentStoryEvent] = useState<StoryEvent | null>(null);
   const [storyEventOpen, setStoryEventOpen] = useState(false);
   const [storyQueue, setStoryQueue] = useState<StoryEvent[]>([]);
   const [dayEvents, setDayEvents] = useState<string[]>([]);
   const [playerMood, setPlayerMood] = useState<string>('neutral');
-  
+  const [completedStorylines, setCompletedStorylines] = useState<string[]>([]);
+  const [activeStorylines, setActiveStorylines] = useState<{
+    storylineId: string;
+    currentSequence: number;
+    choices: Record<number, string>;
+  }[]>([]);
+
   return {
     currentStoryEvent,
     storyEventOpen,
     storyQueue,
     dayEvents,
     playerMood,
+    completedStorylines,
+    activeStorylines,
     setCurrentStoryEvent,
     setStoryEventOpen,
     setStoryQueue,
     setDayEvents,
-    setPlayerMood
+    setPlayerMood,
+    setCompletedStorylines,
+    setActiveStorylines
   };
 }

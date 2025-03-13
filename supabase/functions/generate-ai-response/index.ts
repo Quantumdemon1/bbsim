@@ -9,6 +9,19 @@ interface PlayerProfile {
   traits: string[];
   personality: string;
   backstory: string;
+  attributes?: Record<string, number>;
+}
+
+interface GameContext {
+  phase: string;
+  week: number;
+  options?: any[];
+  players?: any[];
+  alliances?: any[];
+  storylineId?: string;
+  eventType?: string;
+  previousEvents?: any[];
+  playerChoices?: Record<string, string>;
 }
 
 const corsHeaders = {
@@ -44,7 +57,16 @@ serve(async (req) => {
 
   try {
     // Parse request body
-    const { playerProfile, gamePhase, situation, recentMemory, context, responseType, includeEmotion } = await req.json();
+    const {
+      playerProfile,
+      gamePhase,
+      situation,
+      recentMemory,
+      context,
+      responseType,
+      includeEmotion,
+      eventStoryline
+    } = await req.json();
 
     // Build the prompt based on responseType
     let systemPrompt = "";
@@ -81,6 +103,43 @@ Players: ${JSON.stringify(context.players, null, 2)}
 
 What is your decision as ${playerProfile.name}? Provide your choice and a brief reasoning.`;
     }
+    else if (responseType === "storyEvent") {
+      systemPrompt = `You are an AI story generator for a Big Brother game simulation. Your job is to create engaging, realistic storyline events that feel authentic to the Big Brother reality show.
+
+For each request, you'll generate a complete story event with:
+1. A compelling title and description
+2. Meaningful choices for the player
+3. Realistic consequences that should impact relationships and game dynamics
+4. Context-awareness of the current game state (nominations, alliances, etc.)
+
+Make the events feel personalized to the player's current situation and the personalities of other houseguests.`;
+
+      const gameContext = context as GameContext;
+      
+      userPrompt = `Current Game State:
+- Week: ${gameContext.week}
+- Phase: ${gameContext.phase}
+- Player Traits: ${playerProfile.traits.join(", ")}
+- Player Archetype: ${playerProfile.archetype}
+${gameContext.alliances ? `- Active Alliances: ${JSON.stringify(gameContext.alliances)}` : ''}
+${gameContext.storylineId ? `- Storyline ID: ${gameContext.storylineId}` : ''}
+${gameContext.eventType ? `- Event Type: ${gameContext.eventType}` : ''}
+
+${gameContext.previousEvents ? `Previous Events in this Storyline:
+${JSON.stringify(gameContext.previousEvents)}` : ''}
+
+${gameContext.playerChoices ? `Player's Previous Choices:
+${JSON.stringify(gameContext.playerChoices)}` : ''}
+
+Recent Memory: ${recentMemory || "No recent significant events."}
+
+Please generate a story event that:
+1. Feels natural in the current game context
+2. Offers meaningful choices with real consequences
+3. Creates drama or strategic opportunities
+4. Relates to the current phase and player's situation
+`;
+    }
 
     // Call OpenAI API
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -96,7 +155,7 @@ What is your decision as ${playerProfile.name}? Provide your choice and a brief 
           { role: "user", content: userPrompt }
         ],
         temperature: 0.7,
-        max_tokens: 150
+        max_tokens: responseType === "storyEvent" ? 1000 : 150
       })
     });
 
@@ -108,6 +167,7 @@ What is your decision as ${playerProfile.name}? Provide your choice and a brief 
 
     let emotion = "neutral";
     let generated_text = data.choices[0].message.content.trim();
+    let storyEvent = null;
 
     // Determine emotion if requested
     if (includeEmotion) {
@@ -138,6 +198,24 @@ What is your decision as ${playerProfile.name}? Provide your choice and a brief 
       }
     }
 
+    // Parse story event response if that was the request type
+    if (responseType === "storyEvent") {
+      try {
+        // Try to extract JSON from the response if it's enclosed in backticks
+        const jsonMatch = generated_text.match(/```json\s*([\s\S]*?)\s*```/);
+        if (jsonMatch && jsonMatch[1]) {
+          storyEvent = JSON.parse(jsonMatch[1]);
+        } else {
+          // If no JSON formatting, try to parse the entire response
+          storyEvent = JSON.parse(generated_text);
+        }
+      } catch (error) {
+        console.error("Failed to parse story event JSON:", error);
+        // Return the raw text so client can handle it
+        storyEvent = { raw: generated_text };
+      }
+    }
+
     // Store the response in memory if applicable
     if (playerProfile.id && responseType === "dialogue") {
       try {
@@ -160,7 +238,8 @@ What is your decision as ${playerProfile.name}? Provide your choice and a brief 
       JSON.stringify({ 
         generated_text, 
         emotion, 
-        type: responseType 
+        type: responseType,
+        storyEvent 
       }),
       { 
         headers: { 

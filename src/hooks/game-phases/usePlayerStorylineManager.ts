@@ -5,16 +5,23 @@ import { useEventDecisionManager } from './decisions/useEventDecisionManager';
 import { useStorylineState } from './storyline/useStorylineState';
 import { useStorylineActions } from './storyline/useStorylineActions';
 import { StoryEvent } from './storyline/types';
+import { useAllianceContext } from '../gameContext/useAllianceContext';
 
 export type { StoryEvent } from './storyline/types';
 
 export function usePlayerStorylineManager() {
-  // Explicitly type the required properties from GameContext
+  // Get game context
   const { 
     players, 
     currentWeek,
     addMemoryEntry,
+    nominees,
+    hoh,
+    veto,
   } = useGameContext();
+
+  // Get alliance info
+  const { alliances } = useAllianceContext();
 
   // Access these properties from GameContext but with type checking
   const gameContext = useGameContext() as unknown as {
@@ -33,20 +40,49 @@ export function usePlayerStorylineManager() {
     currentEvent 
   } = useEventDecisionManager();
   
-  // Use our new storyline state hook
+  // Use our storyline state hook with updated interface
   const storyState = useStorylineState();
   
   // Get state and setters for passing to actions hook
   const { 
     currentStoryEvent, storyEventOpen, storyQueue, dayEvents, playerMood,
-    setCurrentStoryEvent, setStoryEventOpen, setStoryQueue, setDayEvents, setPlayerMood
+    completedStorylines, activeStorylines,
+    setCurrentStoryEvent, setStoryEventOpen, setStoryQueue, setDayEvents, 
+    setPlayerMood, setCompletedStorylines, setActiveStorylines
   } = storyState;
   
-  // Use our new storyline actions hook
+  // Use our storyline actions hook with enhanced interface
   const storyActions = useStorylineActions(
-    { currentStoryEvent, storyEventOpen, storyQueue, dayEvents, playerMood },
-    { setCurrentStoryEvent, setStoryEventOpen, setStoryQueue, setDayEvents, setPlayerMood },
-    { currentPhase, dayCount, actionsRemaining, players, currentWeek, useAction, addMemoryEntry }
+    { 
+      currentStoryEvent, 
+      storyEventOpen, 
+      storyQueue, 
+      dayEvents, 
+      playerMood,
+      completedStorylines,
+      activeStorylines
+    },
+    { 
+      setCurrentStoryEvent, 
+      setStoryEventOpen, 
+      setStoryQueue, 
+      setDayEvents, 
+      setPlayerMood,
+      setCompletedStorylines,
+      setActiveStorylines
+    },
+    { 
+      currentPhase, 
+      dayCount, 
+      actionsRemaining, 
+      players, 
+      currentWeek, 
+      useAction, 
+      addMemoryEntry,
+      alliances,
+      nominees,
+      hoh
+    }
   );
   
   // Get all the action methods
@@ -55,7 +91,8 @@ export function usePlayerStorylineManager() {
     triggerDiaryRoomEvent, 
     triggerSocialEvent, 
     handleStoryChoice, 
-    generateRandomEvent 
+    generateRandomEvent,
+    startStoryline
   } = storyActions;
 
   // Clear day events when day changes
@@ -70,7 +107,58 @@ export function usePlayerStorylineManager() {
     }
   }, [storyEventOpen, currentEvent, presentNextEvent]);
 
-  // Return the same API as before to maintain compatibility
+  // Phase-specific event generation
+  useEffect(() => {
+    // Adjust event probability based on phase
+    // More important phases have higher chances of events
+    let eventProbability = 0.1; // base probability
+    
+    switch (currentPhase) {
+      case 'HoH Competition':
+        eventProbability = 0.15;
+        break;
+      case 'Nomination Ceremony':
+        eventProbability = 0.25;
+        break;
+      case 'PoV Competition':
+        eventProbability = 0.15;
+        break;
+      case 'Veto Ceremony':
+        eventProbability = 0.25;
+        break;
+      case 'Eviction Voting':
+        eventProbability = 0.35;
+        break;
+    }
+    
+    // Random chance to generate event when phase changes
+    if (Math.random() < eventProbability) {
+      // Small delay to not overwhelm the player
+      setTimeout(() => {
+        generateRandomEvent();
+      }, 2000);
+    }
+  }, [currentPhase, generateRandomEvent]);
+
+  // Check for active storylines that need advancing
+  useEffect(() => {
+    // Every day, give a small chance to progress active storylines
+    if (activeStorylines.length > 0 && Math.random() < 0.2) {
+      // Try to progress a random active storyline
+      const randomStoryline = activeStorylines[
+        Math.floor(Math.random() * activeStorylines.length)
+      ];
+      
+      if (randomStoryline && !dayEvents.includes(`storyline_${randomStoryline.storylineId}`)) {
+        // Use startStoryline to advance it if we have actions available
+        if (actionsRemaining > 1) {
+          startStoryline(randomStoryline.storylineId);
+        }
+      }
+    }
+  }, [dayCount, activeStorylines, startStoryline, dayEvents, actionsRemaining]);
+
+  // Return the same API as before with new additions
   return {
     currentStoryEvent,
     storyEventOpen, 
@@ -80,6 +168,9 @@ export function usePlayerStorylineManager() {
     triggerSocialEvent,
     handleStoryChoice,
     generateRandomEvent,
-    playerMood
+    startStoryline,
+    playerMood,
+    activeStorylines,
+    completedStorylines
   };
 }

@@ -2,9 +2,10 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { StoryEvent } from '@/hooks/game-phases/usePlayerStorylineManager';
-import { Book, User, Lightbulb, Users, Sparkles, MessageSquare } from 'lucide-react';
+import { StoryEvent } from '@/hooks/game-phases/storyline/types';
+import { Book, User, Lightbulb, Users, Sparkles, MessageSquare, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 interface StoryEventDisplayProps {
   event: StoryEvent | null;
@@ -64,6 +65,27 @@ const StoryEventDisplay: React.FC<StoryEventDisplayProps> = ({
     }
   };
 
+  // Function to visualize relationship effect
+  const getRelationshipEffectIndicator = (effect: number | undefined) => {
+    if (!effect || effect === 0) return null;
+    
+    const color = effect > 0 
+      ? 'text-green-400' 
+      : effect < 0 
+        ? 'text-red-400' 
+        : 'text-gray-400';
+        
+    const label = effect > 0 
+      ? '+' + effect 
+      : effect.toString();
+      
+    return (
+      <span className={`ml-2 text-xs font-bold ${color}`}>
+        {label} REL
+      </span>
+    );
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={cn("bg-game-dark text-white border-game-accent max-w-lg", getEventBgColor())}>
@@ -71,6 +93,13 @@ const StoryEventDisplay: React.FC<StoryEventDisplayProps> = ({
         <div className="absolute top-3 right-10 bg-game-dark/80 px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
           {getEventIcon()}
           <span>{getEventTypeLabel()}</span>
+          
+          {/* Storyline indicator */}
+          {event.storylineId && (
+            <Badge variant="outline" className="ml-2 bg-yellow-900/30 text-yellow-300 border-yellow-500">
+              {event.sequence ? `Part ${event.sequence}` : 'Story'}
+            </Badge>
+          )}
         </div>
         
         <DialogHeader className="mt-4">
@@ -88,16 +117,39 @@ const StoryEventDisplay: React.FC<StoryEventDisplayProps> = ({
                 className="w-full text-left justify-start bg-game-medium hover:bg-game-highlight hover:text-black transition-all p-4"
                 onClick={() => handleChoice(option.id)}
               >
-                <div>
-                  <div className="font-bold">{option.text}</div>
-                  <div className="text-xs text-gray-400 mt-1 italic">
-                    Outcome: {option.consequence}
+                <div className="w-full">
+                  <div className="font-bold flex items-center justify-between">
+                    <span>{option.text}</span>
+                    {getRelationshipEffectIndicator(option.relationshipEffect)}
+                  </div>
+                  
+                  <div className="text-xs text-gray-400 mt-1 italic flex items-center">
+                    <span className="mr-1">Outcome:</span> 
+                    {option.consequence}
+                    
+                    {/* Display importance indicator for choices with high importance */}
+                    {option.memoryImportance && option.memoryImportance > 7 && (
+                      <span className="ml-2 flex items-center text-amber-400">
+                        <AlertTriangle className="w-3 h-3 mr-1" /> 
+                        Significant
+                      </span>
+                    )}
                   </div>
                 </div>
               </Button>
             </div>
           ))}
         </div>
+        
+        {/* Connection to the player */}
+        {event.requires?.playerId && (
+          <div className="mt-2 border-t border-gray-700 pt-3">
+            <p className="text-sm text-gray-300 italic flex items-center">
+              <User className="w-4 h-4 mr-2" />
+              This involves your relationship with another houseguest.
+            </p>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
