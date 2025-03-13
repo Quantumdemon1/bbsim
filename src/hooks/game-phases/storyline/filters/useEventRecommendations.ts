@@ -4,6 +4,7 @@ import { StoryEvent } from '../types';
 import { getCategoryForEventType } from '../constants/eventCategories';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { GamePhase } from '@/types/gameTypes';
+import { RelationshipType } from '@/hooks/game-phases/types/player';
 
 /**
  * Hook for event recommendations based on game state
@@ -70,10 +71,10 @@ export function useEventRecommendations() {
           );
           
           if (relationship) {
-            const relationshipScore = relationship.type === 'Ally' ? 5 :
-                                      relationship.type === 'Friend' ? 4 :
-                                      relationship.type === 'Enemy' ? 3 :
-                                      relationship.type === 'Target' ? 3 : 1;
+            const relationshipScore = relationship.type === 'Strong Bond' ? 5 :
+                                      relationship.type === 'Medium Bond' ? 4 :
+                                      relationship.type === 'Dislike' ? 3 :
+                                      relationship.type === 'Strong Dislike' ? 3 : 1;
             
             score += relationshipScore * weights.relationship;
           }

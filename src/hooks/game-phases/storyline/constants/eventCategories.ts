@@ -70,6 +70,7 @@ export const EVENT_TYPE_TO_CATEGORY: Record<string, string> = {
   'twist': 'twist',
   'diary': 'diary',
   'alliance': 'alliance',
+  'strategy': 'strategy'
   // Map any other existing event types to categories
 };
 

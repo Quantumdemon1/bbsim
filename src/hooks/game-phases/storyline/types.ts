@@ -1,11 +1,12 @@
 
 import { GamePhase } from '@/types/gameTypes';
+import { EventCategory } from './types/eventCategories';
 
 export interface StoryEvent {
   id: string;
   title: string;
   description: string;
-  type: 'competition' | 'social' | 'twist' | 'diary' | 'alliance';
+  type: EventCategory;
   options?: {
     id: string;
     text: string;
