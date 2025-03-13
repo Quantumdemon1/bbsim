@@ -1,6 +1,6 @@
 
 import { StoryEvent } from '../types';
-import { generateStorylineEvent } from '../eventGenerators';
+import { generateStorylineEvent } from '../generators';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 
 /**

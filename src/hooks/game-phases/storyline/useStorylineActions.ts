@@ -1,7 +1,6 @@
 
 import { useCallback } from 'react';
 import { StorylineState, StoryEvent } from './types';
-import { generateStorylineEvent } from './eventGenerators';
 import { GamePhase } from '@/types/gameTypes';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { Alliance } from '@/contexts/types';
@@ -115,8 +114,7 @@ export function useStorylineActions(
         currentWeek,
         addMemoryEntry,
         players
-      },
-      generateStorylineEvent
+      }
     );
   }, [
     currentStoryEvent,

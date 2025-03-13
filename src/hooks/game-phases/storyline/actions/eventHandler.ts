@@ -1,138 +1,154 @@
 
 import { StoryEvent } from '../types';
-import { toast } from '@/components/ui/use-toast';
+import { generateStorylineEvent } from '../generators';
+import { PlayerData } from '@/components/PlayerProfileTypes';
 
 /**
  * Handles player's choice in a story event
  */
 export function handleStoryChoice(
-  eventId: string, 
+  eventId: string,
   choiceId: string,
   state: {
-    currentStoryEvent: StoryEvent | null,
+    currentStoryEvent: StoryEvent | null;
     activeStorylines: {
       storylineId: string;
       currentSequence: number;
       choices: Record<number, string>;
-    }[],
-    completedStorylines: string[],
-    storyQueue: StoryEvent[]
+    }[];
+    completedStorylines: string[];
+    storyQueue: StoryEvent[];
   },
   setters: {
-    setCurrentStoryEvent: (event: StoryEvent | null) => void,
-    setStoryEventOpen: (open: boolean) => void,
-    setPlayerMood: (mood: string) => void,
+    setCurrentStoryEvent: (event: StoryEvent | null) => void;
+    setStoryEventOpen: (open: boolean) => void;
+    setPlayerMood: (mood: string) => void;
     setActiveStorylines: (storylines: {
       storylineId: string;
       currentSequence: number;
       choices: Record<number, string>;
-    }[]) => void,
-    setCompletedStorylines: (storylines: string[]) => void,
-    setStoryQueue: (queue: StoryEvent[]) => void
+    }[]) => void;
+    setCompletedStorylines: (storylines: string[]) => void;
+    setStoryQueue: (queue: StoryEvent[]) => void;
   },
   context: {
-    currentWeek?: number,
-    addMemoryEntry: (playerId: string, entry: any) => void,
-    players: any[]
+    currentWeek?: number;
+    addMemoryEntry: (playerId: string, entry: any) => void;
+    players: PlayerData[];
   },
-  generateStorylineEvent: (storylineId: string, sequence: number, choices: Record<number, string>, players: any[]) => StoryEvent | null
-) {
-  const event = state.currentStoryEvent;
-  if (!event) return;
+  generator = generateStorylineEvent
+): void {
+  const { currentStoryEvent, activeStorylines, completedStorylines, storyQueue } = state;
   
-  const choice = event.options?.find(o => o.id === choiceId);
-  if (!choice) return;
-  
-  // Update player mood based on the choice
-  if (choiceId === 'strategic') setters.setPlayerMood('focused');
-  if (choiceId === 'emotional') setters.setPlayerMood('expressive'); 
-  if (choiceId === 'deceptive') setters.setPlayerMood('cunning');
-  
-  // Record the choice for AI memory if related to a specific player
-  if (event.requires?.playerId) {
-    // Create a more detailed memory entry
-    context.addMemoryEntry(event.requires.playerId, {
-      type: event.type === 'social' ? 'conversation' : 'strategy_discussion',
-      week: context.currentWeek || 1,
-      description: `In a ${event.type} interaction about "${event.title}", the human player chose: ${choice.text}`,
-      impact: choice.relationshipEffect && choice.relationshipEffect > 0 ? 'positive' : 
-             choice.relationshipEffect && choice.relationshipEffect < 0 ? 'negative' : 'neutral',
-      importance: choice.memoryImportance || 5,
-      timestamp: new Date().toISOString()
-    });
+  if (!currentStoryEvent || currentStoryEvent.id !== eventId) {
+    console.error('No active event or event ID mismatch');
+    return;
   }
   
-  // Show consequence as toast
-  toast({
-    title: "Decision Made",
-    description: choice.consequence,
-    duration: 3000
-  });
-  
-  // Check if this is part of a storyline
-  if (event.storylineId) {
-    // Handle multi-stage storylines
-    const isActiveStoryline = state.activeStorylines.some(s => s.storylineId === event.storylineId);
-    
-    if (isActiveStoryline) {
-      // Update the active storyline with this choice
-      const updatedStorylines = state.activeStorylines.map(storyline => {
-        if (storyline.storylineId === event.storylineId) {
-          const updatedChoices = {
-            ...storyline.choices,
-            [event.sequence || 1]: choiceId
-          };
-          
-          // If the event is marked as complete, move to completed storylines
-          if (event.isComplete) {
-            setters.setCompletedStorylines([...state.completedStorylines, event.storylineId]);
-            return null; // This will be filtered out
-          }
-          
-          return {
-            ...storyline,
-            currentSequence: (event.sequence || 1) + 1,
-            choices: updatedChoices
-          };
-        }
-        return storyline;
-      }).filter(Boolean) as {
-        storylineId: string;
-        currentSequence: number;
-        choices: Record<number, string>;
-      }[];
-      
-      setters.setActiveStorylines(updatedStorylines);
-      
-      // Generate the next event in the storyline if not complete
-      if (!event.isComplete && choice.nextEventId) {
-        const currentStoryline = state.activeStorylines.find(s => s.storylineId === event.storylineId);
-        
-        if (currentStoryline) {
-          const nextSequence = (event.sequence || 1) + 1;
-          const nextEvent = generateStorylineEvent(
-            event.storylineId,
-            nextSequence,
-            {
-              ...currentStoryline.choices,
-              [event.sequence || 1]: choiceId
-            },
-            context.players
-          );
-          
-          if (nextEvent) {
-            const newQueue = [...state.storyQueue, nextEvent];
-            setters.setStoryQueue(newQueue);
-          }
-        }
-      }
-    }
-  } else if (choice.nextEventId) {
-    // Handle branching for non-storyline events
-    // This would be implemented in the future
+  // Find the selected choice
+  const choice = currentStoryEvent.options?.find(o => o.id === choiceId);
+  if (!choice) {
+    console.error('Invalid choice ID');
+    return;
   }
   
   // Close the event dialog
   setters.setStoryEventOpen(false);
+  
+  // Adjust player mood based on choice
+  if (choice.relationshipEffect) {
+    // Positive choices make the player feel better, negative choices might stress them
+    if (choice.relationshipEffect > 0) {
+      setters.setPlayerMood('positive');
+    } else if (choice.relationshipEffect < -2) {
+      setters.setPlayerMood('negative');
+    }
+  }
+  
+  // Update memory with this event
+  const humanPlayer = context.players.find(p => p.isHuman);
+  if (humanPlayer) {
+    const memoryEntry = {
+      type: 'event_choice',
+      week: context.currentWeek || 1,
+      eventTitle: currentStoryEvent.title,
+      eventDesc: currentStoryEvent.description,
+      choice: choice.text,
+      consequence: choice.consequence,
+      importance: choice.memoryImportance || 5,
+      date: new Date().toISOString()
+    };
+    
+    context.addMemoryEntry(humanPlayer.id, memoryEntry);
+  }
+  
+  // Handle multi-stage storylines
+  if (currentStoryEvent.storylineId) {
+    const storylineIndex = activeStorylines.findIndex(
+      s => s.storylineId === currentStoryEvent.storylineId
+    );
+    
+    if (storylineIndex !== -1) {
+      const storyline = activeStorylines[storylineIndex];
+      
+      // Update choices made
+      if (currentStoryEvent.sequence) {
+        const newChoices = {
+          ...storyline.choices,
+          [currentStoryEvent.sequence]: choiceId
+        };
+        
+        if (currentStoryEvent.isComplete) {
+          // Complete this storyline
+          const newActiveStorylines = [...activeStorylines];
+          newActiveStorylines.splice(storylineIndex, 1);
+          setters.setActiveStorylines(newActiveStorylines);
+          
+          // Add to completed storylines
+          const newCompletedStorylines = [
+            ...completedStorylines,
+            currentStoryEvent.storylineId
+          ];
+          setters.setCompletedStorylines(newCompletedStorylines);
+        } else {
+          // Continue this storyline with next sequence
+          const nextSequence = (currentStoryEvent.sequence || 1) + 1;
+          
+          // Generate next event in sequence
+          const nextEvent = generator(
+            currentStoryEvent.storylineId,
+            nextSequence,
+            newChoices,
+            context.players
+          );
+          
+          if (nextEvent) {
+            // Add to queue for later
+            const newQueue = [...storyQueue, nextEvent];
+            setters.setStoryQueue(newQueue);
+            
+            // Update active storyline with new sequence and choices
+            const newActiveStorylines = [...activeStorylines];
+            newActiveStorylines[storylineIndex] = {
+              ...storyline,
+              currentSequence: nextSequence,
+              choices: newChoices
+            };
+            setters.setActiveStorylines(newActiveStorylines);
+          }
+        }
+      }
+    }
+  }
+  
+  // Clear the current event
   setters.setCurrentStoryEvent(null);
+  
+  // If this choice leads to another event, add it to queue
+  if (choice.nextEventId) {
+    // This would need to generate the next event based on ID
+    // For now we'll just log it
+    console.log('Next event triggered:', choice.nextEventId);
+    // Here you would generate the next event and add it to the queue
+  }
 }

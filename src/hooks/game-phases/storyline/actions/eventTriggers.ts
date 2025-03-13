@@ -1,9 +1,10 @@
 
+// Fix the error in the previous file
 import { StoryEvent } from '../types';
 import { 
   createDiaryRoomEvent, 
   createSocialEvent
-} from '../eventGenerators';
+} from '../generators';
 import { GamePhase } from '@/types/gameTypes';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { Alliance } from '@/contexts/types';
