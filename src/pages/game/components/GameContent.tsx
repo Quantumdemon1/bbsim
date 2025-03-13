@@ -1,5 +1,5 @@
 
-import React, { Suspense } from 'react';
+import React, { Suspense, memo } from 'react';
 import { LoadingState } from '@/components/ui/loading-state';
 import GameControls from './GameControls';
 import AdminPanel from './AdminPanel';
@@ -21,7 +21,8 @@ interface GameContentProps {
   handlePhaseComplete: () => void;
 }
 
-const GameContent: React.FC<GameContentProps> = ({
+// Use memo to prevent unnecessary re-renders
+const GameContent: React.FC<GameContentProps> = memo(({
   players,
   dayCount,
   actionsRemaining,
@@ -33,13 +34,31 @@ const GameContent: React.FC<GameContentProps> = ({
   handlePhaseChange,
   handlePhaseComplete
 }) => {
+  // Memoize GameRoom props to prevent unnecessary re-renders
+  const gameRoomProps = React.useMemo(() => ({
+    players,
+    initialWeek: 1,
+    onPhaseChange: handlePhaseChange
+  }), [players, handlePhaseChange]);
+
+  // Memoize GameControls props
+  const gameControlsProps = React.useMemo(() => ({
+    players,
+    dayCount,
+    actionsRemaining,
+    useAction
+  }), [players, dayCount, actionsRemaining, useAction]);
+
+  // Memoize DayTracker props
+  const dayTrackerProps = React.useMemo(() => ({
+    dayCount,
+    actionsRemaining,
+    advanceDay
+  }), [dayCount, actionsRemaining, advanceDay]);
+
   return (
     <>
-      <DayTracker 
-        dayCount={dayCount} 
-        actionsRemaining={actionsRemaining} 
-        advanceDay={advanceDay} 
-      />
+      <DayTracker {...dayTrackerProps} />
       
       <AdminPanel 
         open={showAdminPanel}
@@ -47,23 +66,17 @@ const GameContent: React.FC<GameContentProps> = ({
       />
       
       <Suspense fallback={<LoadingState text="Loading game controls..." />}>
-        <GameControls 
-          players={players} 
-          dayCount={dayCount}
-          actionsRemaining={actionsRemaining}
-          useAction={useAction}
-        />
+        <GameControls {...gameControlsProps} />
       </Suspense>
       
       <Suspense fallback={<LoadingState text="Loading game room..." />}>
-        <GameRoom 
-          players={players} 
-          initialWeek={1} 
-          onPhaseChange={handlePhaseChange} 
-        />
+        <GameRoom {...gameRoomProps} />
       </Suspense>
     </>
   );
-};
+});
+
+// Add display name for better debugging
+GameContent.displayName = 'GameContent';
 
 export default GameContent;

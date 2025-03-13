@@ -1,7 +1,6 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, memo } from 'react';
 import { useGameContext } from '@/hooks/useGameContext';
-import { LoadingState } from '@/components/ui/loading-state';
 import GameHeader from './components/GameHeader';
 import GameContainer from './components/GameContainer';
 import GameContent from './components/GameContent';
@@ -10,7 +9,8 @@ import { useGameNotifications } from './components/GameNotifications';
 import { useGameInit } from './hooks/useGameInit';
 import { useGameState } from './hooks/useGameState';
 
-const Game = () => {
+// Using memo to prevent unnecessary re-renders
+const Game = memo(() => {
   const { 
     showChat,
     notifications = [],
@@ -43,18 +43,22 @@ const Game = () => {
 
   const { adaptedNotifications } = useGameNotifications({ notifications });
   
+  // Optimized effect with better logging
   useEffect(() => {
-    console.log("Game component - Rendered with showAdminPanel:", showAdminPanel);
-    
-    return () => {
-      console.log("Game component - Unmounted");
-    };
+    if (process.env.NODE_ENV === 'development') {
+      console.log("Game component - Rendered with showAdminPanel:", showAdminPanel);
+      
+      return () => {
+        console.log("Game component - Unmounted");
+      };
+    }
   }, [showAdminPanel]);
 
-  const handleAdminPanelOpenChange = (open: boolean) => {
+  // Memoized handler to prevent recreation
+  const handleAdminPanelOpenChange = React.useCallback((open: boolean) => {
     console.log("handleAdminPanelOpenChange called with:", open);
     setShowAdminPanel(open);
-  };
+  }, [setShowAdminPanel]);
 
   return (
     <GameContainer isLoading={isLoading || !players || players.length === 0} error={error}>
@@ -94,6 +98,9 @@ const Game = () => {
       />
     </GameContainer>
   );
-};
+});
+
+// Add display name for easier debugging
+Game.displayName = 'Game';
 
 export default Game;

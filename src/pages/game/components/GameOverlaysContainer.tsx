@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { PhaseProgressTracker } from '@/components/game-ui/PhaseProgressTracker';
 import ChatPanel from '@/components/chat/ChatPanel';
 import NotificationPanel from '@/components/notifications/NotificationPanel';
@@ -24,7 +24,8 @@ interface GameOverlaysContainerProps {
   savedGames: any[];
 }
 
-const GameOverlaysContainer: React.FC<GameOverlaysContainerProps> = ({
+// Use memo to prevent unnecessary re-renders
+const GameOverlaysContainer: React.FC<GameOverlaysContainerProps> = memo(({
   showChat,
   showNotifications,
   setShowNotifications,
@@ -38,11 +39,19 @@ const GameOverlaysContainer: React.FC<GameOverlaysContainerProps> = ({
   onPhaseComplete,
   savedGames
 }) => {
-  const selectedPlayerData = selectedPlayer ? 
-    players?.find(p => p.id === selectedPlayer) || null : 
-    null;
+  // Memoize computed values to prevent recalculation on every render
+  const selectedPlayerData = useMemo(() => 
+    selectedPlayer ? players?.find(p => p.id === selectedPlayer) || null : null, 
+    [selectedPlayer, players]
+  );
 
-  const hasSaveGame = savedGames.length > 0;
+  const hasSaveGame = useMemo(() => savedGames.length > 0, [savedGames]);
+
+  // Memoize handlers to prevent recreation on render
+  const handlePlayerModalClose = useMemo(() => 
+    () => setSelectedPlayer(null), 
+    [setSelectedPlayer]
+  );
 
   return (
     <>
@@ -74,12 +83,15 @@ const GameOverlaysContainer: React.FC<GameOverlaysContainerProps> = ({
       {selectedPlayerData && (
         <PlayerProfileModal
           open={!!selectedPlayerData}
-          onClose={() => setSelectedPlayer(null)}
+          onClose={handlePlayerModalClose}
           player={selectedPlayerData}
         />
       )}
     </>
   );
-};
+});
+
+// Add display name for better debugging
+GameOverlaysContainer.displayName = 'GameOverlaysContainer';
 
 export default GameOverlaysContainer;

@@ -58,24 +58,39 @@ export function measurePerformance(
 }
 
 // Track app initialization
-export function trackAppInitialization(): void {
+export function trackAppInitialization(): () => void {
   markPerformance(PERFORMANCE_MARKS.APP_INIT_START);
   
-  window.addEventListener('load', () => {
+  const handleLoad = () => {
     markPerformance(PERFORMANCE_MARKS.APP_INIT_END);
     measurePerformance(
       'app-initialization', 
       PERFORMANCE_MARKS.APP_INIT_START, 
       PERFORMANCE_MARKS.APP_INIT_END
     );
-  });
+    
+    // Clean up event listener
+    window.removeEventListener('load', handleLoad);
+  };
+  
+  window.addEventListener('load', handleLoad);
+  
+  // Return cleanup function
+  return () => {
+    window.removeEventListener('load', handleLoad);
+  };
 }
 
 // Track game loading
 export function trackGameLoading(): { start: () => void; end: () => void } {
+  let hasEnded = false;
+  
   return {
     start: () => markPerformance(PERFORMANCE_MARKS.GAME_LOAD_START),
     end: () => {
+      if (hasEnded) return;
+      hasEnded = true;
+      
       markPerformance(PERFORMANCE_MARKS.GAME_LOAD_END);
       measurePerformance(
         'game-loading',
@@ -88,9 +103,14 @@ export function trackGameLoading(): { start: () => void; end: () => void } {
 
 // Track phase changes
 export function trackPhaseChange(): { start: () => void; end: () => void } {
+  let hasEnded = false;
+  
   return {
     start: () => markPerformance(PERFORMANCE_MARKS.PHASE_CHANGE_START),
     end: () => {
+      if (hasEnded) return;
+      hasEnded = true;
+      
       markPerformance(PERFORMANCE_MARKS.PHASE_CHANGE_END);
       measurePerformance(
         'phase-change',
@@ -103,9 +123,14 @@ export function trackPhaseChange(): { start: () => void; end: () => void } {
 
 // Track save game operations
 export function trackSaveGame(): { start: () => void; end: () => void } {
+  let hasEnded = false;
+  
   return {
     start: () => markPerformance(PERFORMANCE_MARKS.SAVE_GAME_START),
     end: () => {
+      if (hasEnded) return;
+      hasEnded = true;
+      
       markPerformance(PERFORMANCE_MARKS.SAVE_GAME_END);
       measurePerformance(
         'save-game',
@@ -119,8 +144,10 @@ export function trackSaveGame(): { start: () => void; end: () => void } {
 // Report performance measurement to analytics
 function reportPerformanceMeasurement(name: string, duration: number): void {
   // In production, this would send data to an analytics service
-  // For now, we'll just log to console
-  console.log(`Performance: ${name} took ${duration.toFixed(2)}ms`);
+  // For now, we'll just log to console in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`Performance: ${name} took ${duration.toFixed(2)}ms`);
+  }
   
   // Example implementation for when analytics is added:
   // if (window.analytics) {
@@ -145,21 +172,25 @@ export function clearPerformanceMarks(): void {
 }
 
 // Initialize performance monitoring
-export function initPerformanceMonitoring(): void {
+export function initPerformanceMonitoring(): () => void {
   if (!isPerformanceSupported) {
     console.warn('Performance API not supported in this browser');
-    return;
+    return () => {};
   }
   
-  trackAppInitialization();
+  const cleanupAppInit = trackAppInitialization();
   
   // Log long tasks
+  let observer: PerformanceObserver | undefined;
+  
   if ('PerformanceObserver' in window) {
     try {
-      const observer = new PerformanceObserver((list) => {
+      observer = new PerformanceObserver((list) => {
         const entries = list.getEntries();
         entries.forEach((entry) => {
-          console.warn(`Long task detected: ${entry.duration}ms`, entry);
+          if (process.env.NODE_ENV === 'development') {
+            console.warn(`Long task detected: ${entry.duration}ms`, entry);
+          }
         });
       });
       
@@ -168,4 +199,10 @@ export function initPerformanceMonitoring(): void {
       console.warn('Long Task monitoring not supported', e);
     }
   }
+  
+  // Return a cleanup function to disconnect observer and remove listeners
+  return () => {
+    cleanupAppInit();
+    observer?.disconnect();
+  };
 }

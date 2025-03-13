@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { useGameContext } from '@/hooks/useGameContext';
@@ -18,6 +18,7 @@ export function useGameInit() {
   } = useGameContext();
   const { toast } = useToast();
   
+  // UI State
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
@@ -25,13 +26,17 @@ export function useGameInit() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   
+  // Game mechanics state
   const [dayCount, setDayCount] = useState(1);
   const [actionsRemaining, setActionsRemaining] = useState(3);
 
+  // Initialize performance monitoring only once
   useEffect(() => {
-    initPerformanceMonitoring();
+    const cleanup = initPerformanceMonitoring();
+    return cleanup;
   }, []);
   
+  // Game loading and validation
   useEffect(() => {
     const gameLoadTracker = trackGameLoading();
     gameLoadTracker.start();
@@ -56,20 +61,26 @@ export function useGameInit() {
     };
     
     const requirementsMet = checkRequirements();
+    let timer: number | undefined;
     
     if (requirementsMet) {
-      const timer = setTimeout(() => {
+      timer = window.setTimeout(() => {
         setIsLoading(false);
         gameLoadTracker.end();
       }, 500);
-      
-      return () => clearTimeout(timer);
     } else {
       gameLoadTracker.end();
     }
+    
+    // Proper cleanup to prevent memory leaks
+    return () => {
+      if (timer) window.clearTimeout(timer);
+      gameLoadTracker.end();
+    };
   }, [gameState, isAuthenticated, navigate, gameMode]);
   
-  const advanceDay = () => {
+  // Memoized action handlers to prevent recreating functions
+  const advanceDay = useCallback(() => {
     setDayCount(prev => prev + 1);
     setActionsRemaining(3);
     
@@ -77,9 +88,9 @@ export function useGameInit() {
       title: "New Day",
       description: `Day ${dayCount + 1} in the Big Brother house begins. You have 3 actions remaining.`,
     });
-  };
+  }, [dayCount, toast]);
   
-  const useAction = () => {
+  const useAction = useCallback(() => {
     if (actionsRemaining > 0) {
       setActionsRemaining(prev => prev - 1);
       
@@ -100,13 +111,13 @@ export function useGameInit() {
       });
       return false;
     }
-  };
+  }, [actionsRemaining, toast]);
   
-  const handlePhaseChange = (newPhase: GamePhase) => {
+  const handlePhaseChange = useCallback((newPhase: GamePhase) => {
     setCurrentPhase(newPhase);
-  };
+  }, []);
   
-  const handlePhaseComplete = () => {
+  const handlePhaseComplete = useCallback(() => {
     console.log("Phase completed:", currentPhase);
     
     try {
@@ -124,21 +135,23 @@ export function useGameInit() {
       console.error("Error completing phase:", error);
       setError(error instanceof Error ? error : new Error('Unknown error during phase completion'));
     }
-  };
+  }, [currentPhase, clearPhaseProgress, saveGame]);
   
+  // Auto-save with proper cleanup
   useEffect(() => {
     if (gameState === 'playing' && saveGame) {
-      const saveInterval = setInterval(() => {
+      const saveInterval = window.setInterval(() => {
         saveGame().catch(error => {
           console.error("Failed to auto-save game:", error);
         });
-      }, 5 * 60 * 1000);
+      }, 5 * 60 * 1000); // 5 minutes
       
-      return () => clearInterval(saveInterval);
+      return () => window.clearInterval(saveInterval);
     }
   }, [gameState, saveGame]);
 
-  return {
+  // Memoize the return object to prevent unnecessary re-renders
+  return useMemo(() => ({
     players,
     dayCount,
     actionsRemaining,
@@ -155,5 +168,19 @@ export function useGameInit() {
     useAction,
     handlePhaseChange,
     handlePhaseComplete,
-  };
+  }), [
+    players,
+    dayCount,
+    actionsRemaining,
+    currentPhase,
+    showNotifications,
+    selectedPlayer,
+    showAdminPanel,
+    isLoading,
+    error,
+    advanceDay,
+    useAction,
+    handlePhaseChange,
+    handlePhaseComplete
+  ]);
 }

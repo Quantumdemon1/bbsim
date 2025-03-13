@@ -7,8 +7,12 @@ interface GameNotificationsProps {
   notifications: any[];
 }
 
-// Moved the logic to a custom hook to separate rendering from data transformation
+/**
+ * Custom hook to efficiently transform game notifications
+ * Separated from rendering logic for better testability and reuse
+ */
 export const useGameNotifications = ({ notifications }: GameNotificationsProps) => {
+  // Use memoization to prevent unnecessary recalculations
   const adaptedNotifications: Notification[] = React.useMemo(() => {
     if (!notifications || notifications.length === 0) return [];
     
@@ -22,10 +26,11 @@ export const useGameNotifications = ({ notifications }: GameNotificationsProps) 
   return { adaptedNotifications };
 };
 
-// The component now returns null since it's just a logic wrapper
-const GameNotifications: React.FC<GameNotificationsProps> = (props) => {
-  // This component doesn't actually render anything,
-  // it's just a wrapper for the hook logic
+/**
+ * This component doesn't render anything, it's just a wrapper for the hook logic
+ * It's kept for backwards compatibility but can be removed in future refactoring
+ */
+const GameNotifications: React.FC<GameNotificationsProps> = () => {
   return null;
 };
 
