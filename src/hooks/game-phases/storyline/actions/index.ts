@@ -5,6 +5,7 @@ import { generateRandomEvent } from './randomEventGenerator';
 import { presentNextEvent, startStoryline } from './storylineManager';
 import { triggerDiaryRoomEvent, triggerSocialEvent } from './eventTriggers';
 
+// Export all action creators together
 export {
   handleStoryChoice,
   generateRandomEvent,
