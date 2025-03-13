@@ -46,7 +46,8 @@ export function useStorylineActions(
       setStoryEventOpen(true);
       
       // Remove from queue
-      setStoryQueue((prev: StoryEvent[]) => prev.slice(1));
+      const newQueue = storyQueue.slice(1);
+      setStoryQueue(newQueue);
     }
   }, [storyQueue, currentStoryEvent, setCurrentStoryEvent, setStoryEventOpen, setStoryQueue]);
 
@@ -60,11 +61,14 @@ export function useStorylineActions(
     
     const diaryEvent = createDiaryRoomEvent(currentPhase);
     
-    setStoryQueue((prev: StoryEvent[]) => [...prev, diaryEvent]);
-    setDayEvents((prev: string[]) => [...prev, 'diary']);
+    const newQueue = [...storyQueue, diaryEvent];
+    setStoryQueue(newQueue);
+    
+    const newDayEvents = [...dayEvents, 'diary'];
+    setDayEvents(newDayEvents);
     
     return true;
-  }, [currentPhase, dayEvents, useAction, setStoryQueue, setDayEvents]);
+  }, [currentPhase, dayEvents, useAction, storyQueue, setStoryQueue, setDayEvents]);
 
   // Trigger a social interaction with another player
   const triggerSocialEvent = useCallback((targetPlayerId: string) => {
@@ -76,11 +80,14 @@ export function useStorylineActions(
     
     const socialEvent = createSocialEvent(targetPlayer);
     
-    setStoryQueue((prev: StoryEvent[]) => [...prev, socialEvent]);
-    setDayEvents((prev: string[]) => [...prev, `social_${targetPlayerId}`]);
+    const newQueue = [...storyQueue, socialEvent];
+    setStoryQueue(newQueue);
+    
+    const newDayEvents = [...dayEvents, `social_${targetPlayerId}`];
+    setDayEvents(newDayEvents);
     
     return true;
-  }, [players, useAction, setStoryQueue, setDayEvents]);
+  }, [players, useAction, storyQueue, dayEvents, setStoryQueue, setDayEvents]);
 
   // Handle player's choice in an event
   const handleStoryChoice = useCallback((eventId: string, choiceId: string) => {
@@ -134,11 +141,14 @@ export function useStorylineActions(
     if (!newEvent) return false;
     
     // Add to queue
-    setStoryQueue((prev: StoryEvent[]) => [...prev, newEvent]);
-    setDayEvents((prev: string[]) => [...prev, newEvent.type]);
+    const newQueue = [...storyQueue, newEvent];
+    setStoryQueue(newQueue);
+    
+    const newDayEvents = [...dayEvents, newEvent.type];
+    setDayEvents(newDayEvents);
     
     return true;
-  }, [context.actionsRemaining, dayEvents, useAction, players, setStoryQueue, setDayEvents]);
+  }, [context.actionsRemaining, dayEvents, useAction, players, storyQueue, setStoryQueue, setDayEvents]);
 
   return {
     presentNextEvent,
