@@ -8,6 +8,7 @@ import { StoryEvent } from './storyline/types';
 import { useAllianceContext } from '../gameContext/useAllianceContext';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { GamePhaseState } from './types';
+import { GamePhase } from '@/types/gameTypes';
 
 export type { StoryEvent } from './storyline/types';
 
@@ -26,7 +27,7 @@ export function usePlayerStorylineManager() {
   // Safely extract properties that might not be directly available in all useGameContext implementations
   // by using type assertion to a more specific type that includes these properties
   const gamePhaseContext = gameContext as unknown as {
-    currentPhase: string;
+    currentPhase: GamePhase; // Changed from string to GamePhase
     dayCount: number;
     actionsRemaining: number;
     useAction: () => boolean;
