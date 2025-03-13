@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { AIMemoryEntry } from '../types';
 import { AIPlayerService } from '../aiPlayerService';
 import { sortMemoriesByImportance } from './memoryUtils';
-import { getDefaultEmotion } from './memoryUtils';
+import { getDefaultEmotion } from './emotionUtils';
 
 /**
  * Core hook for AI memory management
@@ -91,18 +91,3 @@ export function useAIMemoryCore() {
     clearAIMemory
   };
 }
-
-/**
- * Get default emotion based on impact
- */
-const getDefaultEmotion = (impact: 'positive' | 'negative' | 'neutral'): string => {
-  switch (impact) {
-    case 'positive':
-      return 'happy';
-    case 'negative':
-      return 'upset';
-    case 'neutral':
-    default:
-      return 'neutral';
-  }
-};

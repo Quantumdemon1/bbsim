@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { AIMemoryEntry, AIPlayerDecision, AIPlayerAttributes, PlayerArchetype, PersonalityTrait } from './types';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { PlayerAttributes } from '@/hooks/game-phases/types/player';
-import { getDefaultEmotion } from './memory/memoryUtils';
+import { getDefaultEmotion } from './memory/emotionUtils';
 import { Database } from '@/integrations/supabase/types';
 
 type AIMemoryDbEntry = Database['public']['Tables']['ai_memory_entries']['Row'];
