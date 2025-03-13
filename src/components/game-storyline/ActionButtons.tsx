@@ -17,7 +17,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
       <Button 
         variant="outline" 
         className="flex items-center gap-2 justify-center bg-game-medium/30 hover:bg-game-medium/50 border-game-accent/30"
-        onClick={() => triggerDiaryRoomEvent()}
+        onClick={triggerDiaryRoomEvent}
         disabled={actionsRemaining === 0}
       >
         <MessageCircle className="w-4 h-4" />
@@ -28,8 +28,8 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
         variant="outline" 
         className="flex items-center gap-2 justify-center bg-game-medium/30 hover:bg-game-medium/50 border-game-accent/30"
         disabled={actionsRemaining === 0}
-        // Placeholder for future alliance functionality
-        onClick={() => {}}
+        // Simple no-op function instead of undefined
+        onClick={() => console.log("Strategy button clicked")}
       >
         <Network className="w-4 h-4" />
         Strategy

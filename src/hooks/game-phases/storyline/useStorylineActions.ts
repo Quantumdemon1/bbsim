@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { StoryEvent, StorylineState } from './types';
 import { 
@@ -74,8 +73,14 @@ export function useStorylineActions(
     // Only allow diary room once per day
     if (dayEvents.includes('diary')) return false;
     
+    // Ensure useAction is a function before calling it
+    if (typeof context.useAction !== 'function') {
+      console.error('useAction is not a function', context.useAction);
+      return false;
+    }
+    
     // Costs an action point
-    if (!useAction()) return false;
+    if (!context.useAction()) return false;
     
     const diaryEvent = createDiaryRoomEvent(currentPhase);
     
@@ -86,12 +91,18 @@ export function useStorylineActions(
     setDayEvents(newDayEvents);
     
     return true;
-  }, [currentPhase, dayEvents, useAction, storyQueue, setStoryQueue, setDayEvents]);
+  }, [currentPhase, dayEvents, context.useAction, storyQueue, setStoryQueue, setDayEvents]);
 
   // Trigger a social interaction with another player
   const triggerSocialEvent = useCallback((targetPlayerId: string) => {
+    // Ensure useAction is a function before calling it
+    if (typeof context.useAction !== 'function') {
+      console.error('useAction is not a function', context.useAction);
+      return false;
+    }
+    
     // Costs an action point
-    if (!useAction()) return false;
+    if (!context.useAction()) return false;
     
     const targetPlayer = players.find(p => p.id === targetPlayerId);
     if (!targetPlayer) return false;
@@ -110,7 +121,7 @@ export function useStorylineActions(
     setDayEvents(newDayEvents);
     
     return true;
-  }, [players, useAction, storyQueue, dayEvents, setStoryQueue, setDayEvents, alliances]);
+  }, [players, context.useAction, storyQueue, dayEvents, setStoryQueue, setDayEvents, alliances]);
 
   // Handle player's choice in an event
   const handleStoryChoice = useCallback((eventId: string, choiceId: string) => {
@@ -270,6 +281,12 @@ export function useStorylineActions(
 
   // Generate random house events based on game state
   const generateRandomEvent = useCallback(() => {
+    // Ensure useAction is a function before calling it
+    if (typeof context.useAction !== 'function') {
+      console.error('useAction is not a function', context.useAction);
+      return false;
+    }
+    
     // Limit random events based on actions
     if (context.actionsRemaining < 2 || dayEvents.length > 3) return false;
     
@@ -295,7 +312,7 @@ export function useStorylineActions(
         
         if (nextEvent) {
           // Use an action
-          if (!useAction()) return false;
+          if (!context.useAction()) return false;
           
           // Add to queue
           const newQueue = [...storyQueue, nextEvent];
@@ -320,7 +337,7 @@ export function useStorylineActions(
         ];
         
         if (startStoryline(newStorylineId)) {
-          if (!useAction()) return false;
+          if (!context.useAction()) return false;
           
           const newDayEvents = [...dayEvents, `storyline_${newStorylineId}`];
           setDayEvents(newDayEvents);
@@ -333,8 +350,8 @@ export function useStorylineActions(
     // 15% chance of a regular random event if no storyline progressed
     if (Math.random() > 0.15) return false;
     
-    // Use an action
-    if (!useAction()) return false;
+    // Use an action only if useAction is a function
+    if (!context.useAction()) return false;
     
     const newEvent = generateRandomGameEvent(
       players, 
@@ -359,7 +376,7 @@ export function useStorylineActions(
   }, [
     context.actionsRemaining, 
     dayEvents, 
-    useAction, 
+    context.useAction, 
     players, 
     storyQueue, 
     setStoryQueue, 

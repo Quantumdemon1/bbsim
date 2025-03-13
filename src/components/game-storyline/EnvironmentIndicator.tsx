@@ -42,9 +42,12 @@ const EnvironmentIndicator: React.FC<EnvironmentIndicatorProps> = ({ currentPhas
           description: 'The house is somber as someone will leave'
         };
       default:
+        // Check if currentPhase is a string and includes 'night' before trying to use includes()
+        const isNightPhase = typeof currentPhase === 'string' && currentPhase.includes('night');
+        
         return {
           bgColor: 'bg-gray-500/10',
-          icon: currentPhase.includes('night') ? 
+          icon: isNightPhase ? 
             <Moon className="text-blue-300 opacity-20 w-32 h-32" /> : 
             <Sun className="text-orange-300 opacity-20 w-32 h-32" />,
           description: 'Daily life continues in the house'
