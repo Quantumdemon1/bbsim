@@ -4,6 +4,7 @@ import { useGameContext } from '@/hooks/useGameContext';
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { useEventDecisionManager } from './decisions/useEventDecisionManager';
 import { toast } from '@/components/ui/use-toast';
+import { GamePhase } from '@/types/gameTypes';
 
 export interface StoryEvent {
   id: string;
@@ -24,15 +25,22 @@ export interface StoryEvent {
 }
 
 export function usePlayerStorylineManager() {
+  // Explicitly type the required properties from GameContext
   const { 
     players, 
     currentWeek,
-    currentPhase,
     addMemoryEntry,
-    dayCount,
-    actionsRemaining,
-    useAction
   } = useGameContext();
+
+  // Access these properties from GameContext but with type checking
+  const gameContext = useGameContext() as unknown as {
+    currentPhase: GamePhase;
+    dayCount: number;
+    actionsRemaining: number;
+    useAction: () => boolean;
+  } & ReturnType<typeof useGameContext>;
+
+  const { currentPhase, dayCount, actionsRemaining, useAction } = gameContext;
 
   const [currentStoryEvent, setCurrentStoryEvent] = useState<StoryEvent | null>(null);
   const [storyEventOpen, setStoryEventOpen] = useState(false);

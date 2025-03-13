@@ -3,7 +3,8 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StoryEvent } from '@/hooks/game-phases/usePlayerStorylineManager';
-import { Book, User, Lightbulb, Users, Sparkles } from 'lucide-react';
+import { Book, User, Lightbulb, Users, Sparkles, MessageSquare } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface StoryEventDisplayProps {
   event: StoryEvent | null;
@@ -27,28 +28,56 @@ const StoryEventDisplay: React.FC<StoryEventDisplayProps> = ({
   const getEventIcon = () => {
     switch (event.type) {
       case 'diary':
-        return <Book className="w-5 h-5 text-amber-400" />;
+        return <Book className="w-6 h-6 text-amber-400" />;
       case 'social':
-        return <User className="w-5 h-5 text-blue-400" />;
+        return <MessageSquare className="w-6 h-6 text-blue-400" />;
       case 'alliance':
-        return <Users className="w-5 h-5 text-green-400" />;
+        return <Users className="w-6 h-6 text-green-400" />;
       case 'twist':
-        return <Sparkles className="w-5 h-5 text-purple-400" />;
+        return <Sparkles className="w-6 h-6 text-purple-400" />;
       case 'competition':
-        return <Lightbulb className="w-5 h-5 text-red-400" />;
+        return <Lightbulb className="w-6 h-6 text-red-400" />;
       default:
         return null;
     }
   };
 
+  const getEventTypeLabel = () => {
+    switch (event.type) {
+      case 'diary': return 'DIARY ROOM';
+      case 'social': return 'CONVERSATION';
+      case 'alliance': return 'ALLIANCE TALK';
+      case 'twist': return 'GAME TWIST';
+      case 'competition': return 'COMPETITION';
+      default: return 'EVENT';
+    }
+  };
+
+  const getEventBgColor = () => {
+    switch (event.type) {
+      case 'diary': return 'bg-amber-950/30';
+      case 'social': return 'bg-blue-950/30';
+      case 'alliance': return 'bg-green-950/30';
+      case 'twist': return 'bg-purple-950/30';
+      case 'competition': return 'bg-red-950/30';
+      default: return 'bg-slate-950/30';
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-game-dark text-white border-game-accent max-w-lg">
-        <DialogHeader className="flex flex-row items-center gap-2">
+      <DialogContent className={cn("bg-game-dark text-white border-game-accent max-w-lg", getEventBgColor())}>
+        {/* Event Type Badge */}
+        <div className="absolute top-3 right-10 bg-game-dark/80 px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
           {getEventIcon()}
-          <DialogTitle className="text-xl font-bold text-game-accent">{event.title}</DialogTitle>
+          <span>{getEventTypeLabel()}</span>
+        </div>
+        
+        <DialogHeader className="mt-4">
+          <DialogTitle className="text-2xl font-bold text-game-accent">{event.title}</DialogTitle>
         </DialogHeader>
-        <DialogDescription className="text-gray-300 text-base">
+        
+        <DialogDescription className="text-gray-200 text-base mt-2 whitespace-pre-line">
           {event.description}
         </DialogDescription>
         
@@ -61,6 +90,9 @@ const StoryEventDisplay: React.FC<StoryEventDisplayProps> = ({
               >
                 <div>
                   <div className="font-bold">{option.text}</div>
+                  <div className="text-xs text-gray-400 mt-1 italic">
+                    Outcome: {option.consequence}
+                  </div>
                 </div>
               </Button>
             </div>

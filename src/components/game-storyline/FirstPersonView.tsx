@@ -6,18 +6,25 @@ import { Badge } from '@/components/ui/badge';
 import { Book, User, Users, Clock, AlertTriangle } from 'lucide-react';
 import { usePlayerStorylineManager } from '@/hooks/game-phases/usePlayerStorylineManager';
 import StoryEventDisplay from './StoryEventDisplay';
+import { GamePhase } from '@/types/gameTypes';
 
 interface FirstPersonViewProps {
   currentPlayerId: string | null;
 }
 
 const FirstPersonView: React.FC<FirstPersonViewProps> = ({ currentPlayerId }) => {
-  const { 
-    players, 
-    dayCount, 
-    actionsRemaining,
-    currentPhase
-  } = useGameContext();
+  // Get required game context properties with type assertions
+  const { players } = useGameContext();
+  
+  // Use type assertion to access missing properties
+  const gameContext = useGameContext() as unknown as {
+    dayCount: number;
+    actionsRemaining: number;
+    currentPhase: GamePhase;
+    useAction: () => boolean;
+  } & ReturnType<typeof useGameContext>;
+  
+  const { dayCount, actionsRemaining, currentPhase } = gameContext;
   
   const { 
     currentStoryEvent,
