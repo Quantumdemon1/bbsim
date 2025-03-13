@@ -4,6 +4,9 @@ import { AIMemoryEntry, AIPlayerDecision, AIPlayerAttributes, PlayerArchetype, P
 import { PlayerData } from '@/components/PlayerProfileTypes';
 import { PlayerAttributes } from '@/hooks/game-phases/types/player';
 import { getDefaultEmotion } from './memory/memoryUtils';
+import { Database } from '@/integrations/supabase/types';
+
+type AIMemoryDbEntry = Database['public']['Tables']['ai_memory_entries']['Row'];
 
 /**
  * Service for interacting with AI player data in Supabase
@@ -78,11 +81,17 @@ export const AIPlayerService = {
     
     // Convert database entries to AIMemoryEntry format
     return data.map(entry => ({
-      ...entry,
-      timestamp: entry.timestamp, // Keep as string since our interface now accepts both string and number
-      emotion: entry.emotion || getDefaultEmotion(entry.impact as 'positive' | 'negative' | 'neutral'),
-      decayFactor: entry.decay_factor || (entry.importance / 5),
-      relatedPlayerId: entry.related_player_id
+      description: entry.description,
+      importance: entry.importance || 3,
+      type: entry.type,
+      impact: entry.impact as 'positive' | 'negative' | 'neutral',
+      player_id: entry.player_id || playerId,
+      relatedPlayerId: entry.related_player_id,
+      week: entry.week,
+      id: entry.id,
+      timestamp: entry.timestamp || new Date().toISOString(),
+      emotion: getDefaultEmotion(entry.impact as 'positive' | 'negative' | 'neutral'),
+      decayFactor: (entry.importance || 3) / 5
     })) as AIMemoryEntry[];
   },
   
@@ -106,8 +115,6 @@ export const AIPlayerService = {
         type: entry.type,
         week: entry.week,
         timestamp: timestamp || new Date().toISOString(),
-        emotion: entry.emotion || getDefaultEmotion(entry.impact),
-        decay_factor: entry.decayFactor || (entry.importance / 5)
       }]);
     
     if (error) {
@@ -126,20 +133,5 @@ export const AIPlayerService = {
     if (error) {
       console.error("Error updating game state:", error);
     }
-  }
-};
-
-/**
- * Get default emotion based on impact
- */
-const getDefaultEmotion = (impact: 'positive' | 'negative' | 'neutral'): string => {
-  switch (impact) {
-    case 'positive':
-      return 'happy';
-    case 'negative':
-      return 'upset';
-    case 'neutral':
-    default:
-      return 'neutral';
   }
 };
