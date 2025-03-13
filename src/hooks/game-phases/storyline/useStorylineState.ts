@@ -1,34 +1,7 @@
 
-import { useState } from 'react';
-import { StoryEvent, StorylineState } from './types';
+// This is now just a barrel file that re-exports from the state directory
+// to maintain backward compatibility with existing imports
+import { useStorylineState } from './state';
 
-export function useStorylineState() {
-  const [currentStoryEvent, setCurrentStoryEvent] = useState<StoryEvent | null>(null);
-  const [storyEventOpen, setStoryEventOpen] = useState(false);
-  const [storyQueue, setStoryQueue] = useState<StoryEvent[]>([]);
-  const [dayEvents, setDayEvents] = useState<string[]>([]);
-  const [playerMood, setPlayerMood] = useState<string>('neutral');
-  const [completedStorylines, setCompletedStorylines] = useState<string[]>([]);
-  const [activeStorylines, setActiveStorylines] = useState<{
-    storylineId: string;
-    currentSequence: number;
-    choices: Record<number, string>;
-  }[]>([]);
-
-  return {
-    currentStoryEvent,
-    storyEventOpen,
-    storyQueue,
-    dayEvents,
-    playerMood,
-    completedStorylines,
-    activeStorylines,
-    setCurrentStoryEvent,
-    setStoryEventOpen,
-    setStoryQueue,
-    setDayEvents,
-    setPlayerMood,
-    setCompletedStorylines,
-    setActiveStorylines
-  };
-}
+export { useStorylineState };
+export default useStorylineState;

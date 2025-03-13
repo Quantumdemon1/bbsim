@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { useGameContext } from '@/hooks/useGameContext';
 import { useEventDecisionManager } from './decisions/useEventDecisionManager';
-import { useStorylineState } from './storyline/useStorylineState';
+import { useStorylineState } from './storyline/state';
 import { useStorylineActions } from './storyline/useStorylineActions';
 import { StoryEvent } from './storyline/types';
 import { useAllianceContext } from '../gameContext/useAllianceContext';
